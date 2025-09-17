@@ -9,7 +9,6 @@ interface Props {
 
 export default function SaleTable({ items, handleRemoveItem, formatCurrency }: Props) {
   const t = useTranslations("makeSale");
-  console.log("hola desde la tabla", items);
 
   return (
     <div className="overflow-x-auto border-b border-gray-700 flex-grow">

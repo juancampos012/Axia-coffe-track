@@ -61,7 +61,6 @@ export const findBetterSuppliers = async (productId: string, searchPriority: str
 
 export const getListSuppliers = async (): Promise<SupplierDAO[]> => {
   const url = `${API_BASE_URL}`;
-  console.log('Fetching products from:', url);
 
   const response = await fetchWithCredentials(url, {
     method: 'GET',
@@ -90,7 +89,6 @@ export const createSupplier = async (body: SupplierDAO): Promise<Response> => {
 
 export const deleteSupplier= async (id: string): Promise<SupplierDAO[]> => {
   const url = `${API_BASE_URL}/${id}`;
-  console.log('Fetching products from:', url);
 
   const response = await fetchWithCredentials(url, {
     method: 'DELETE',
@@ -120,7 +118,6 @@ export const updateSupplier = async (body: SupplierDAO, id:string): Promise<Resp
 export const getListSuppliersByName = async (name: string): Promise<SupplierDAO[]> => {
   try {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/suppliers/search?name=${encodeURIComponent(name)}`;
-    console.log('Searching suppliers by name:', url);
     
     const response = await fetch(url, {
       method: 'GET',

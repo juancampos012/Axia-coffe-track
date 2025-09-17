@@ -49,7 +49,10 @@ export default function ScreenInvoices() {
                     id: invoice.id,
                     cliente: `${invoice.client?.firstName || "Nombre"} ${invoice.client?.lastName || "Desconocido"}`,
                     fecha: new Date(invoice.date).toLocaleDateString(),
-                    total: `$${(invoice.totalPrice || 0).toFixed(2)}`,
+                    total: `$${(invoice.totalPrice || 0).toLocaleString("es-CO", {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    })}`,
                 }));
 
                 setInvoices(formatted);

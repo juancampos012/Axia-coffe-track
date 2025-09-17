@@ -61,7 +61,6 @@ export const getPublicPurchaseInvoices = async () => {
 
 export const crearCompra = async (compra: Compra): Promise<CreatedPurchase> => {
     const urlCompra = `${envVariables.API_URL}/purchase-invoices`;
-    console.log ("hola2", compra); 
 
     const facturaPayload = {
         tenantId: compra.tenantId,
@@ -77,8 +76,6 @@ export const crearCompra = async (compra: Compra): Promise<CreatedPurchase> => {
     });
 
     const urlProductosFactura = `${envVariables.API_URL}/purchase-product-invoices`;
-
-    console.log("factura", facturaRes)
     
     await Promise.all(
         compra.products.map(p =>

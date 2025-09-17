@@ -18,7 +18,6 @@ const fetchWithCredentials = async <T>(url: string, options: RequestInit): Promi
 // Función para obtener clientes sin autenticación (para SSG)
 export const getPublicClients = async () => {
   const url = `${envVariables.API_URL}/clients/public/list`;
-  console.log('Fetching public clients from:', url);
 
   const response = await fetch(url, {
     method: 'GET',
@@ -38,7 +37,6 @@ export const getPublicClients = async () => {
 // Función para obtener un cliente por ID sin autenticación (para SSG)
 export const getPublicClientById = async (clientId: string) => {
   const url = `${envVariables.API_URL}/clients/public/${clientId}`;
-  console.log('Fetching public client by ID:', url);
 
   const response = await fetch(url, {
     method: 'GET',

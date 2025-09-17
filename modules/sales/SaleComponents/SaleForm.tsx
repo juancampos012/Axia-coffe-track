@@ -52,34 +52,76 @@ export default function SaleForm({
 
         <div className="flex flex-row space-x-7">
           <div className="flex flex-col w-full">
-            <label className="mb-1 text-sm font-medium text-white">{t("quantity")}</label>
-            <Input
-              type="number"
-              value={quantity}
-              onChange={(e) => {
-                let raw = e.target.value;
-                if (/^0[0-9]/.test(raw)) {
-                  raw = raw.replace(/^0+/, '');
-                }
-                setQuantity(raw);
-              }}
-              placeholder={t('quantityPlaceholder')}
-            />
+            <label className="mb-1 text-sm font-medium text-white">Cantidad</label>
+              <Input
+                type="text"
+                value={ quantity }
+                disabled={!name}
+                onChange={(e) => {
+                  let raw = e.target.value.replace(/\./g, "");
+
+                  if (!/^\d*$/.test(raw)) {
+                    return; 
+                  }
+
+                  if (/^0[0-9]/.test(raw)) {
+                    raw = raw.replace(/^0+/, "");
+                  }
+
+                  if (raw === "") {
+                    setQuantity("");
+                    return;
+                  }
+
+                  const numberValue = parseInt(raw, 10);
+                  if (isNaN(numberValue)) {
+                    setQuantity("");
+                    return;
+                  }
+                  setQuantity(numberValue.toString());
+                }}
+                placeholder={t("quantityPlaceholder")}
+              />
           </div>
           <div className="flex flex-col w-full">
             <label className="mb-1 text-sm font-medium text-white">{t("apricewTx")}</label>
-            <Input
-              type="number"
-              value={price}
-              onChange={(e) => {
-                let raw = e.target.value;
-                if (/^0[0-9]/.test(raw)) {
-                  raw = raw.replace(/^0+/, '');
+              <Input
+                type="text"
+                value={
+                  price === ""
+                    ? ""
+                    : parseInt(price, 10).toLocaleString("es-CO", {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })
                 }
-                setPrice(raw);
-              }}
-              placeholder={t('pricePlaceholder')}
-            />
+                disabled={!name}
+                onChange={(e) => {
+                  let raw = e.target.value.replace(/\./g, "");
+
+                  if (!/^\d*$/.test(raw)) {
+                    return; 
+                  }
+
+                  if (/^0[0-9]/.test(raw)) {
+                    raw = raw.replace(/^0+/, "");
+                  }
+
+                  if (raw === "") {
+                    setPrice("");
+                    return;
+                  }
+
+                  const numberValue = parseInt(raw, 10);
+                  if (isNaN(numberValue)) {
+                    setPrice("");
+                    return;
+                  }
+                  setPrice(numberValue.toString());
+                }}
+                placeholder={t("pricePlaceholder")}
+              />
+
           </div>
         </div>
 

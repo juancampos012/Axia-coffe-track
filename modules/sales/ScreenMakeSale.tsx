@@ -19,7 +19,7 @@ export default function ScreenMakeSale() {
   const [tenantIdProduct, settenantIdProduct] = useState('');
   const [items, setItems] = useState<SaleItem[]>([]);
   const [productId, setProductId] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState('');
   const [nextId, setNextId] = useState(1);
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState(0);
@@ -29,7 +29,7 @@ export default function ScreenMakeSale() {
   const resetSaleForm = () => {
     setItems([]);
     setName('');
-    setQuantity(1);
+    setQuantity('');
     setPrice('');
     setStock(0);
     setTax(0);
@@ -39,7 +39,7 @@ export default function ScreenMakeSale() {
 
   const handleAddItem = () => {
     const priceValue = parseFloat(price);
-    if (!name || isNaN(priceValue) || priceValue <= 0 || quantity <= 0) return;
+    if (!name || isNaN(priceValue) || priceValue <= 0 || Number(quantity) <= 0) return;
     const basePriceValue = priceValue;
     const priceWithTax = priceValue * (1 + tax / 100);
 
@@ -49,7 +49,7 @@ export default function ScreenMakeSale() {
       tenantId: tenantIdProduct,
       productId: selectedProductId,
       name,
-      quantity,
+      quantity: parseInt(quantity, 10),
       stock,
       price: priceWithTax,
       basePrice: basePriceValue,
@@ -58,7 +58,7 @@ export default function ScreenMakeSale() {
     setItems([...items, newItem]);
     setNextId(nextId + 1);
     
-    setQuantity(1);
+    setQuantity('');
     setPrice('');
     setStock(0);
     setTax(0);
@@ -116,7 +116,7 @@ export default function ScreenMakeSale() {
             quantity={quantity.toString()}
             price={price}
             name={name}
-            setQuantity={(q: string) => setQuantity(Number(q))}
+            setQuantity={(q: string) => setQuantity(q)}
             setName={setName}
             setPrice={setPrice}
             setStock={setStock}
