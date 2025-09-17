@@ -1,0 +1,1141 @@
+{
+  "EmployeeForm": {
+    "codeLabel": "Code",
+    "codePlaceholder": "AUTOGENERÉ",
+    "nameLabel": "Nom",
+    "namePlaceholder": "Ex. Jean",
+    "emailLabel": "Courriel électronique",
+    "emailPlaceholder": "Ex. Jean@gmail.com",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "Mot de passe",
+    "roleLabel": "Rôle",
+    "rolePlaceholder": "Ex. admin",
+    "createButton": "Créer un client",
+    "closeButton": "Fermer",
+    "success": "Employé créé avec succès",
+    "connectionError": "Erreur de connexion. Réessayez s'il vous plaît.",
+    "errors": {
+      "nameMin": "Le nom doit comporter au moins 3 caractères",
+      "nameMax": "Le nom ne peut pas dépasser 50 caractères",
+      "roleRequired": "Vous devez sélectionner un rôle",
+      "emailInvalid": "Doit être un email valide",
+      "emailMax": "L'email ne peut pas dépasser 100 caractères",
+      "passwordMin": "Le mot de passe doit comporter au moins 6 caractères",
+      "passwordMax": "Le mot de passe ne peut pas dépasser 50 caractères"
+    }
+  },
+
+  "EmployeeDashboard": {
+    "latestProducts": "Derniers Produits",
+    "distributor": "Distributeur",
+    "product": "Produit",
+    "brand": "Marque",
+    "stock": "Stock",
+    "price": "Prix"
+  },
+
+  "Employees": {
+    "title": "Gestion des Employés",
+    "addNew": "Ajouter un Nouvel Employé",
+    "edit": "Éditer un Employé",
+    "listTitle": "Liste des Employés",
+    "searchPlaceholder": "Rechercher des employés...",
+    "loading": "Chargement des employés...",
+    "noResults": "Aucun employé trouvé",
+    "noResultsFor": "Aucun employé trouvé pour: \"{searchTerm}\"",
+    "fetchError": "Erreur de récupération des employés:",
+    "deleteError": "Erreur de suppression de l'employé:",
+    "tableHeaders": {
+      "id": "ID",
+      "name": "Nom",
+      "role": "Rôle",
+      "email": "Courriel"
+    }
+  },
+
+  "employeeForm": {
+    "id": "ID",
+    "generated": "AUTOGENERÉ",
+    "role": "Rôle",
+    "roleExample": "Ex. admin",
+    "name": "Nom",
+    "nameExample": "Ex. Jean",
+    "email": "Email*",
+    "emailExample": "Ex. jean@example.com",
+    "password": "Mot de passe*",
+    "newPassword": "Nouveau Mot de passe",
+    "close": "Fermer",
+    "update": "Mettre à jour l'Employé",
+    "create": "Créer un Employé",
+    "updateSuccess": "Employé mis à jour correctement",
+    "updateError": "Erreur de mise à jour de l'employé",
+    "noIdError": "ID de client non disponible",
+    "errorSubmit": "Erreur de soumission:",
+
+    "errors": {
+      "name": {
+        "min": "Le nom doit comporter au moins 3 caractères",
+        "max": "Le nom ne peut pas dépasser 50 caractères"
+      },
+      "role": {
+        "required": "Vous devez sélectionner un rôle"
+      },
+      "email": {
+        "invalid": "Doit être un email valide",
+        "max": "L'email ne peut pas dépasser 100 caractères"
+      },
+      "password": {
+        "min": "Le mot de passe doit comporter au moins 6 caractères",
+        "max": "Le mot de passe ne peut pas dépasser 50 caractères"
+      }
+    }
+  },
+
+  "CustomTable": {
+    "edit": {
+      "products": "Éditer le produit",
+      "clients": "Éditer le client",
+      "employees": "Éditer l'employé",
+      "suppliers": "Éditer le fournisseur",
+      "invoices": "Éditer la facture",
+      "purchase" : "Modifier l'achat",
+      "default": "Éditer"
+    },
+    "view": {
+      "products": "Voir le produit",
+      "clients": "Voir le client",
+      "employees": "Voir l'employé",
+      "suppliers": "Voir le fournisseur",
+      "invoices": "Voir la facture",
+      "purchase": "Voir l'achat",
+      "default": "Voir"
+    },
+    "delete": {
+      "products": "Supprimer le produit",
+      "clients": "Supprimer le client",
+      "employees": "Supprimer l'employé",
+      "suppliers": "Supprimer le fournisseur",
+      "invoices": "Supprimer la facture",
+      "purchase": "Supprimer l'achat",
+      "default": "Supprimer"
+    },
+    "options": "Options",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page",
+    "of": "de",
+
+    "delete_confirmation": "Êtes-vous sûr de vouloir supprimer ce ",
+    "clients": "client",
+    "employees": "employé",
+    "products": "produit",
+    "suppliers": "fournisseur",
+    "invoices": "facture"
+  },
+
+  "EmployeeDetailClient": {
+    "title": "Détail de l'employé",
+    "backButton": "Retour",
+    "id": "ID",
+    "email": "Courriel électronique",
+    "role": "Poste"
+  },
+
+  "employeeDetails": {
+    "title": "Détail de l'employé",
+    "closeButton": "Fermer",
+    "id": "ID",
+    "email": "Courriel électronique",
+    "role": "Poste"
+  },
+
+  "customers": {
+    "title": "Gestion des Clients",
+    "add": "Ajouter un Nouveau Client",
+    "edit": "Éditer un Client",
+    "listTitle": "Liste des Clients",
+    "searchPlaceholder": "Rechercher des clients...",
+    "loading": "Chargement des clients...",
+    "noResults": "Aucun client trouvé",
+    "noResultsMsg": "Aucun client trouvé pour: \"{{searchTerm}}\"",
+    "table": {
+      "id": "ID",
+      "identification": "Identification",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "email": "Courriel électronique"
+    }
+  },
+
+  "customerEdit": {
+    "fields": {
+      "id": "ID",
+      "identification": "Identification",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "email": "Courriel électronique"
+    },
+    "placeholders": {
+      "id": "Ex. 123456789",
+      "identification": "Ex. 123456789",
+      "firstName": "Ex. Jean",
+      "lastName": "Ex. Pérez",
+      "email": "Ex. jean.perez@email.com"
+    },
+    "buttons": {
+      "close": "Fermer",
+      "create": "Créer un Client",
+      "update": "Mettre à jour un Client",
+      "processing": "Traitement en cours..."
+    },
+    "alerts": {
+      "noClientId": "ID de client non disponible",
+      "updateSuccess": "Client mis à jour correctement",
+      "updateError": "Erreur de mise à jour du client"
+    },
+    "errors": {
+      "firstName": {
+        "required": "Le prénom est obligatoire",
+        "min": "Le prénom doit comporter au moins 4 caractères",
+        "max": "Le prénom ne peut pas dépasser 40 caractères",
+        "invalid": "Le prénom ne peut pas contenir de caractères spéciaux, d'espaces ni de chiffres"
+      },
+      "lastName": {
+        "required": "Le nom de famille est obligatoire",
+        "min": "Le nom de famille doit comporter au moins 4 caractères",
+        "max": "Le nom de famille ne peut pas dépasser 40 caractères",
+        "invalid": "Le nom de famille ne peut pas contenir de caractères spéciaux, d'espaces ni de chiffres"
+      },
+      "email": {
+        "required": "Le courriel électronique est obligatoire",
+        "invalid": "Veuillez entrer un courriel valide",
+        "max": "Le courriel ne peut pas dépasser 40 caractères"
+      }
+    }
+  },
+
+  "customerForm": {
+    "codeLabel": "Code",
+    "codePlaceholder": "AUTOGENERÉ",
+
+    "identificationLabel": "Identification",
+    "identificationPlaceholder": "Ex. 123456789",
+
+    "firstNameLabel": "Prénom",
+    "firstNamePlaceholder": "Ex. Jean",
+
+    "lastNameLabel": "Nom de famille",
+    "lastNamePlaceholder": "Ex. Pérez",
+
+    "emailLabel": "Courriel électronique",
+    "emailPlaceholder": "Ex. jean.perez@email.com",
+
+    "closeButton": "Fermer",
+    "submitButton": "Créer un Client",
+
+    "successMessage": "Client créé avec succès",
+    "creationError": "Erreur de création du client:",
+    "connectionError": "Erreur de connexion. Réessayez s'il vous plaît.",
+    "authTokenMissing": "Le jeton d'authentification manque",
+
+    "errors": {
+      "firstName": {
+        "required": "Le prénom est obligatoire",
+        "min": "Le prénom doit comporter au moins 4 caractères",
+        "max": "Le prénom ne peut pas dépasser 40 caractères",
+        "invalid": "Le prénom ne peut pas contenir de caractères spéciaux, d'espaces ni de chiffres"
+      },
+      "lastName": {
+        "required": "Le nom de famille est obligatoire",
+        "min": "Le nom de famille doit comporter au moins 4 caractères",
+        "max": "Le nom de famille ne peut pas dépasser 40 caractères",
+        "invalid": "Le nom de famille ne peut pas contenir de caractères spéciaux, d'espaces ni de chiffres"
+      },
+      "identification": {
+        "required": "L'identification est obligatoire",
+        "min": "L'identification doit comporter au moins 6 caractères",
+        "max": "L'identification ne peut pas dépasser 15 caractères",
+        "invalid": "L'identification ne peut contenir que des chiffres"
+      },
+      "email": {
+        "required": "Le courriel électronique est obligatoire",
+        "invalid": "Veuillez entrer un courriel valide",
+        "max": "Le courriel ne peut pas dépasser 40 caractères"
+      }
+    }
+  },
+
+  "customerDetail": {
+    "title": "Détail du client",
+    "backButton": "Retour",
+    "id": "ID",
+    "email": "Courriel électronique",
+    "identification": "Identification"
+  },
+
+  "purchase": {
+    "title": "Boutique",
+    "addItem": "Ajouter des Articles",
+    "productLabel": "Produit",
+    "productPlaceholder": "Rechercher des produits à acheter...",
+    "quantityLabel": "Quantité",
+    "quantityPlaceholder": "Entrer la quantité",
+    "purchasePriceLabel": "Prix d'achat",
+    "pricePlaceholder": "Entrer le prix",
+    "addProductButton": "Ajouter un produit",
+    "purchaseDetailTitle": "Détail de l'Achat",
+    "emptyCart": "Le panier est vide.",
+    "product": "Produit",
+    "quantity": "Quantité",
+    "basePrice": "Prix sans taxe",
+    "tax": "Taxe %",
+    "priceWithTax": "Prix avec taxe",
+    "subtotal": "Sous-total",
+    "action": "Action",
+    "delete": "Supprimer",
+    "total": "Total",
+    "clearCart": "Vider le Panier",
+
+    "purchaseDate": "Date d'achat",
+
+    "supplierLabel": "Fournisseur",
+    "supplierPlaceholder": "Rechercher des fournisseurs...",
+    "confirmPurchase": "Confirmer l'achat",
+    "supplier": "Fournisseur",
+    "noSupplier": "Sans fournisseur",
+    "edit": "Modifier le produit",
+    "loading": "Chargement",
+    "editPurchaseTitle": "Modifier l'achat",
+    "saveChanges": "Enregistrer"
+  },
+
+  "supplier": {
+    "title": "Fournisseurs",
+    "new": "Ajouter un nouveau fournisseur",
+    "edit": "Éditer un Fournisseur",
+    "list": "Liste des Fournisseurs",
+    "searchPlaceholder": "Rechercher des fournisseurs...",
+    "loading": "Chargement des fournisseurs...",
+    "noResults": "Aucun fournisseur trouvé",
+    "notFoundFor": "Aucun fournisseur trouvé pour: \"{term}\"",
+    "id": "ID",
+    "nit": "NIT",
+    "name": "Nom",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "deleteError": "Impossible de supprimer le fournisseur"
+  },
+
+  "supplierForm": {
+    "code": "Code",
+    "autoGenerated": "AUTOGENERÉ",
+    "name": "Nom",
+    "namePlaceholder": "Ex. Fournisseur S.A.",
+    "nit": "NIT",
+    "nitPlaceholder": "Ex. 123456789-0",
+    "phone": "Téléphone",
+    "phonePlaceholder": "Ex. 987654321",
+    "address": "Adresse",
+    "addressPlaceholder": "Ex. Rue 123 #45-67",
+    "close": "Fermer",
+    "create": "Créer un Fournisseur",
+    "successMessage": "Fournisseur créé avec succès",
+    "errorMessage": "Erreur de création du fournisseur",
+    "connectionError": "Erreur de connexion. Réessayez s'il vous plaît.",
+    "errors": {
+      "nit": {
+        "min": "Le NIT doit comporter au moins 5 caractères",
+        "max": "Le NIT ne peut pas dépasser 20 caractères",
+        "regex": "Seulement des chiffres et des tirets sont autorisés"
+      },
+      "name": {
+        "min": "Nom trop court (minimum 3 caractères)",
+        "max": "Nom trop long (maximum 100 caractères)"
+      },
+      "phone": {
+        "min": "Téléphone trop court (minimum 7 chiffres)",
+        "max": "Téléphone trop long (maximum 15 chiffres)",
+        "regex": "Seulement des chiffres sont autorisés"
+      },
+      "address": {
+        "min": "Adresse trop courte (minimum 5 caractères)",
+        "max": "Adresse trop longue (maximum 200 caractères)"
+      }
+    }
+  },
+
+  "supplierEdit": {
+    "fields": {
+      "id": "Code",
+      "name": "Nom du Fournisseur",
+      "nit": "NIT",
+      "phone": "Téléphone",
+      "address": "Adresse"
+    },
+    "placeholders": {
+      "id": "AUTOGENERÉ",
+      "name": "Ex. Fournisseur S.A.",
+      "nit": "Ex. 123456789-0",
+      "phone": "Ex. 987654321",
+      "address": "Ex. Rue 123 #45-67"
+    },
+    "buttons": {
+      "close": "Fermer",
+      "update": "Mettre à jour le Fournisseur"
+    },
+    "success": {
+      "updated": "Fournisseur mis à jour correctement"
+    },
+    "error": {
+      "noId": "ID de fournisseur non disponible",
+      "update": "Erreur de mise à jour du fournisseur"
+    },
+    "errors": {
+      "nit": {
+        "min": "Le NIT doit comporter au moins 5 caractères",
+        "max": "Le NIT ne peut pas dépasser 20 caractères",
+        "regex": "Seulement des chiffres et des tirets sont autorisés"
+      },
+      "name": {
+        "min": "Nom trop court (minimum 3 caractères)",
+        "max": "Nom trop long (maximum 100 caractères)"
+      },
+      "phone": {
+        "min": "Téléphone trop court (minimum 7 chiffres)",
+        "max": "Téléphone trop long (maximum 15 chiffres)",
+        "regex": "Seulement des chiffres sont autorisés"
+      },
+      "address": {
+        "min": "Adresse trop courte (minimum 5 caractères)",
+        "max": "Adresse trop longue (maximum 200 caractères)"
+      }
+    }
+  },
+
+  "supplierDetail": {
+    "title": "Détail du fournisseur",
+    "close": "Fermer",
+    "phone": "Téléphone",
+    "address": "Adresse"
+  },
+
+  "products": {
+    "title": "Gestion des Produits",
+    "newProduct": "Nouveau Produit",
+    "searchPlaceholder": "Rechercher des produits...",
+    "loading": "Chargement des produits...",
+    "noResults": "Aucun produit trouvé",
+    "productNotFound": "Aucun produit trouvé pour: \"{term}\"",
+    "tableTitle": "Liste des Produits",
+    "edit": "Éditer un Produit",
+    "headers": {
+      "code": "Code",
+      "product": "Produit",
+      "supplier": "Fournisseur",
+      "tax": "Taxe",
+      "stock": "Stock",
+      "purchasePrice": "P. achat",
+      "salePrice": "P. vente"
+    }
+  },
+
+  "productForm": {
+    "loadingSuppliers": "Chargement des fournisseurs...",
+    "code": "Code",
+    "autogenerated": "AUTOGENERÉ",
+    "supplier": "Fournisseur",
+    "selectSupplier": "Sélectionner un fournisseur",
+    "name": "Nom",
+    "exampleName": "Ex. SOURIS RAZER",
+    "stock": "Stock",
+    "exampleStock": "EX. 10",
+    "tax": "Taxe",
+    "exampleTax": "EX. 19%",
+    "purchasePrice": "Prix d'achat",
+    "examplePurchase": "EX. 1,00",
+    "salePrice": "Prix de vente",
+    "exampleSale": "EX. 1,00",
+    "close": "Fermer",
+    "createProduct": "Créer un Produit",
+    "successCreate": "Produit créé avec succès",
+    "errorCreate": "Erreur de création du produit",
+    "connectionError": "Erreur de connexion. Réessayez s'il vous plaît.",
+    "authTokenMissing": "Le jeton d'authentification manque",
+
+    "errors": {
+      "name": {
+        "required": "Le nom est requis"
+      },
+      "stock": {
+        "number": "Le stock doit être un nombre",
+        "min": "Le stock ne peut pas être négatif"
+      },
+      "tax": {
+        "number": "La taxe doit être un nombre",
+        "min": "La taxe ne peut pas être négative",
+        "max": "La taxe ne peut pas dépasser 100"
+      },
+      "purchasePrice": {
+        "number": "Le prix d'achat doit être un nombre",
+        "min": "Le prix d'achat ne peut pas être négatif"
+      },
+      "salePrice": {
+        "number": "Le prix de vente doit être un nombre",
+        "min": "Le prix de vente ne peut pas être négatif"
+      }
+    }
+  },
+
+  "productEdit": {
+    "code": "Code",
+    "supplier": "Fournisseur",
+    "name": "Nom",
+    "namePlaceholder": "Ex. SOURIS RAZER",
+    "stock": "Stock",
+    "stockPlaceholder": "Ex. 10",
+    "tax": "Taxe",
+    "taxPlaceholder": "Ex. 19%",
+    "purchasePrice": "Prix d'achat",
+    "purchasePricePlaceholder": "Ex. 1,00",
+    "salePrice": "Prix de vente",
+    "salePricePlaceholder": "Ex. 1,00",
+    "close": "Fermer",
+    "createProduct": "Créer un Produit",
+    "updateProduct": "Mettre à jour un Produit",
+    "productCreated": "Produit créé avec succès",
+    "productUpdated": "Produit mis à jour avec succès",
+    "createError": "Erreur de création du produit",
+    "updateError": "Erreur de mise à jour du produit",
+    "connectionError": "Erreur de connexion. Réessayez s'il vous plaît.",
+    "autoGenerated": "AUTOGENERÉ",
+    "authTokenMissing": "Le jeton d'authentification manque",
+
+    "errors": {
+      "name": {
+        "required": "Le nom est requis"
+      },
+      "stock": {
+        "number": "Le stock doit être un nombre",
+        "min": "Le stock ne peut pas être négatif"
+      },
+      "tax": {
+        "number": "La taxe doit être un nombre",
+        "min": "La taxe ne peut pas être négative",
+        "max": "La taxe ne peut pas dépasser 100"
+      },
+      "purchasePrice": {
+        "number": "Le prix d'achat doit être un nombre",
+        "min": "Le prix d'achat ne peut pas être négatif"
+      },
+      "salePrice": {
+        "number": "Le prix de vente doit être un nombre",
+        "min": "Le prix de vente ne peut pas être négatif"
+      }
+    }
+  },
+
+  "productDetail": {
+    "title": "Détail du Produit",
+    "back": "Retour",
+    "id": "ID",
+    "supplier": "Fournisseur",
+    "tax": "Taxe",
+    "stock": "Stock",
+    "units": "unités",
+    "purchasePrice": "Prix d'achat",
+    "salePrice": "Prix de vente",
+    "margin": "Marge",
+    "close": "Fermer"
+  },
+
+  "toolbar": {
+    "add": "Ajouter Nouveau",
+    "imprimir": "Imprimer Rapport"
+  },
+
+  "makeSale": {
+    "title": "Nouvelle Vente",
+    "addItems": "Ajouter des Articles",
+    "product": "Produit",
+    "searchPlaceholder": "Rechercher des produits à acheter...",
+    "quantityPlaceholder": "Entrer la quantité",
+    "pricePlaceholder": "Entrer le prix",
+    "addProduct": "Ajouter un produit",
+    "quantity": "Quantité",
+    "table": {
+      "product": "Produit",
+      "quantity": "Quantité",
+      "priceNoTax": "Prix sans taxe",
+      "tax": "Taxe %",
+      "priceWithTax": "Prix avec taxe",
+      "subtotal": "Sous-total",
+      "action": "Action"
+    },
+    "apricewTx": "Prix sans taxe",
+    "remove": "Supprimer",
+    "noItems": "Aucun produit pour le moment.",
+    "subtotal": "Sous-total",
+    "totalTaxes": "Total des Taxes",
+    "totalToPay": "Total à payer",
+    "completeSale": "Finaliser la vente",
+    "confirmSale": "Confirmer la Vente",
+    "addBeforeComplete": "Ajoutez des produits avant de finaliser la vente.",
+    "success": "Vente finalisée avec succès.",
+    "notEnoughStock": "Pas assez de stock. Disponible: "
+  },
+
+  "sidebar": {
+    "loading": "Chargement...",
+    "logout": "Se déconnecter",
+    "home": "Accueil",
+    "box": "Caisse",
+    "historyCash": "Historique de caisse",
+    "manageCash": "Gérer la caisse",
+    "store": "Boutique",
+    "products": "Produits",
+    "sales": "Ventes",
+    "makeSales": "Effectuer des ventes",
+    "viewSales": "Consulter les ventes",
+    "shopping": "Achats",
+    "viewPurchase": "Voir les achats",
+    "makePurchase": "Effectuer un achat",
+    "supplier": "Fournisseurs",
+    "users": "Utilisateurs",
+    "customers": "Clients",
+    "employees": "Employés",
+    "dashboard": "Tableau de Bord"
+  },
+
+  "saleInvoice": {
+    "title": "Factures de Vente",
+    "headers": {
+      "id": "ID de facture",
+      "client": "Client",
+      "date": "Date",
+      "total": "Total"
+    },
+    "tableTitle": "Liste des Factures",
+    "loading": "Chargement des factures...",
+    "empty": "Aucune facture n'a été enregistrée.",
+    "searchPlaceholder": "Recherche par clients...",
+    "deleteError": "Une erreur s'est produite lors de la suppression de la facture."
+  },
+
+  "purchases": {
+    "title": "Gestion des achats",
+    "loading": "Chargement des achats ...",
+    "empty": "Aucun achat enregistré.",
+    "tableTitle": "Liste des achats",
+    "headers": {
+      "id": "ID d'achat",
+      "date": "Date",
+      "total": "Total",
+      "supplier": "Fournisseur"
+    },
+    "searchPlaceholder": "Recherche par fournisseurs",
+    "deleteError": "Une erreur s'est produite lors de la suppression de l'enregistrement d'achat."
+  },
+
+  "notFoundPurchase": {
+    "description": "Désolé, nous n'avons pas pu trouver cet enregistrement d'achat",
+    "button": "Retour aux Achats"
+  },
+
+  "purchaseDetail": {
+    "title": "Détail de la facture",
+    "backButton": "Retour",
+    "invoiceId": "ID de Facture",
+    "date": "Date",
+    "electronic": "Facture électronique",
+    "yes": "Oui",
+    "no": "Non",
+    "supplierSection": "Fournisseur",
+    "supplier": {
+      "name": "Nom",
+      "nit": "NIT",
+      "phone": "Téléphone",
+      "address": "Adresse",
+      "supplierId": "ID Fournisseur"
+    },
+    "companySection": "Entreprise",
+    "company": {
+      "name": "Nom",
+      "nit": "NIT",
+      "address": "Adresse",
+      "phone": "Téléphone"
+    },
+    "productsSection": "Produits",
+    "noProducts": "Aucun produit associé.",
+    "product": "Produit",
+    "quantity": "Quantité"
+  },
+
+  "invoiceDetail": {
+    "title": "Détail de la facture",
+    "backButton": "Retour",
+    "invoiceId": "ID de Facture",
+    "date": "Date",
+    "electronic": "Facture électronique",
+    "yes": "Oui",
+    "no": "Non",
+    "clientSection": "Client",
+    "client": {
+      "name": "Nom",
+      "id": "Identification",
+      "email": "Email",
+      "clientId": "ID Client"
+    },
+    "companySection": "Entreprise",
+    "company": {
+      "name": "Nom",
+      "nit": "NIT",
+      "address": "Adresse",
+      "phone": "Téléphone"
+    },
+    "productsSection": "Produits",
+    "noProducts": "Aucun produit associé.",
+    "product": "Produit",
+    "quantity": "Quantité"
+  },
+
+  "invoiceModal": {
+    "title": "Facturer une vente",
+    "client": "Client",
+    "clientPlaceholder": "Rechercher un client",
+    "payment": "Méthode de paiement",
+    "paymentPlaceholder": "Sélectionner une méthode",
+    "paymentMethods": {
+      "CASH": "Espèces",
+      "CARD": "Carte",
+      "TRANSFER": "Virement"
+    },
+    "electronicBill": "Facture électronique?",
+    "toggle": {
+      "yes": "Oui",
+      "no": "Non"
+    },
+    "labels": {
+      "subtotal": "Sous-total",
+      "tax": "Taxes",
+      "total": "Total"
+    },
+    "errors": {
+      "noClient": "Veuillez sélectionner un client.",
+      "auth": "Les informations de l'utilisateur n'ont pas été trouvées.",
+      "sale": "Erreur de traitement de la vente."
+    },
+    "submit": "Traiter la vente",
+    "cancel": "Annuler",
+    "processing": "Traitement en cours...",
+    "preview": {
+      "title": "Aperçu de la facture",
+      "download": "Télécharger le PDF",
+      "finish": "Terminer"
+    },
+    "pdf": {
+      "title": "Facture de Vente",
+      "companyName": "Nom de l'entreprise",
+      "nit": "NIT",
+      "address": "Adresse",
+      "phone": "Téléphone",
+      "client": "Client",
+      "date": "Date",
+      "paymentMethod": "Méthode de paiement",
+      "productDescription": "Description du produit",
+      "headers": {
+        "product": "Produit",
+        "quantity": "Quantité",
+        "unitPrice": "Prix Unitaire",
+        "tax": "Taxe",
+        "subtotal": "Sous-total"
+      }
+    }
+  },
+
+  "admin": {
+    "tableTitle": "Liste des Produits",
+    "headers": {
+      "code": "Code",
+      "product": "Produit",
+      "supplier": "Fournisseur",
+      "tax": "Taxe",
+      "stock": "Stock",
+      "purchasePrice": "P.achat",
+      "salePrice": "P.vente"
+    }
+  },
+
+  "metrics": {
+    "amount": "Montant",
+    "financialComparison": "Ventes contre Achats",
+    "entityDistribution": "Distribution des Entités",
+    "totalSales": "Total des Ventes",
+    "totalPurchases": "Total des Achats",
+    "suppliers": "Fournisseurs",
+    "customers": "Clients",
+    "pendingOrders": "Commandes en Attente",
+    "sales": "Ventes",
+    "purchases": "Achats",
+    "count": "Nombre"
+  },
+
+  "login": {
+    "backToHome": "Retour à l'accueil",
+    "title": "Bienvenue de nouveau",
+    "emailPlaceholder": "Courriel électronique",
+    "passwordPlaceholder": "Mot de passe",
+    "loading": "Chargement...",
+    "loginButton": "SE CONNECTER",
+    "forgotPassword": "Avez-vous oublié votre mot de passe?",
+    "orContinueWith": "ou continuer avec",
+    "authError": "Erreur d'authentification",
+    "connectionError": "Erreur de connexion. Réessayez s'il vous plaît.",
+    "logoAlt": "Axia Logo",
+    "errors": {
+      "emailRequired": "Le courriel est obligatoire",
+      "emailInvalid": "Veuillez entrer un courriel valide",
+      "passwordRequired": "Le mot de passe est obligatoire",
+      "passwordMin": "Le mot de passe doit comporter au moins 8 caractères",
+      "passwordFormat": "Le mot de passe ne doit contenir que des lettres et des chiffres"
+    }
+  },
+
+  "register": {
+    "placeholders": {
+      "name": "Nom",
+      "email": "Courriel électronique",
+      "password": "Mot de passe"
+    },
+    "roles": {
+      "admin": "Administrateur",
+      "user": "Utilisateur",
+      "editor": "Invité"
+    },
+    "buttons": {
+      "sending": "Envoie...",
+      "createAccount": "Créer un compte",
+      "login": "Se connecter"
+    },
+
+    "errors": {
+      "nameRequired": "Le nom est obligatoire",
+      "nameMin": "Le nom d'utilisateur doit comporter au moins 4 caractères",
+      "nameFormat": "Le nom d'utilisateur ne peut pas contenir de caractères spéciaux, d'espaces ni de chiffres",
+      "emailRequired": "Le courriel est obligatoire",
+      "emailInvalid": "Veuillez entrer un courriel valide",
+      "passwordRequired": "Le mot de passe est obligatoire",
+      "passwordMin": "Le mot de passe doit comporter au moins 8 caractères",
+      "passwordFormat": "Le mot de passe ne doit contenir que des lettres, des chiffres et les caractères spéciaux autorisés (@, ., -, _, !, #, $, %, &)"
+    },
+
+    "title": "Créer un compte",
+    "joinedBefore": "Avez-vous déjà rejoint auparavant?",
+    "orContinueWith": "ou continuer avec",
+    "unknownServerError": "Erreur inconnue sur le serveur",
+    "unexpectedError": "Une erreur inattendue s'est produite. Veuillez réessayer s'il vous plaît."
+  },
+
+  "home": {
+    "inicio": "Accueil",
+    "aboutus": "À propos de nous",
+    "contactus": "Contactez-nous",
+    "placeholderPlatform": "Plateforme",
+    "headline": "Comptabilité claire et sans complications",
+    "subheadline": "Axia Invoice vous aide à maintenir vos finances en ordre de manière simple. Moins de temps pour les formalités, plus de temps pour votre entreprise.",
+    "startButton": "Commencer",
+    "learnMoreButton": "En savoir plus",
+
+    "heroBlur": {
+      "headline": "Axia Invoice Simplifie votre facturation et comptabilité",
+      "subheadline": "Émettez des factures électroniques, gérez vos recouvrements et menez votre comptabilité de manière intuitive et efficace."
+    },
+    "features": {
+      "invoicing": {
+        "title": "Facturation Électronique",
+        "description": "Émettez des factures électroniques conformes à la réglementation de manière rapide."
+      },
+      "collection": {
+        "title": "Gestion des Recouvrements",
+        "description": "Administrez vos recouvrements et paiements de manière centralisée et automatisée."
+      },
+      "realTimeAccounting": {
+        "title": "Comptabilité en Temps Réel",
+        "description": "Générez des rapports et analysez votre comptabilité instantanément."
+      },
+      "bankIntegration": {
+        "title": "Intégration Bancaire",
+        "description": "Connectez et conciliez vos transactions bancaires de manière automatique et sécurisée."
+      }
+    },
+
+    "contentHero": {
+      "title": "Révolutionnant la Gestion Financière",
+      "description": "Chez Axia, nous transformons la comptabilité et la facturation électronique avec des solutions innovantes et sécurisées. Nous optimisons les processus professionnels pour stimuler la croissance et la productivité de nos clients dans un monde financier en constante évolution.",
+      "buttonText": "Commencer Maintenant"
+    },
+
+    "pricing": {
+      "header1": "Choisissez votre Plan",
+      "header2": "¡Poussez sans Limites!",
+      "subtitle": "Des prix clairs et honnêtes pour chaque étape de votre entreprise. Aucune surprise, seulement de la croissance.",
+      "billing": {
+        "monthly": "Mensuel",
+        "yearly": "Annuel"
+      },
+      "plans": {
+        "basic": {
+          "title": "Plan Basique",
+          "features": [
+            "Outils de facturation et d'inventaire basiques",
+            "Gestion des fournisseurs et clients",
+            "Facturation électronique basique",
+            "Rapports de ventes mensuels",
+            "Support par email"
+          ]
+        },
+        "pro": {
+          "title": "Plan Pro",
+          "features": [
+            "Tout ce du Plan Basique",
+            "Gestion avancée des clients et fournisseurs",
+            "Analyse de données en temps réel",
+            "Intégration basique de l'IA pour les prévisions de ventes et d'inventaire",
+            "Support prioritaire par email",
+            "Rapports de ventes hebdomadaires"
+          ]
+        },
+        "allin": {
+          "title": "Plan All-in",
+          "features": [
+            "Tout ce du Plan Pro",
+            "Intégration complète de l'IA avec intelligence prédictive",
+            "Alertes intelligentes et détection des anomalies",
+            "Automatisation des commandes d'inventaire",
+            "Support 24/7 premium",
+            "Chatbot avec IA pour les consultations et le support"
+          ]
+        }
+      },
+
+      "card": {
+        "start": "Commencer"
+      }
+    }
+  },
+
+  "footer": {
+    "sections": {
+      "quickLinks": "Liens Rapides",
+      "copyright": "Droits et Politiques",
+      "social": "Réseaux Sociaux"
+    },
+    "quickLinks": {
+      "home": "Accueil",
+      "services": "Services",
+      "aboutUs": "À propos de Nous",
+      "contact": "Contact"
+    },
+    "copyright": {
+      "privacy": "Politique de Confidentialité",
+      "terms": "Termes de Service",
+      "about": "À propos"
+    },
+    "social": {
+      "twitter": "Twitter",
+      "discord": "Discord",
+      "github": "Github"
+    },
+    "brand": {
+      "name": "Axia Invoice",
+      "description": "Axia Invoice est une plateforme de facturation et de comptabilité électronique qui simplifie la gestion financière des entreprises. Notre mission est de fournir des outils innovants et sécurisés pour optimiser la productivité et la croissance de nos clients.",
+      "logoAlt": "Logo Axia Invoice"
+    },
+    "brandsection1": "Innover en gestion d'entreprise : votre allié",
+    "brandsection2": "dans la facturation, l'inventaire et l'analyse des données.",
+    "copyrightText": "Tous droits réservés par Juan Campos Santi Jime."
+  },
+
+  "misionVision": {
+    "title": "Axia InvoIce SAS",
+    "description": "Axia InvoIce S.A.S. est une entreprise innovante dans le domaine de la technologie financière, spécialisée dans le développement de logiciels de comptabilité et de facturation électronique. Fondée en 2023, nous nous engageons à transformer la gestion professionnelle grâce à des solutions efficaces et sécurisées qui maximisent la croissance et la productivité.",
+    "mission": {
+      "title": "Mission",
+      "text": "Chez Axia Invoice SAS, nous nous consacrons à simplifier et optimiser la gestion financière et comptable des entreprises grâce à des solutions technologiques innovantes. Notre logiciel de comptabilité et de facturation électronique est conçu pour être intuitif, efficace et sécurisé, permettant à nos clients de gagner du temps, de réduire les coûts et de se conformer aux réglementations en vigueur. Nous nous engageons à offrir des outils qui stimulent la croissance et la productivité de nos utilisateurs, en fournissant un support exceptionnel et en nous adaptant à leurs besoins en constante évolution."
+    },
+    "vision": {
+      "title": "Vision",
+      "text": "Être reconnu comme leader dans le développement de logiciels de comptabilité et de facturation électronique en Amérique Latine d'ici 2030. Nous aspirons à transformer la manière dont les entreprises gèrent leurs finances, devenant synonyme d'innovation, de fiabilité et d'excellence en service. À travers une technologie de pointe et une approche centrée sur le client, nous cherchons à autonomiser les entreprises pour qu'elles atteignent leur plein potentiel, contribuant ainsi au développement économique et technologique de la région."
+    }
+  },
+
+  "aboutUs": {
+    "title": "À Propos de Nous",
+    "description": "Nous sommes trois étudiants en Ingénierie des Systèmes passionnés par la technologie et le développement de logiciels. Ce projet fait partie de notre apprentissage et de notre passion pour créer des solutions innovantes.",
+    "person": {
+      "role": "Étudiant en ingénierie des systèmes",
+      "title": " Fondateur"
+    }
+  },
+
+  "contactUs": {
+    "title": "Contactez-nous",
+    "description": "Si vous avez des questions ou souhaitez plus d'informations, n'hésitez pas à nous contacter.",
+    "form": {
+      "name": "Nom",
+      "email": "Courriel électronique",
+      "phone": "Téléphone (optionnel)",
+      "subject": "Objet",
+      "message": "Message",
+      "send": "Envoyer le Message"
+    }
+  },
+
+  "TableFilter": {
+    "filter": "Trier par"
+  },
+
+  "dashboard": {
+    "title": "Tableau de Bord",
+    "errorLoading": "Erreur lors du chargement des données",
+    "retry": "Réessayer",
+    "sales": {
+      "title": "Analyse des Ventes",
+      "totalRevenue": "Revenu Total",
+      "totalSales": "Ventes Totales",
+      "revenue": "Revenu",
+      "count": "Nombre",
+      "week": "Semaine",
+      "month": "Mois"
+    },
+    "products": {
+      "title": "Produits les Plus Vendus",
+      "units": "unités",
+      "revenue": "Revenu"
+    },
+    "inventory": {
+      "title": "Résumé de l'Inventaire",
+      "totalProducts": "Total des Produits",
+      "totalStock": "Stock Total",
+      "inventoryValue": "Valeur de l'Inventaire",
+      "lowStockItems": "Articles à Faible Stock",
+      "lowStockAlert": "Produits à Stock Critique",
+      "noData": "Aucune donnée d'inventaire disponible"
+    },
+    "customers": {
+      "title": "Analyse des Clients",
+      "totalCustomers": "Total des Clients",
+      "newCustomers": "Nouveaux Clients",
+      "repeatRate": "Taux de Fidélité",
+      "customerCount": "Nombre de Clients",
+      "averageOrderValue": "Valeur Moyenne des Commandes",
+      "segmentsTitle": "Segments",
+      "segments": {
+        "new": "Nouveaux (1 achat)",
+        "regular": "Réguliers (2-3 achats)",
+        "frequent": "Fréquents (4+ achats)"
+      },
+      "topCustomers": "Meilleurs Clients",
+      "orders": "Commandes",
+      "spent": "Dépensé",
+      "noData": "Aucune donnée client disponible"
+    },
+    "profitability": {
+      "title": "Analyse de la Rentabilité",
+      "revenue": "Revenu",
+      "cogs": "Coût des Marchandises",
+      "grossProfit": "Bénéfice Brut",
+      "netProfit": "Bénéfice Net",
+      "profitMargin": "Marge de Bénéfice",
+      "costBreakdown": "Décomposition des Coûts",
+      "noData": "Aucune donnée de rentabilité disponible",
+      "costOfGoods": "Coût des Marchandises",
+      "netProfitCategory": "Bénéfice Net",
+      "operationalExpenses": "Frais d'Exploitation"
+    }
+  },
+
+  "invoices": {
+    "management": "Gestion des Factures",
+    "customer": "Client",
+    "date": "Date",
+    "total": "Total",
+    "viewDetails": "Voir Détails",
+    "loading": "Chargement des factures...",
+    "noInvoices": "Aucune facture n'a été enregistrée.",
+    "invoiceList": "Liste des Factures",
+    "fetchError": "Erreur lors de la récupération des factures:",
+    "deleteError": "Erreur lors de la suppression de la facture:",
+    "deleteErrorAlert": "Une erreur s'est produite lors de la suppression de la facture.",
+    "name": "Nom",
+    "unknown": "Inconnu"
+  },
+
+  "searchBar": {
+    "searching": "Recherche en cours...",
+    "error": "Erreur de recherche",
+    "noResults": "Aucun résultat trouvé.",
+    "noResultsFor": "Aucun résultat trouvé pour:"
+  },
+
+  "confirmations": {
+    "delete": "Êtes-vous sûr de vouloir supprimer cet élément?",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
+  },
+
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "backButton": "Retour",
+    "closeButton": "Fermer",
+    "save": "Enregistrer",
+    "update": "Mettre à jour",
+    "create": "Créer",
+    "delete": "Supprimer",
+    "view": "Voir",
+    "edit": "Modifier",
+    "search": "Rechercher",
+    "noData": "Aucune donnée disponible",
+    "success": "Opération terminée avec succès",
+    "connectionError": "Erreur de connexion. Veuillez réessayer.",
+    "logoAlt": "Axia Logo"
+  },
+
+  "errors": {
+    "notFound": "404",
+    "pageNotFound": "Désolé, nous n'avons pas pu trouver cette page",
+    "returnHome": "Retourner à l'accueil"
+  },
+
+  "Lenguages": {
+    "español": "Espagnol",
+    "ingles": "Anglais",
+    "frances": "Français"
+  },
+
+  "notFoundHome": {
+    "description": "Désolé, nous n'avons pas pu trouver cette page.",
+    "button": "Retour à l'accueil"
+  },
+
+  "notFoundClient": {
+    "description": "Désolé, nous n'avons pas pu trouver ce client.",
+    "button": "Retour aux clients"
+  },
+
+  "notFoundEmployee": {
+    "description": "Désolé, nous n'avons pas pu trouver cet employé.",
+    "button": "Retour aux employés"
+  },
+
+  "notFoundProducts": {
+    "description": "Désolé, nous n'avons pas pu trouver ce produit",
+    "button": "Retour aux Produits"
+  },
+
+  "notFoundInvoice": {
+    "description": "Désolé, nous n'avons pas pu trouver cette facture",
+    "button": "Retour aux Factures"
+  }
+
+}
