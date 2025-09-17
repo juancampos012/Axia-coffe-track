@@ -2,7 +2,6 @@
 
 import { jsPDF } from 'jspdf';
 import { useState } from 'react';
-import autoTable from 'jspdf-autotable';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 
@@ -238,7 +237,6 @@ export default function InvoiceModal({
       setError(t('errors.noClient'));
       return;
     }
-    console.log('Processing sale for client:', user);
 
     if (!user) {
       setError(t('errors.auth'));
@@ -252,9 +250,10 @@ export default function InvoiceModal({
       const productsForAPI: SaleItemForAPI[] = items.map(item => ({
         tenantId: user?.tenantId || '', 
         productId: item.productId || '',
-        quantity: item.quantity
+        quantity: item.quantity,
+        unitPrice: item.price
       }));
-      
+
       const invoiceResponse = await crearFacturaVenta({
         clientId: selectedClient.id,
         totalPrice: total,

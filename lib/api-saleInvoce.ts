@@ -95,31 +95,20 @@ export const crearFacturaVenta = async (venta: Venta): Promise<CreatedInvoice> =
     totalPrice: venta.totalPrice,
     tenantId: venta.tenantId,
     electronicBill: venta.electronicBill ?? false,
-    payment: venta.payment ?? null
+    payment: venta.payment ?? null,
+    products: venta.products.map(p => ({
+      productId: p.productId,
+      quantity: p.quantity,
+      unitPrice: p.unitPrice,
+      tenantId: p.tenantId
+    }))
   };
-  
+
   const factura = await fetchWithCredentials<CreatedInvoice>(urlFactura, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(facturaPayload)
-  });
-
-  const urlProductosFactura = `${envVariables.API_URL}/sale-product-invoices`;
-  // Asociar productos a la factura
-  await Promise.all(
-    venta.products.map(p =>
-      fetchWithCredentials<void>(urlProductosFactura, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tenantId: p.tenantId,
-          productId: p.productId,
-          invoiceId: factura.id,
-          quantity: p.quantity
-        })
-      })
-    )
-  );
+  })
 
   return factura;
 };
