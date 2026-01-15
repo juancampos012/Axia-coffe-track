@@ -73,6 +73,7 @@ export default function ScreenCustomers() {
             identification: client.identification,
             "first name": client.firstName,
             "last name": client.lastName,
+            phone: client.phone || "",
             email: client.email || "",
         }));
         return formattedClients;
@@ -88,7 +89,7 @@ export default function ScreenCustomers() {
 
     const handleClientsFound = useCallback((results: ProductDAO[] | EmployeeDAO[] | SupplierDAO[] | ClientDAO[] | CreatedInvoice[]) => {
         const clientsResults = results.filter((result): result is ClientDAO => 
-            'firstName' in result && 'lastName' in result && 'identification' in result
+            'firstName' in result && 'lastName' in result && 'identification' in result && 'phone' in result
         );
         
         if (clientsResults.length > 0) {
@@ -135,6 +136,7 @@ export default function ScreenCustomers() {
                 identification: clientToEdit.identification,
                 firstName: clientToEdit["first name"],
                 lastName: clientToEdit["last name"],
+                phone: clientToEdit["phone"],
                 email: clientToEdit.email,
             });
             setIsModalOpen(true);
@@ -150,6 +152,7 @@ export default function ScreenCustomers() {
                 identification: clientToView.identification,
                 firstName: clientToView["first name"],
                 lastName: clientToView["last name"],
+                phone: clientToView["phone"],
                 email: clientToView.email,
             });
             router.push(`/${locale}/users/customers/${clientId}`);
@@ -171,6 +174,7 @@ export default function ScreenCustomers() {
         { label: t("table.identification"), key: "identification"},
         { label: t("table.firstName"), key: "first name"},
         { label: t("table.lastName"), key: "last name"},
+        { label: 'Telefono', key: "phone"},
         { label: t("table.email"), key: "email"}
     ];
 
@@ -250,6 +254,7 @@ export default function ScreenCustomers() {
                         identification: currentClient.identification,
                         firstName: currentClient.firstName,
                         lastName: currentClient.lastName,
+                        phone: currentClient.phone || "",
                         email: currentClient.email || ""
                     } : undefined}
                     onSuccess={() => {

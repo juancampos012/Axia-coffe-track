@@ -27,6 +27,12 @@ export default function SaleForm({
 }: Props) {
   const t = useTranslations("makeSale");
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && name && quantity && parseFloat(quantity) > 0) {
+      handleAddItem();
+    }
+  };
+
   return (
     <div className="flex-1 min-w-[300px] border border-gray-600 bg-transparent p-4 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4 text-white">{t('addItems')}</h2>
@@ -39,96 +45,84 @@ export default function SaleForm({
             onAddToCart={(item) => {
               const product = item as ProductDAO;
               setName(product.name);
-              setPrice('');
+              setPrice(product.salePrice?.toString() || '');
               setStock(product.stock);
               setTax(product.tax);
               setSelectedProductId(product.id);
               setTenantIdProduct(product.tenantId);
+              // Auto-focus en cantidad
+              setTimeout(() => {
+                const qtyInput = document.querySelector('input[name="quantity"]');
+                if (qtyInput) (qtyInput as HTMLInputElement).focus();
+              }, 100);
             }}
             showResults={true}
             placeholder={t('searchPlaceholder')}
           />
         </div>
 
-        <div className="flex flex-row space-x-7">
-          <div className="flex flex-col w-full">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
             <label className="mb-1 text-sm font-medium text-white">Cantidad</label>
-              <Input
-                type="text"
-                value={ quantity }
-                disabled={!name}
-                onChange={(e) => {
-                  let raw = e.target.value.replace(/\./g, "");
-
-                  if (!/^\d*$/.test(raw)) {
-                    return; 
-                  }
-
-                  if (/^0[0-9]/.test(raw)) {
-                    raw = raw.replace(/^0+/, "");
-                  }
-
-                  if (raw === "") {
-                    setQuantity("");
-                    return;
-                  }
-
-                  const numberValue = parseInt(raw, 10);
-                  if (isNaN(numberValue)) {
-                    setQuantity("");
-                    return;
-                  }
-                  setQuantity(numberValue.toString());
-                }}
-                placeholder={t("quantityPlaceholder")}
-              />
-          </div>
-          <div className="flex flex-col w-full">
-            <label className="mb-1 text-sm font-medium text-white">{t("apricewTx")}</label>
-              <Input
-                type="text"
-                value={
-                  price === ""
-                    ? ""
-                    : parseInt(price, 10).toLocaleString("es-CO", {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
-                      })
+            <Input
+              name="quantity"
+              type="text"
+              value={quantity}
+              disabled={!name}
+              onChange={(e) => {
+                let raw = e.target.value.replace(/\./g, "");
+                if (!/^\d*$/.test(raw)) return;
+                if (/^0[0-9]/.test(raw)) raw = raw.replace(/^0+/, "");
+                if (raw === "") {
+                  setQuantity("");
+                  return;
                 }
-                disabled={!name}
-                onChange={(e) => {
-                  let raw = e.target.value.replace(/\./g, "");
-
-                  if (!/^\d*$/.test(raw)) {
-                    return; 
-                  }
-
-                  if (/^0[0-9]/.test(raw)) {
-                    raw = raw.replace(/^0+/, "");
-                  }
-
-                  if (raw === "") {
-                    setPrice("");
-                    return;
-                  }
-
-                  const numberValue = parseInt(raw, 10);
-                  if (isNaN(numberValue)) {
-                    setPrice("");
-                    return;
-                  }
+                const numberValue = parseInt(raw, 10);
+                if (!isNaN(numberValue)) {
+                  setQuantity(numberValue.toString());
+                }
+              }}
+              onKeyPress={handleKeyPress}
+              placeholder="0"
+              autoFocus={!!name}
+            />
+          </div>
+          <div>
+            <label className="mb-1 text-sm font-medium text-white">Precio</label>
+            <Input
+              name="price"
+              type="text"
+              value={price === "" ? "" : parseInt(price, 10).toLocaleString("es-CO")}
+              disabled={!name}
+              onChange={(e) => {
+                let raw = e.target.value.replace(/\./g, "");
+                if (!/^\d*$/.test(raw)) return;
+                if (/^0[0-9]/.test(raw)) raw = raw.replace(/^0+/, "");
+                if (raw === "") {
+                  setPrice("");
+                  return;
+                }
+                const numberValue = parseInt(raw, 10);
+                if (!isNaN(numberValue)) {
                   setPrice(numberValue.toString());
-                }}
-                placeholder={t("pricePlaceholder")}
-              />
-
+                }
+              }}
+              onKeyPress={handleKeyPress}
+              placeholder="$0"
+            />
           </div>
         </div>
+
+        {name && (
+          <div className="mt-2 p-3 bg-gray-800 rounded-md">
+            <p className="font-medium">{name}</p>
+          </div>
+        )}
 
         <button
           onClick={handleAddItem}
           disabled={!name || !quantity || parseFloat(quantity) <= 0}
-          className="px-6 py-2 bg-homePrimary text-white rounded-md hover:bg-homePrimary-400 disabled:bg-gray-500 transition-colors w-full"
+          className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors w-full font-medium"
         >
           {t('addProduct')}
         </button>

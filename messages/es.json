@@ -99,7 +99,8 @@
       "suppliers": "Editar proveedor",
       "invoices": "Editar factura",
       "purchase": "Editar compra",
-      "default": "Editar"
+      "default": "Editar",
+      "loan": "Ver préstamo"
     },
     "view": {
       "products": "Ver producto",
@@ -108,7 +109,8 @@
       "suppliers": "Ver proveedor",
       "invoices": "Ver factura",
       "purchase": "Ver compra",
-      "default": "Ver"
+      "default": "Ver",
+      "loan": "Ver préstamo"
     },
     "delete": {
       "products": "Eliminar producto",
@@ -117,7 +119,8 @@
       "suppliers": "Eliminar proveedor",
       "invoices": "Eliminar factura",
       "purchase": "Eliminar compra",
-      "default": "Eliminar"
+      "default": "Eliminar",
+      "loan": "Eliminar préstamo"
     },
     "options": "Opciones",
     "previous": "Anterior",

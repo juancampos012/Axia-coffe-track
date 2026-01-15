@@ -12,10 +12,9 @@ import {
   ShoppingCart,
   ChevronDown, 
   ChevronUp, 
-  HandCoins, 
-  ArchiveRestore, 
   LogOut,
-  BarChart2
+  BarChart2,
+  Banknote,
 } from "lucide-react";
 
 import { useUserStore } from "@/store/UserStore";
@@ -97,6 +96,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
   }
 
   const basePath = role === "USER" ? `/${locale}/employee` : `/${locale}/admin`;
+  const baseLoansPath = `/${locale}/loans`;
 
   const menuItems: MenuItem[] = [
     { 
@@ -125,6 +125,27 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
           href: `/${locale}/store/products`,
           allowedRoles: ["USER", "ADMIN", "SUPERADMIN"]
         },
+      ],
+    },
+    {
+      icon: Banknote,
+      label: 'Préstamos',
+      allowedRoles: ["USER", "ADMIN", "SUPERADMIN"],
+      subOptions: [
+        ...(role === "ADMIN" || role == "USER"|| role === "SUPERADMIN" ? [
+          { 
+            label: 'Crear préstamo',
+            href: `/${locale}/loans/new-loan`,
+            allowedRoles: ["USER", "ADMIN", "SUPERADMIN"]
+          }
+        ] : []),
+        ...(role === "ADMIN" || role == "USER"|| role === "SUPERADMIN" ? [
+          { 
+            label: 'Ver préstamos',
+            href: `/${locale}/loans/view-loan`,
+            allowedRoles: ["USER", "ADMIN", "SUPERADMIN"]
+          }
+        ] : []),
       ],
     },
     { 
@@ -202,36 +223,44 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
     >
       {filteredItems.map(({ icon: Icon, label, href, subOptions }, index) => (
         <div key={`${label}-${index}`} className="w-full">
-          <div 
-            className={`flex items-center justify-between p-2 rounded-xl hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group ${
-              openMenu === label ? "bg-gray-700/70" : ""
-            }`}
-            onClick={() => subOptions ? toggleMenu(label) : undefined}
-          >
-            <Link 
-              href={href || "#"} 
-              className="flex items-center gap-4"
-              onClick={(e) => {
-                if (subOptions) {
-                  e.preventDefault();
-                  toggleMenu(label);
-                }
-              }}
+          {/* CORRECCIÓN AQUÍ: Manejar diferente según si tiene subOptions o no */}
+          {subOptions ? (
+            // Para items con submenú
+            <div 
+              className={`flex items-center justify-between p-2 rounded-xl hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group ${
+                openMenu === label ? "bg-gray-700/70" : ""
+              }`}
+              onClick={() => toggleMenu(label)}
             >
-              <Icon className="w-5 text-gray-300 group-hover:text-white transition-colors" />
-              {isOpen && <span className="text-gray-200 text-sm font-medium group-hover:text-white">{label}</span>}
-            </Link>
-
-            {subOptions && isOpen && (
-              <div className="ml-3">
-                {openMenu === label ? (
-                  <ChevronUp className="h-5 w-5 text-gray-300 group-hover:text-white" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-gray-300 group-hover:text-white" />
-                )}
+              <div className="flex items-center gap-4">
+                <Icon className="w-5 text-gray-300 group-hover:text-white transition-colors" />
+                {isOpen && <span className="text-gray-200 text-sm font-medium group-hover:text-white">{label}</span>}
               </div>
-            )}
-          </div>
+
+              {isOpen && (
+                <div className="ml-3">
+                  {openMenu === label ? (
+                    <ChevronUp className="h-5 w-5 text-gray-300 group-hover:text-white" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-gray-300 group-hover:text-white" />
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            // Para items SIN submenú (como Préstamos) - usar Link directamente
+            <Link 
+              href={href || "#"}
+              className={`flex items-center justify-between p-2 rounded-xl hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group ${
+                !isOpen ? "justify-center" : ""
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <Icon className="w-5 text-gray-300 group-hover:text-white transition-colors" />
+                {isOpen && <span className="text-gray-200 text-sm font-medium group-hover:text-white">{label}</span>}
+              </div>
+            </Link>
+          )}
           
           {subOptions && isOpen && openMenu === label && (
             <div className="pl-10 pt-2 pb-1 bg-gray-800/30 rounded-lg mt-1">
