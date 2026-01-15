@@ -54,7 +54,6 @@ export const getListproducts = async (params?: {
 
 export const getListproductsByName = async (name: string): Promise<ProductDAO[]> => {
   const url = `${envVariables.API_URL}/products/search?name=${encodeURIComponent(name)}`;
-  console.log('Searching products by name:', url);
 
   return fetchWithCredentials<ProductDAO[]>(url, {
     method: 'GET',
@@ -66,7 +65,6 @@ export const getListproductsByName = async (name: string): Promise<ProductDAO[]>
 
 export const getProductById = async (productId: string) => {
   const url = `${envVariables.API_URL}/products/${productId}`;
-  console.log('Fetching product by ID:', url);
 
   return fetchWithCredentials<ProductDAO>(url, {
     method: 'GET',
@@ -79,7 +77,6 @@ export const getProductById = async (productId: string) => {
 // Función para obtener productos sin autenticación (para SSG)
 export const getPublicProducts = async () => {
   const url = `${envVariables.API_URL}/products/public/list`;
-  console.log('Fetching public products from:', url);
 
   const response = await fetch(url, {
     method: 'GET',
@@ -99,7 +96,6 @@ export const getPublicProducts = async () => {
 // Función para obtener un producto por ID sin autenticación (para SSG)
 export const getPublicProductById = async (productId: string) => {
   const url = `${envVariables.API_URL}/products/public/${productId}`;
-  console.log('Fetching public product by ID:', url);
 
   const response = await fetch(url, {
     method: 'GET',

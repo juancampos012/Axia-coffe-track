@@ -15,6 +15,7 @@ type CustomerFormData = {
     identification: string; 
     firstName: string;
     lastName: string;
+    phone?: string;
     email: string; 
 };
 
@@ -107,6 +108,17 @@ const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuccess
                     {...register("lastName")} 
                 />
                 {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName.message}</p>}
+            </div>
+
+            <div>
+                <label className="text-sm font-semibold text-gray-500">{'Telefono'}</label>
+                <Input 
+                    className="text-homePrimary-200 bg-transparent" 
+                    placeholder={'EJ. 1234567890'} 
+                    type="number" 
+                    {...register("phone")} 
+                />
+                {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
             </div>
 
             <div>

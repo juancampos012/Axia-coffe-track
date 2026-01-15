@@ -18,13 +18,6 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
 
     return (
         <div className="relative w-full min-h-screen text-white flex justify-center">
-            <Image 
-                src="/Images/fondoHerooo.png" 
-                alt="Background Image" 
-                fill 
-                className="absolute top-0 left-0 w-full h-full object-cover"
-                priority
-            />
 
             <div className="relative w-full max-w-4xl bg-blac bg-opacity-50 rounded-lg shadow-lg mt-20">
                 <div className="flex justify-between items-center mb-6">

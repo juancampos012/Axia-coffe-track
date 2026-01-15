@@ -61,7 +61,7 @@ export interface SaleItem {
     tax: number;
     price: number;
     basePrice: number;
-    tenantId: string; // ← agregar esto
+    tenantId: string;
 }  
 
 export interface Venta {
@@ -199,7 +199,7 @@ export interface SaleItemForAPI {
   tenantId: string;
   productId: string;
   quantity: number;
-  product?: ProductDAO;
+  unitPrice: number; 
 }
 
 // Interfaces de Analytics

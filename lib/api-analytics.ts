@@ -53,7 +53,6 @@ const fetchWithCredentials = async <T>(url: string, options: RequestInit = {}): 
  */
 export const getSalesMetrics = async (period: string = 'month', limit: number = 6): Promise<SalesMetricsData[]> => {
   const url = `${envVariables.API_URL}/analytics/sales?period=${period}&limit=${limit}`;
-  console.log(`Fetching sales metrics for period: ${period}, limit: ${limit}`);
   
   return fetchWithCredentials<SalesMetricsData[]>(url);
 };
@@ -65,7 +64,6 @@ export const getSalesMetrics = async (period: string = 'month', limit: number = 
  */
 export const getTopProducts = async (limit: number = 5): Promise<TopProductData[]> => {
   const url = `${envVariables.API_URL}/analytics/top-products?limit=${limit}`;
-  console.log(`Fetching top ${limit} products`);
   
   return fetchWithCredentials<TopProductData[]>(url);
 };
@@ -76,8 +74,7 @@ export const getTopProducts = async (limit: number = 5): Promise<TopProductData[
  */
 export const getInventorySummary = async (): Promise<InventorySummaryData> => {
   const url = `${envVariables.API_URL}/analytics/inventory`;
-  console.log('Fetching inventory summary');
-  
+
   return fetchWithCredentials<InventorySummaryData>(url);
 };
 
@@ -87,7 +84,6 @@ export const getInventorySummary = async (): Promise<InventorySummaryData> => {
  */
 export const getCustomerMetrics = async (): Promise<CustomerMetricsData> => {
   const url = `${envVariables.API_URL}/analytics/customers`;
-  console.log('Fetching customer metrics');
   
   return fetchWithCredentials<CustomerMetricsData>(url);
 };
@@ -98,7 +94,6 @@ export const getCustomerMetrics = async (): Promise<CustomerMetricsData> => {
  */
 export const getDashboardMetrics = async (): Promise<DashboardMetricsData> => {
   const url = `${envVariables.API_URL}/analytics/dashboard`;
-  console.log('Fetching dashboard metrics');
   
   return fetchWithCredentials<DashboardMetricsData>(url);
 };
@@ -109,7 +104,6 @@ export const getDashboardMetrics = async (): Promise<DashboardMetricsData> => {
  */
 export const getProfitabilityMetrics = async (): Promise<ProfitabilityMetricsData> => {
   const url = `${envVariables.API_URL}/analytics/profitability`;
-  console.log('Fetching profitability metrics');
   
   return fetchWithCredentials<ProfitabilityMetricsData>(url, {
     method: 'GET',
@@ -125,7 +119,6 @@ export const getProfitabilityMetrics = async (): Promise<ProfitabilityMetricsDat
  */
 export const getInventoryHealth = async (): Promise<InventoryHealthData> => {
   const url = `${envVariables.API_URL}/analytics/inventory-health`;
-  console.log('Fetching inventory health metrics');
   
   return fetchWithCredentials<InventoryHealthData>(url);
 };
@@ -138,7 +131,6 @@ export const getInventoryHealth = async (): Promise<InventoryHealthData> => {
  */
 export const getProductPerformance = async (period: string = 'month', limit: number = 10): Promise<ProductPerformanceData> => {
   const url = `${envVariables.API_URL}/analytics/product-performance?period=${period}&limit=${limit}`;
-  console.log(`Fetching product performance for period: ${period}, limit: ${limit}`);
   
   return fetchWithCredentials<ProductPerformanceData>(url);
 };
@@ -149,7 +141,6 @@ export const getProductPerformance = async (period: string = 'month', limit: num
  */
 export const getCustomerInsights = async (): Promise<CustomerInsightsData> => {
   const url = `${envVariables.API_URL}/analytics/customer-insights`;
-  console.log('Fetching customer insights');
   
   return fetchWithCredentials<CustomerInsightsData>(url);
 };

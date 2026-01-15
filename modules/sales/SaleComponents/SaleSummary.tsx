@@ -1,6 +1,5 @@
-import { useTranslations } from 'next-intl';
-
-interface Props {
+'use client';
+interface SaleSummaryProps {
   subtotal: number;
   taxTotal: number;
   total: number;
@@ -9,32 +8,34 @@ interface Props {
   formatCurrency: (value: number) => string;
 }
 
-export default function SaleSummary({
-  subtotal, taxTotal, total,
-  onCompleteSale, disabled, formatCurrency
-}: Props) {
-  const t = useTranslations("makeSale");
-
+export default function SaleSummary({ 
+  subtotal, 
+  taxTotal, 
+  total, 
+  onCompleteSale, 
+  disabled, 
+  formatCurrency 
+}: SaleSummaryProps) {
   return (
-    <div className="pt-4 space-y-2 text-right">
-      <div className="flex justify-between">
-        <span className="font-medium">{t('subtotal')}:</span>
+    <div className="space-y-3">
+      <div className="flex justify-between text-sm text-gray-400">
+        <span>Subtotal:</span>
         <span>{formatCurrency(subtotal)}</span>
       </div>
-      <div className="flex justify-between">
-        <span className="font-medium">{t('totalTaxes')}:</span>
+      <div className="flex justify-between text-sm text-gray-400">
+        <span>Impuestos:</span>
         <span>{formatCurrency(taxTotal)}</span>
       </div>
-      <div className="flex justify-between text-lg font-bold mt-2">
-        <span>{t('totalToPay')}:</span>
+      <div className="flex justify-between text-2xl font-bold border-t border-gray-700 pt-3 text-green-400">
+        <span>TOTAL:</span>
         <span>{formatCurrency(total)}</span>
       </div>
-      <button
-        onClick={onCompleteSale}
+      <button 
+        onClick={onCompleteSale} 
         disabled={disabled}
-        className="w-full px-6 py-3 mt-4 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-500 transition-colors text-lg font-medium"
+        className="w-full py-4 mt-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 rounded-lg font-bold text-xl transition-all"
       >
-        {t('completeSale')}
+        COBRAR (EFECTIVO)
       </button>
     </div>
   );

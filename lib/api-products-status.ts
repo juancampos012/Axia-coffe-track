@@ -32,7 +32,6 @@ export const createProduct = async (body: ProductDAO): Promise<Response> => {
 
 export const deleteProduct= async (id: string): Promise<ProductDAO[]> => {
   const url = `${API_BASE_URL}/${id}`;
-  console.log('Fetching products from:', url);
 
   const response = await fetchWithCredentials(url, {
     method: 'DELETE',

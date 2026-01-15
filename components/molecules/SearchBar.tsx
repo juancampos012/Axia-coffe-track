@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Search } from "lucide-react";
+import { Search, X, Loader2 } from "lucide-react";
 
-import Input from "@/components/atoms/Input";
 import { getListClientsByName } from "@/lib/api-clients";
-import CustomButton from "@/components/atoms/CustomButton";
 import { getListproductsByName } from "@/lib/api-products";
 import { getListEmployeesByName } from "@/lib/api-employees";
 import { getListSuppliersByName } from "@/lib/api-suppliers";
@@ -75,7 +73,6 @@ const SearchBarUniversal: React.FC<SearchBarUniversalProps> = ({
     }
   }, [resetTrigger]);
 
-
   const debounceSearch = useMemo(
     () =>
       debounce(async (term: string) => {
@@ -93,11 +90,9 @@ const SearchBarUniversal: React.FC<SearchBarUniversalProps> = ({
           
           if (searchType === "products") {
             fetchedResults = await getListproductsByName(term) || [];
-
             if (supplierIdFilter){
               fetchedResults = fetchedResults.filter((product) => product.supplier?.id === supplierIdFilter);
             }
-
           } else if (searchType === "clients") {
             fetchedResults = (await getListClientsByName(term)) || [];
           } else if (searchType === "suppliers") {
@@ -111,7 +106,7 @@ const SearchBarUniversal: React.FC<SearchBarUniversalProps> = ({
           setResults(fetchedResults);
 
           if (fetchedResults.length === 0) {
-            setError("No se encontraron resultados para la búsqueda.");
+            setError("No se encontraron resultados");
           } else {
             setError(null);
           }
@@ -127,7 +122,7 @@ const SearchBarUniversal: React.FC<SearchBarUniversalProps> = ({
         } finally {
           setIsLoading(false);
         }
-      }, 500),
+      }, 400),
     [onResultsFound, searchType, supplierIdFilter]
   );
 
@@ -146,94 +141,125 @@ const SearchBarUniversal: React.FC<SearchBarUniversalProps> = ({
     if (onSearchTermChange) onSearchTermChange(term);
   };
 
-  return (
-    <div className="w-full">
+  const clearSearch = () => {
+    setSearchTerm("");
+    setResults([]);
+    setShowResultsInternal(false);
+  };
 
-      <div className="relative">
-        <Input
-          icon={Search}
+  return (
+    <div className="w-full relative">
+      {/* Input de búsqueda */}
+      <div className="relative flex items-center">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
+          <Search size={20} />
+        </div>
+        
+        <input
+          type="text"
           placeholder={placeholder}
           value={searchTerm}
-          disable={disabled}
+          disabled={disabled}
           onChange={handleSearch}
+          className="w-full pl-11 pr-12 py-3 bg-gray-900 border-2 border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:bg-gray-800 disabled:cursor-not-allowed text-base"
         />
+
+        {/* Loading o Clear button */}
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          {isLoading ? (
+            <Loader2 size={20} className="text-blue-400 animate-spin" />
+          ) : searchTerm ? (
+            <button
+              onClick={clearSearch}
+              className="text-gray-400 hover:text-gray-300 transition-colors"
+            >
+              <X size={20} />
+            </button>
+          ) : null}
+        </div>
       </div>
 
-      {showResultsInternal && (
-        <div className="mt-2">
-          {isLoading && <p className="text-gray-500 text-sm">{t("searching")}</p>}
-          
-          {error && <p className="text-yellow-600 text-sm">{t("error")}</p>}
-
-          {searchTerm && results.length > 0 ? (
-            <ul className="bg-black border border-gray-300 rounded-md shadow-sm max-h-60 overflow-auto">
-              {results.map((item) => (
-                <li
+      {/* Resultados */}
+      {showResultsInternal && searchTerm && (
+        <div className="absolute z-50 w-full mt-2 bg-gray-900 border-2 border-gray-700 rounded-xl shadow-2xl overflow-hidden">
+          {error ? (
+            <div className="p-4 text-center">
+              <p className="text-gray-400 text-sm">😕 {error}</p>
+            </div>
+          ) : results.length > 0 ? (
+            <div className="overflow-y-auto max-h-[240px]">
+              {results.map((item, index) => (
+                <div
                   key={(item as any).id}
-                  className="flex justify-between items-center p-2 border-b hover:bg-gray-700"
+                  className={`flex justify-between items-center p-4 hover:bg-gray-800 transition-colors cursor-pointer ${
+                    index !== results.length - 1 ? 'border-b border-gray-800' : ''
+                  }`}
+                  onClick={() => {
+                    if (onAddToCart && (searchType === "products" || searchType === "clients" || searchType === "suppliers")) {
+                      onAddToCart(item as any);
+                      const name =
+                        (item as ProductDAO).name ||
+                        (item as EmployeeDAO).name ||
+                        (item as SupplierDAO).name ||
+                        `${(item as ClientDAO).firstName} ${(item as ClientDAO).lastName}`;
+                      setSearchTerm(name);
+                      setShowResultsInternal(false);
+                    }
+                  }}
                 >
-                  <div>
-                    <span className="font-medium text-white">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-white truncate">
                       {(item as ProductDAO).name || 
                        (item as EmployeeDAO).name || 
                        (item as SupplierDAO).name || 
                        `${(item as ClientDAO).firstName} ${(item as ClientDAO).lastName}`}
-                    </span>
+                    </p>
 
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-400 mt-1">
                       {searchType === "products" ? (
-                        <>
-                        </>
+                        <span>Producto</span>
                       ) : searchType === "employees" ? (
-                        <>
-                          <span>Posición: {(item as EmployeeDAO).id}</span>
-                          <span className="ml-2">Email: {(item as EmployeeDAO).email}</span>
-                        </>
+                        <span>{(item as EmployeeDAO).email}</span>
                       ) : searchType === "clients" ? (
-                        <>
-                          <span>Email: {(item as ClientDAO).email}</span>
-                          <span className="ml-2">ID: {(item as ClientDAO).identification}</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>NIT: {(item as SupplierDAO).nit}</span>
-                          <span className="ml-2">Teléfono: {(item as SupplierDAO).phone}</span>
-                        </>
-                      )}
+                        <span>
+                          {(item as ClientDAO).email || (item as ClientDAO).identification}
+                        </span>
+                      ) : searchType === "suppliers" ? (
+                        <span>NIT: {(item as SupplierDAO).nit}</span>
+                      ) : null}
                     </div>
                   </div>
 
                   {(onAddToCart && (searchType === "products" || searchType === "clients" || searchType === "suppliers")) && (
-                    <CustomButton
-                      text="Agregar"
-                      style="c text-white hover:bg-homePrimary-400 text-sm px-3 py-1"
-                      onClickButton={() => {
-                        onAddToCart?.(item as any);
-
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddToCart(item as any);
                         const name =
                           (item as ProductDAO).name ||
                           (item as EmployeeDAO).name ||
                           (item as SupplierDAO).name ||
                           `${(item as ClientDAO).firstName} ${(item as ClientDAO).lastName}`;
-
                         setSearchTerm(name);
-
-                        if (showResults) {
-                          setShowResultsInternal(false);
-                        }
+                        setShowResultsInternal(false);
                       }}
-                    />
+                      className="ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex-shrink-0"
+                    >
+                      Seleccionar
+                    </button>
                   )}
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           ) : (
-            searchTerm && !isLoading && !error && 
-            <p className="text-gray-500 text-sm">{t("noResults")}</p>
+            !isLoading && (
+              <div className="p-4 text-center">
+                <p className="text-gray-400 text-sm">🔍 Escribe al menos 2 caracteres para buscar</p>
+              </div>
+            )
           )}
         </div>
       )}
-      
     </div>
   );
 };

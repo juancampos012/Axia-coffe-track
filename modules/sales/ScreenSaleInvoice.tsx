@@ -7,9 +7,10 @@ import { useRouter } from "next/navigation";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
-import Toolbar from "@/components/organisms/ToolBar";
 import EmptyState from '@/components/molecules/EmptyState';
 import CustomTable from "@/components/organisms/CustomTable";
 import { deleteSaleInvoice, searchInvoicesByDateRange } from "@/lib/api-saleInvoce";
@@ -22,6 +23,7 @@ export default function ScreenInvoices() {
 
     const [currentSort, setCurrentSort] = useState<{field: string, direction: 'asc' | 'desc'} | null>(null);
     const [invoices, setInvoices] = useState<{ [key: string]: string }[]>([]);
+    const [invoicesXlsx, setInvoicesXlsx] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [startDate, setStartDate] = useState<Dayjs | null>(null);
     const [endDate, setEndDate] = useState<Dayjs | null>(null);
@@ -42,14 +44,19 @@ export default function ScreenInvoices() {
 
         try {
             const res = await searchInvoicesByDateRange(start, end);
-            console.log("Fetched invoices:", start, end, res);
+            setInvoicesXlsx(res || []);
 
             if (res && Array.isArray(res)) {
+                setInvoicesXlsx(res)
+                console.log("Facturas obtenidas para Excel:", res);
                 const formatted = res.map((invoice) => ({
                     id: invoice.id,
                     cliente: `${invoice.client?.firstName || "Nombre"} ${invoice.client?.lastName || "Desconocido"}`,
                     fecha: new Date(invoice.date).toLocaleDateString(),
-                    total: `$${(invoice.totalPrice || 0).toFixed(2)}`,
+                    total: `$${(invoice.totalPrice || 0).toLocaleString("es-CO", {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    })}`,
                 }));
 
                 setInvoices(formatted);
@@ -105,9 +112,101 @@ export default function ScreenInvoices() {
         setInvoices(sorted);
     }, [invoices]);
 
+const handleExportExcel = async () => {
+  if (!invoicesXlsx.length) return;
+
+  const workbook = new ExcelJS.Workbook();
+
+  // Recolectar todos los productos
+  const allProducts = new Set<string>();
+  invoicesXlsx.forEach(inv => {
+    (inv.invoiceProducts || []).forEach((p: any) => {
+      allProducts.add(p.product?.name || "Producto sin nombre");
+    });
+  });
+
+  // Crear una hoja por producto
+  for (const prodName of Array.from(allProducts)) {
+    const worksheet = workbook.addWorksheet(prodName);
+
+    // Encabezados
+    worksheet.addRow([
+      "Cliente",
+      "Fecha",
+      `${prodName} (Cantidad)`,
+      `${prodName} (Precio Unitario)`,
+      `${prodName} (Total)`
+    ]);
+
+    // Estilos de encabezado
+    worksheet.getRow(1).eachCell(cell => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "4F81BD" } // azul
+      };
+      cell.font = { bold: true, color: { argb: "FFFFFF" } };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+    });
+
+    // Filas de datos
+    invoicesXlsx.forEach(inv => {
+      const prod = inv.invoiceProducts?.find((p: any) => (p.product?.name || "Producto sin nombre") === prodName);
+      if (prod) {
+        const row = worksheet.addRow([
+          `${inv.client?.firstName || ""} ${inv.client?.lastName || ""}`,
+          new Date(inv.date).toLocaleDateString(),
+          prod.quantity || "",
+          prod.unitPrice || prod.product?.salePrice || "",
+          prod.quantity && (prod.unitPrice || prod.product?.salePrice) ? prod.quantity * (prod.unitPrice || prod.product?.salePrice) : ""
+        ]);
+      }
+    });
+
+    // Totales
+    const totalQty = invoicesXlsx.reduce((sum, inv) => {
+      const prod = inv.invoiceProducts?.find((p: any) => (p.product?.name || "Producto sin nombre") === prodName);
+      return sum + (prod?.quantity || 0);
+    }, 0);
+
+    const totalSum = invoicesXlsx.reduce((sum, inv) => {
+      const prod = inv.invoiceProducts?.find((p: any) => (p.product?.name || "Producto sin nombre") === prodName);
+      return sum + ((prod?.quantity || 0) * (prod?.unitPrice || prod?.product?.salePrice || 0));
+    }, 0);
+
+    worksheet.addRow(["Totales", "", totalQty || "", "", totalSum || ""]);
+
+    // Ajustar ancho de columnas
+    worksheet.columns.forEach(col => {
+      let maxLength = 0;
+      if (typeof col.eachCell === "function") {
+        col.eachCell({ includeEmpty: true }, cell => {
+          const value = cell.value ? cell.value.toString() : "";
+          maxLength = Math.max(maxLength, value.length);
+        });
+      }
+      col.width = maxLength + 5;
+    });
+  }
+
+  // Exportar el archivo
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buffer]), "reporte_facturas.xlsx");
+};
     return (
         <div className="container mx-auto">
-            <Toolbar title={t("title")} invoice={true} />
+            <div className="p-4 shadow">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold text-homePrimary-200">Facturas de compras</h2>
+                    <button
+                        onClick={handleExportExcel}
+                        disabled={!invoices.length}
+                        className="px-6 py-2 bg-homePrimary text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all"
+                        >
+                        Descargar Excel
+                    </button>
+                </div>
+            </div>
 
             <div className="flex justify-between items-center mb-4 mt-4">
                 <LocalizationProvider dateAdapter={AdapterDayjs}>

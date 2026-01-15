@@ -59,7 +59,6 @@ export const deleteSaleInvoice = async (id: string): Promise<void> => {
 
 export const getListInvoicesByClientName = async (name: string): Promise<CreatedInvoice[]> => {
   const url = `${envVariables.API_URL}/sale-invoices/search?name=${encodeURIComponent(name)}`;
-  console.log('Searching invoices by name:', url);
 
   return fetchWithCredentials<CreatedInvoice[]>(url, {
     method: "GET",
@@ -72,7 +71,6 @@ export const getListInvoicesByClientName = async (name: string): Promise<Created
 // Función para obtener facturas sin autenticación (para SSG)
 export const getPublicSaleInvoices = async () => {
   const url = `${envVariables.API_URL}/sale-invoices/public/list`;
-  console.log('Fetching public sale invoices from:', url);
 
   const response = await fetch(url, {
     method: 'GET',
@@ -91,38 +89,26 @@ export const getPublicSaleInvoices = async () => {
 
 export const crearFacturaVenta = async (venta: Venta): Promise<CreatedInvoice> => {
   const urlFactura = `${envVariables.API_URL}/sale-invoices`;
-  console.log('Creando factura en:', urlFactura);
 
   const facturaPayload = {
     clientId: venta.clientId,
     totalPrice: venta.totalPrice,
     tenantId: venta.tenantId,
     electronicBill: venta.electronicBill ?? false,
-    payment: venta.payment ?? null
+    payment: venta.payment ?? null,
+    products: venta.products.map(p => ({
+      productId: p.productId,
+      quantity: p.quantity,
+      unitPrice: p.unitPrice,
+      tenantId: p.tenantId
+    }))
   };
-  
+
   const factura = await fetchWithCredentials<CreatedInvoice>(urlFactura, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(facturaPayload)
-  });
-
-  const urlProductosFactura = `${envVariables.API_URL}/sale-product-invoices`;
-  // Asociar productos a la factura
-  await Promise.all(
-    venta.products.map(p =>
-      fetchWithCredentials<void>(urlProductosFactura, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tenantId: p.tenantId,
-          productId: p.productId,
-          invoiceId: factura.id,
-          quantity: p.quantity
-        })
-      })
-    )
-  );
+  })
 
   return factura;
 };

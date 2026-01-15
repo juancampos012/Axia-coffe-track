@@ -33,4 +33,9 @@ export const customertSchema = (t: ReturnType<typeof useTranslations>) => z.obje
 			.nonempty({ message: t("errors.email.required") })
 			.email({message: t("errors.email.invalid") })
 			.max(40, t("errors.email.max")),
+
+    phone: z.string()
+                .nonempty({ message: t("errors.phone.required") })
+                .min(10, {message: t("errors.phone.min")})
+                .max(10, {message: t("errors.phone.max")})
 });

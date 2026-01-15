@@ -15,6 +15,7 @@ type CustomerFormData = {
     identification: string; 
     firstName: string;
     lastName: string;
+    phone?: string;
     email: string; 
 };
 
@@ -24,6 +25,7 @@ interface CustomerFormProps {
         identification: string; 
         firstName: string;
         lastName: string;
+        phone?: string;
         email: string; 
     };
     onSuccess?: () => void; 
@@ -75,6 +77,7 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
                 identification: data.identification,
                 firstName: data.firstName,
                 lastName: data.lastName,
+                phone: data.phone || "",
                 email: data.email,
             };
     

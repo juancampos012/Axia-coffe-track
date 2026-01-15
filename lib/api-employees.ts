@@ -17,7 +17,6 @@ const fetchWithCredentials = async <T>(url: string, options: RequestInit): Promi
 
 export const getListEmployees = async (): Promise<EmployeeDAO[]> => {
   const url = `${envVariables.API_URL}/users`;
-  console.log('Obteniendo empleados desde:', url);
 
   return fetchWithCredentials<EmployeeDAO[]>(url, {
     method: 'GET',
@@ -32,7 +31,6 @@ export const getListEmployeesByName = async (name: string, role?: string): Promi
   if (role) {
     url += `&role=${encodeURIComponent(role)}`;
   }
-  console.log('Buscando empleados:', url);
 
   return fetchWithCredentials<EmployeeDAO[]>(url, {
     method: 'GET',
@@ -44,7 +42,6 @@ export const getListEmployeesByName = async (name: string, role?: string): Promi
 
 export const getPublicEmployees = async () => {
   const url = `${envVariables.API_URL}/users/public/list`;
-  console.log('Fetching public employees from:', url);
 
   const response = await fetch(url, {
     method: 'GET',
