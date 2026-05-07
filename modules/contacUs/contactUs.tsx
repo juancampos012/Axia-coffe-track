@@ -13,65 +13,81 @@ export default function ContactUs() {
   return (
     <section
       id="contact"
-      className="relative overflow-hidden bg-black py-20 flex flex-col items-center justify-center"
+      className="relative overflow-hidden bg-black py-32 flex flex-col items-center justify-center"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/30 via-black/90 to-black opacity-95 blur-[100px]" />
+      {/* Fondo degradado corregido a dorado/café sutil */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D4A373]/10 via-black/95 to-black opacity-90 blur-[100px]" />
 
-      <div className="relative z-10 max-w-4xl px-4 text-center mt-10">
-        <h2 className="text-4xl font-bold text-white mb-4">{t('title')}</h2>
-        <p className="text-gray-300 text-lg mb-10">
+      <div className="relative z-10 max-w-4xl w-full px-6 text-center mt-20">
+        {/* Título con más margen para que no lo tape el Navbar */}
+        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+          {t('title')}
+        </h2>
+        <p className="text-gray-400 text-lg mb-16 max-w-2xl mx-auto">
           {t('description')}
         </p>
 
-        <form className="space-y-6" onSubmit={onsubmit}>
-          <div>
+        <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={onsubmit}>
+          {/* Nombre */}
+          <div className="text-left">
+            <label className="text-[#D4A373] text-xs font-bold uppercase mb-2 block ml-1">Nombre</label>
             <input
               type="text"
               placeholder={t('form.name')}
-              className="w-full p-4 rounded-lg bg-white/10 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-homePrimary-200"
+              className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-gray-300 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#D4A373]/50 transition-all"
             />
           </div>
 
-          <div>
+          {/* Email */}
+          <div className="text-left">
+            <label className="text-[#D4A373] text-xs font-bold uppercase mb-2 block ml-1">Correo Electrónico</label>
             <input
               type="email"
               placeholder={t('form.email')}
-              className="w-full p-4 rounded-lg bg-white/10 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-homePrimary-200"
+              className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-gray-300 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#D4A373]/50 transition-all"
             />
           </div>
 
-          <div>
+          {/* Teléfono */}
+          <div className="text-left">
+            <label className="text-[#D4A373] text-xs font-bold uppercase mb-2 block ml-1">Teléfono</label>
             <input
               type="text"
               placeholder={t('form.phone')}
-              className="w-full p-4 rounded-lg bg-white/10 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-homePrimary-200"
+              className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-gray-300 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#D4A373]/50 transition-all"
             />
           </div>
 
-          <div>
+          {/* Asunto */}
+          <div className="text-left">
+            <label className="text-[#D4A373] text-xs font-bold uppercase mb-2 block ml-1">Asunto</label>
             <input
               type="text"
               placeholder={t('form.subject')}
-              className="w-full p-4 rounded-lg bg-white/10 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-homePrimary-200"
+              className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-gray-300 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#D4A373]/50 transition-all"
             />
           </div>
 
-          <div>
-              <textarea
-                  placeholder={t('form.message')}
-                  className="w-full h-40 p-4 rounded-lg bg-white/10 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-homePrimary-200"
-              />
+          {/* Mensaje - Ocupa 2 columnas */}
+          <div className="md:col-span-2 text-left">
+            <label className="text-[#D4A373] text-xs font-bold uppercase mb-2 block ml-1">Mensaje</label>
+            <textarea
+              placeholder={t('form.message')}
+              className="w-full h-40 p-4 rounded-xl bg-white/5 border border-white/10 text-gray-300 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#D4A373]/50 transition-all resize-none"
+            />
           </div>
 
-          <button
-            type="submit"
-            className="bg-homePrimary hover:bg-primary text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
-          >
-            {t('form.send')}
-          </button>
+          {/* Botón Centrado */}
+          <div className="md:col-span-2 flex justify-center mt-6">
+            <button
+              type="submit"
+              className="bg-[#D4A373] hover:bg-[#b88a5d] text-black px-12 py-4 rounded-xl font-black uppercase tracking-widest transition-all duration-300 hover:scale-105 shadow-lg shadow-[#D4A373]/20"
+            >
+              {t('form.send')}
+            </button>
+          </div>
         </form>
       </div>
     </section>
   );
 }
-  

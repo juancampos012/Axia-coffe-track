@@ -209,29 +209,12 @@ export default function ScreenSimpleLoans() {
                   </div>
                 </div>
 
-                {/* Validaciones */}
-                {!selectedClient && amount > 0 && (
-                  <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-3 mb-4">
-                    <p className="text-yellow-300 text-sm">⚠️ Selecciona una persona</p>
-                  </div>
-                )}
-
-                {balance !== null && amount > balance && (
-                  <div className="bg-red-900/30 border border-red-700 rounded-lg p-3 mb-4">
-                    <p className="text-red-300 text-sm">⚠️ Fondos insuficientes</p>
-                    <p className="text-red-400 text-xs mt-1">
-                      Necesitas {formatCurrency(amount - balance)} más
-                    </p>
-                  </div>
-                )}
-
                 <button
                   onClick={handleCreateSimpleLoan}
                   disabled={
                     loading || 
                     !selectedClient || 
-                    amount <= 0 || 
-                    (balance !== null && amount > balance)
+                    amount <= 0 
                   }
                   className="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors text-lg font-bold"
                 >

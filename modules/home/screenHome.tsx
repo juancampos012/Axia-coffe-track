@@ -10,7 +10,7 @@ import HomeFooter from "@/components/organisms/HomeFooter";
 const ScreenHome: React.FC = () => {
   return (
     <div className="bg-black">
-      <div className="min-h-screen w-full flex bg-black relative">
+      <div className="min-h-screen w-full bg-black ">
         <Navbar />
         <Hero />
       </div>

@@ -1,5 +1,4 @@
 import { useTranslations, useLocale } from "next-intl";
-
 import { BrandSection } from "../molecules/homeFooter/BrandSection";
 import { LinksColumn } from "../molecules/homeFooter/Links";
 
@@ -11,47 +10,54 @@ export default function HomeFooter({style}: HomeFooterProps) {
     const t = useTranslations("footer");
     const locale = useLocale();
 
+    // Enlaces de navegación rápida enfocados en el servicio
     const quickLinks = [
-        { href: `/${locale}/`, label: t("quickLinks.home") },
-        { href: `/${locale}/services`, label: t("quickLinks.services") },
-        { href: `/${locale}/aboutus`, label: t("quickLinks.aboutUs") },
-        { href: `/${locale}/contactus`, label: t("quickLinks.contact") },
+        { href: `/${locale}/`, label: "Inicio" },
+        { href: `/${locale}/aboutus`, label: "Nuestra Solución" },
+        { href: `/${locale}/contactus`, label: "Soporte Técnico" },
+        { href: `/${locale}/pricing`, label: "Planes" },
     ];
 
+    // Enlaces legales y de confianza
     const copyrightLinks = [
-        { href: `/${locale}/privacy`, label: t("copyright.privacy") },
-        { href: `/${locale}/terms`, label: t("copyright.terms") },
-        { href: `/${locale}/about`, label: t("copyright.about") },
-    ];
-
-    const socialLinks = [
-        { href: "https://twitter.com", label: t("social.twitter") },
-        { href: "https://discord.gg", label: t("social.discord") },
-        { href: "https://github.com", label: t("social.github") },
+        { href: `/${locale}/privacy`, label: "Privacidad de Datos" },
+        { href: `/${locale}/terms`, label: "Términos del Servicio" },
+        { href: `/${locale}/security`, label: "Seguridad de la Información" },
     ];
 
     return (
-        <footer className={`${style} py-12 mt-10`}>
-            <div className="max-w-6xl mx-auto px-4 md:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-20">
-                    <BrandSection />
+        <footer className={`${style} py-16 border-`}>
+            <div className="max-w-7xl mx-auto px-6 md:px-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-12 lg:gap-8">
+                    
+                    {/* Sección de Marca: Ocupa más espacio */}
+                    <div className="lg:col-span-3">
+                        <BrandSection />
+                        <p className="mt-4 text-gray-500 text-sm max-w-xs">
+                            Tecnología colombiana diseñada para modernizar la compra y venta de café pergamino en todo el país.
+                        </p>
+                    </div>
+
+                    {/* Columnas de Links */}
                     <LinksColumn
-                        title={t("sections.quickLinks")}
+                        title="Navegación"
                         links={quickLinks}
                     />
                     <LinksColumn
-                        title={t("sections.copyright")}
+                        title="Legal"
                         links={copyrightLinks}
-                    />
-                    <LinksColumn
-                        title={t("sections.social")}
-                        links={socialLinks}
                     />
                 </div>
                 
-                {/* Copyright */}
-                <div className="mt-10 border-t border-gray-800 pt-4 text-center text-sm">
-                    &copy;{new Date().getFullYear()} Axia. {t("copyrightText")}
+                {/* Línea final y Copyright */}
+                <div className="mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-gray-500 text-xs uppercase tracking-widest font-medium">
+                    <div>
+                        &copy; {new Date().getFullYear()} AXIA COFFEE TRACK. TODOS LOS DERECHOS RESERVADOS.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        Sistemas Operativos 100% Online
+                    </div>
                 </div>
             </div>
         </footer>

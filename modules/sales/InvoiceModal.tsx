@@ -251,7 +251,8 @@ export default function InvoiceModal({
         tenantId: user?.tenantId || '', 
         productId: item.productId || '',
         quantity: item.quantity,
-        unitPrice: item.price
+        unitPrice: item.price,
+        announcementId: null
       }));
 
       const invoiceResponse = await crearFacturaVenta({

@@ -1,165 +1,139 @@
-import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
-import BarChart from "@/modules/dashboard/charts/BarChart";
-import PieChart from "@/modules/dashboard/charts/PieChart";
-import { formatCurrency } from "@/utils/format";
-import { getDashboardMetrics } from "@/lib/api-analytics";
+'use client'
+
+import { useMemo } from 'react'
+
+import BarChart from '@/modules/dashboard/charts/BarChart'
+import PieChart from '@/modules/dashboard/charts/PieChart'
+
+import { formatCurrency } from '@/utils/format'
+import { useDashboardData } from '@/modules/dashboard/hooks/useDashboardData'
 
 export default function MetricCharts() {
-  const t = useTranslations("metrics");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Datos para el gráfico de barras (ventas vs compras)
-  const [financialData, setFinancialData] = useState({
-    labels: [t("sales"), t("purchases")],
-    datasets: [
-      {
-        label: t("amount"),
-        data: [0, 0],
-        backgroundColor: ["#60a5fa", "#1e3c8b"],
-      }
-    ],
-  });
-  
-  // Datos para el gráfico circular (distribución de entidades)
-  const [entityData, setEntityData] = useState({
-    labels: [t("suppliers"), t("customers"), t("pendingOrders")],
-    datasets: [
-      {
-        label: t("count"),
-        data: [0, 0, 0],
-        backgroundColor: ["#1e3c8b", "#60a5fa", "#93c5fd"],
-        borderColor: ["#1e3c8b", "#60a5fa", "#93c5fd"],
-      },
-    ],
-  });
+  const {
+    data: dashboardData,
+    isLoading,
+    isError
+  } = useDashboardData()
 
-  useEffect(() => {
-    async function fetchAnalyticsData() {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const dashboardData = await getDashboardMetrics();
-        
-        // Actualizar datos financieros (ventas vs compras)
-        setFinancialData({
-          labels: [t("sales"), t("purchases")],
-          datasets: [
-            {
-              label: t("amount"),
-              data: [
-                dashboardData.sales.total || 0,
-                dashboardData.purchases.total || 0
-              ],
-              backgroundColor: ["#60a5fa", "#1e3c8b"],
-            }
-          ],
-        });
-        
-        // Actualizar datos de entidades (proveedores, clientes, órdenes)
-        setEntityData({
-          labels: [t("suppliers"), t("customers"), t("pendingOrders")],
-          datasets: [
-            {
-              label: t("count"),
-              data: [
-                dashboardData.suppliersTotal || 0,
-                dashboardData.clientsTotal || 0,
-                dashboardData.pendingOrders || 0
-              ],
-              backgroundColor: ["#1e3c8b", "#60a5fa", "#93c5fd"],
-              borderColor: ["#1e3c8b", "#60a5fa", "#93c5fd"],
-            },
-          ],
-        });
-        
-      } catch (err) {
-        console.error("Error fetching analytics data:", err);
-        setError(err instanceof Error ? err.message : "Error fetching data");
-        
-        // Datos de fallback en caso de error
-        setFinancialData({
-          labels: [t("sales"), t("purchases")],
-          datasets: [
-            {
-              label: t("amount"),
-              data: [680000, 425120],
-              backgroundColor: ["#60a5fa", "#1e3c8b"],
-            }
-          ],
-        });
-        
-        setEntityData({
-          labels: [t("suppliers"), t("customers"), t("pendingOrders")],
-          datasets: [
-            {
-              label: t("count"),
-              data: [245, 1589, 458],
-              backgroundColor: ["#1e3c8b", "#60a5fa", "#93c5fd"],
-              borderColor: ["#1e3c8b", "#60a5fa", "#93c5fd"],
-            },
-          ],
-        });
-      } finally {
-        setIsLoading(false);
+  const financialData = useMemo(() => ({
+    labels: ['Ventas', 'Préstamos pendientes'],
+    datasets: [
+      {
+        label: 'Monto',
+        data: [
+          dashboardData?.sales.totalRevenue || 0,
+          dashboardData?.operations.pendingLoans || 0
+        ],
+        backgroundColor: ['#60a5fa', '#1e3c8b']
       }
-    }
-    
-    fetchAnalyticsData();
-  }, [t]);
+    ]
+  }), [dashboardData])
+
+  const stockData = useMemo(() => ({
+    labels: [
+      'Café',
+      'Café verde',
+      'Frijol',
+      'Pasilla',
+      'Cacao'
+    ],
+    datasets: [
+      {
+        label: 'Inventario',
+        data: [
+          dashboardData?.inventory.stock.coffee || 0,
+          dashboardData?.inventory.stock.wetCoffee || 0,
+          dashboardData?.inventory.stock.bean || 0,
+          dashboardData?.inventory.stock.pasilla || 0,
+          dashboardData?.inventory.stock.cacao || 0
+        ],
+        backgroundColor: [
+          '#1e3c8b',
+          '#60a5fa',
+          '#93c5fd',
+          '#3b82f6',
+          '#1d4ed8'
+        ],
+        borderColor: [
+          '#1e3c8b',
+          '#60a5fa',
+          '#93c5fd',
+          '#3b82f6',
+          '#1d4ed8'
+        ]
+      }
+    ]
+  }), [dashboardData])
 
   if (isLoading) {
-    return <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
-      <div className="bg-black/50 border border-homePrimary/20 rounded-lg p-5 h-64 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-homePrimary"></div>
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
+        {[1, 2].map(i => (
+          <div
+            key={i}
+            className="bg-black/50 border border-homePrimary/20 rounded-lg p-5 h-64 flex items-center justify-center"
+          >
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-homePrimary" />
+          </div>
+        ))}
       </div>
-      <div className="bg-black/50 border border-homePrimary/20 rounded-lg p-5 h-64 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-homePrimary"></div>
-      </div>
-    </div>;
+    )
   }
 
-  if (error) {
-    return <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
-      <div className="bg-black/50 border border-red-500/20 rounded-lg p-5 h-64 flex items-center justify-center text-red-400">
-        <p>Error loading analytics data: {error}</p>
+  if (isError || !dashboardData) {
+    return (
+      <div className="bg-black/50 border border-red-500/20 rounded-lg p-5 text-red-400">
+        Error cargando métricas del dashboard
       </div>
-    </div>;
+    )
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
-      {/* Gráfico de Ventas vs Compras */}
+      
+      {/* Ventas vs Préstamos */}
       <div className="bg-black/50 border border-homePrimary/20 rounded-lg p-4 backdrop-blur-sm">
-        <h2 className="text-base font-medium mb-2 text-gray-200">{t("financialComparison")}</h2>
-        <BarChart 
-          labels={financialData.labels} 
+        <h2 className="text-base font-medium mb-2 text-gray-200">
+          Comparación Financiera
+        </h2>
+
+        <BarChart
+          labels={financialData.labels}
           datasets={financialData.datasets}
           height={180}
-          horizontal={true}
+          horizontal
         />
+
         <div className="flex justify-between mt-2 text-xs text-gray-400">
-          <div>{t("totalSales")}: {formatCurrency(financialData.datasets[0].data[0])}</div>
-          <div>{t("totalPurchases")}: {formatCurrency(financialData.datasets[0].data[1])}</div>
+          <div>
+            Total Ventas: {formatCurrency(financialData.datasets[0].data[0])}
+          </div>
+          <div>
+            Préstamos pendientes: {formatCurrency(financialData.datasets[0].data[1])}
+          </div>
         </div>
       </div>
 
-      {/* Gráfico de Distribución de Entidades */}
+      {/* Distribución Inventario */}
       <div className="bg-black/50 border border-homePrimary/20 rounded-lg p-4 backdrop-blur-sm">
-        <h2 className="text-base font-medium mb-2 text-gray-200">{t("entityDistribution")}</h2>
-        <PieChart 
-          labels={entityData.labels} 
-          datasets={entityData.datasets}
+        <h2 className="text-base font-medium mb-2 text-gray-200">
+          Distribución Inventario
+        </h2>
+
+        <PieChart
+          labels={stockData.labels}
+          datasets={stockData.datasets}
           height={180}
         />
-        <div className="flex justify-between mt-2 text-xs text-gray-400">
-          <div>{t("suppliers")}: {entityData.datasets[0].data[0]}</div>
-          <div>{t("customers")}: {entityData.datasets[0].data[1]}</div>
-          <div>{t("pendingOrders")}: {entityData.datasets[0].data[2]}</div>
+
+        <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-gray-400">
+          {stockData.labels.map((label, i) => (
+            <div key={label}>
+              {label}: {stockData.datasets[0].data[i]}
+            </div>
+          ))}
         </div>
       </div>
     </div>
-  );
+  )
 }
