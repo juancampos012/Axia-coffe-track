@@ -67,16 +67,18 @@ export default function ScreenCustomers() {
         }
     };
 
+    // 1. ACTUALIZADO: Mapeo de segundos nombres y apellidos
     const formatClients = (clientList: ClientDAO[]) => {
-        const formattedClients = clientList.map((client) => ({
+        return clientList.map((client) => ({
             id: client.id,
             identification: client.identification,
             "first name": client.firstName,
+            "middle name": client.middleName || "",
             "last name": client.lastName,
+            "second last name": client.secondLastName || "",
             phone: client.phone || "",
             email: client.email || "",
         }));
-        return formattedClients;
     };
 
     const sortCustomers = (data: { [key: string]: string }[], field: string, direction: 'asc' | 'desc') => {
@@ -102,16 +104,17 @@ export default function ScreenCustomers() {
                 setClients(formattedData);
             }
         } else if (searchTerm && searchTerm.length >= 2) {
-            // Create a "no results" row when actively searching
             setClients([{
                 id: "no-results",
                 identification: "",
                 "first name": "",
+                "middle name": "",
                 "last name": `No se encontraron clientes para: "${searchTerm}"`,
+                "second last name": "",
+                phone: "",
                 email: "",
             }]);
         } else {
-            // Show original data when not searching
             if (currentSort) {
                 const sortedData = sortCustomers([...initialClients], currentSort.field, currentSort.direction);
                 setClients(sortedData);
@@ -127,6 +130,7 @@ export default function ScreenCustomers() {
         setClients(sortedClients);
     }, [clients]);
 
+    // 2. ACTUALIZADO: Manejador de edición con nuevos campos
     const handleEditClient = (clientId: string) => {
         const clientToEdit = initialClients.find(client => client.id === clientId);
         if (clientToEdit) {
@@ -135,10 +139,12 @@ export default function ScreenCustomers() {
                 tenantId: "", 
                 identification: clientToEdit.identification,
                 firstName: clientToEdit["first name"],
+                middleName: clientToEdit["middle name"], // Agregado
                 lastName: clientToEdit["last name"],
+                secondLastName: clientToEdit["second last name"], // Agregado
                 phone: clientToEdit["phone"],
                 email: clientToEdit.email,
-            });
+            } as ClientDAO);
             setIsModalOpen(true);
         }
     };
@@ -146,15 +152,6 @@ export default function ScreenCustomers() {
     const handleViewClient = (clientId: string) => {
         const clientToView = initialClients.find(client => client.id === clientId);
         if (clientToView) {
-            setCurrentClient({
-                id: clientToView.id,
-                tenantId: "", 
-                identification: clientToView.identification,
-                firstName: clientToView["first name"],
-                lastName: clientToView["last name"],
-                phone: clientToView["phone"],
-                email: clientToView.email,
-            });
             router.push(`/${locale}/users/customers/${clientId}`);
         }
     };
@@ -169,12 +166,15 @@ export default function ScreenCustomers() {
              });
     };
 
+    // 3. ACTUALIZADO: Cabeceras de la tabla con los nuevos campos
     const tableHeaders = [
         { label: t("table.id"), key: "id"},
         { label: t("table.identification"), key: "identification"},
         { label: t("table.firstName"), key: "first name"},
+        { label: "Segundo Nombre", key: "middle name"},
         { label: t("table.lastName"), key: "last name"},
-        { label: 'Telefono', key: "phone"},
+        { label: "Segundo Apellido", key: "second last name"},
+        { label: 'Teléfono', key: "phone"},
         { label: t("table.email"), key: "email"}
     ];
 
@@ -219,7 +219,6 @@ export default function ScreenCustomers() {
             
             {isLoading && <p className="text-gray-500 text-sm mb-2">{t("loading")}</p>}
             
-            {/* Show empty state when search has no results */}
             {searchTerm && searchTerm.length >= 2 && clients.length === 1 && clients[0].id === "no-results" ? (
                 <EmptyState 
                     message={t("noResults")} 
@@ -248,12 +247,15 @@ export default function ScreenCustomers() {
                 }}
                 title={t("edit")}
             >
+                {/* 4. ACTUALIZADO: Pasando datos completos al formulario de edición */}
                 <CustomerFormEdit 
                     client={currentClient ? {
                         id: currentClient.id,
                         identification: currentClient.identification,
                         firstName: currentClient.firstName,
+                        middleName: currentClient.middleName || "",
                         lastName: currentClient.lastName,
+                        secondLastName: currentClient.secondLastName || "",
                         phone: currentClient.phone || "",
                         email: currentClient.email || ""
                     } : undefined}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -40,201 +40,131 @@ export default function ScreenProducts({ onSuccess }: ProductFormProps) {
 
     const initialFetchDone = useRef(false);
     
+    // Mapeo simplificado para ordenamiento
     const fieldMapping: { [key: string]: string } = {
         'código': 'id',
-        'producto': 'name',
-        'proveedor': 'supplier',
-        'impuesto': 'tax',
-        'stock': 'stock',
-        'p. compra': 'purchasePrice',
-        'p. venta': 'salePrice'
-    };
-    
-    useEffect(() => {
-        if (!initialFetchDone.current) {
-            fetchAllProducts();
-            initialFetchDone.current = true;
-        }
-    }, []);
-
-    // Crea una función separada para el formateo inicial
-    const formatAndSetInitialProducts = (productList: ProductDAO[]) => {
-        const formattedProducts = productList.map((product: ProductDAO) => ({
-            id: product.id,
-            código: product.id,
-            producto: product.name,
-            proveedor: product.supplier?.name || 'N/A',
-            impuesto: product.tax?.toString() || '0',
-            stock: product.stock?.toString() || '0',
-            'p. compra': product.purchasePrice?.toString() || '0',
-            'p. venta': product.salePrice?.toString() || '0',
-        }));
-        setInitialProducts(formattedProducts);
-        setProducts(formattedProducts);
+        'producto': 'name'
     };
 
-    // Modifica la función actual para trabajar solo con 'products'
-    const formatAndSetProducts = (productList: ProductDAO[]) => {
-        const formattedProducts = productList.map((product: ProductDAO) => ({
-            id: product.id,
-            código: product.id,
-            producto: product.name,
-            proveedor: product.supplier?.name || 'N/A',
-            impuesto: product.tax?.toString() || '0',
-            stock: product.stock?.toString() || '0',
-            'p. compra': product.purchasePrice?.toString() || '0',
-            'p. venta': product.salePrice?.toString() || '0',
-        }));
-        setProducts(formattedProducts);
-    };
-
-    // Actualiza fetchAllProducts para usar la función correcta
-    const fetchAllProducts = async (sortParams?: { sortBy: string, order: 'asc' | 'desc' }) => {
+    // 1. SOLUCIÓN AL WARNING: fetchAllProducts con useCallback
+    const fetchAllProducts = useCallback(async (sortParams?: { sortBy: string, order: 'asc' | 'desc' }) => {
         if (isLoading) return;
         
         setIsLoading(true);
         try {
             const res = await getListproducts(sortParams);
             if (res && Array.isArray(res)) {
-                formatAndSetInitialProducts(res); // Usamos la nueva función aquí
+                // Formateamos para que el estado solo tenga lo que queremos mostrar
+                const formatted = res.map((product: ProductDAO) => ({
+                    id: product.id,
+                    código: product.id,
+                    producto: product.name,
+                }));
+                setInitialProducts(formatted);
+                setProducts(formatted);
             }
         } catch (err) {
             console.error('Error al obtener productos:', err);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [isLoading]); // Dependencia necesaria
 
-    // Mejora handleProductsFound para ser más explícito sobre cuándo regresar a initialProducts
-    const handleProductsFound = (results: ProductDAO[] | EmployeeDAO[] | SupplierDAO[] | ClientDAO[] | CreatedInvoice[]) => {
+    // 2. SOLUCIÓN AL EFFECT: fetchAllProducts ya es estable
+    useEffect(() => {
+        if (!initialFetchDone.current) {
+            fetchAllProducts();
+            initialFetchDone.current = true;
+        }
+    }, [fetchAllProducts]);
+
+    const handleProductsFound = (results: any[]) => {
         const productResults = results.filter((result): result is ProductDAO => 
-            'name' in result && 'stock' in result
+            'name' in result && 'id' in result
         );
         
         if (productResults.length > 0) {
-            formatAndSetProducts(productResults);
+            const formatted = productResults.map(p => ({
+                id: p.id,
+                código: p.id,
+                producto: p.name
+            }));
+            setProducts(formatted);
         } else if (searchTerm && searchTerm.length >= 2) {
-            // Create a "no results" row for products
             setProducts([{
                 id: "no-results",
                 código: "",
                 producto: t("productNotFound", { term: searchTerm }),
-                proveedor: "",
-                impuesto: "",
-                stock: "",
-                'p. compra': "",
-                'p. venta': "",
             }]);
         } else {
             setProducts(initialProducts);
         }
     };
 
-    // Función para manejar el ordenamiento de productos
     const handleSort = (field: string, direction: 'asc' | 'desc') => {
         setCurrentSort({ field, direction });
-        
         if (fieldMapping[field]) {
-            fetchAllProducts({ 
-                sortBy: fieldMapping[field], 
-                order: direction 
-            });
-        } else {
-            const sortedProducts = [...products].sort((a, b) => {
-                // Convertir a número si el campo es numérico
-                if (field === 'impuesto' || field === 'stock' || field === 'p. compra' || field === 'p. venta') {
-                    const aValue = parseFloat(a[field] || '0');
-                    const bValue = parseFloat(b[field] || '0');
-                    return direction === 'asc' ? aValue - bValue : bValue - aValue;
-                } 
-                // Ordenar como texto para campos no numéricos
-                else {
-                    if (a[field] < b[field]) return direction === 'asc' ? -1 : 1;
-                    if (a[field] > b[field]) return direction === 'asc' ? 1 : -1;
-                    return 0;
-                }
-            });
-            setProducts(sortedProducts);
+            fetchAllProducts({ sortBy: fieldMapping[field], order: direction });
         }
     };
 
     const handleRowClick = (productId: string) => {
-        const productToView = initialProducts.find(product => product.id === productId);
-        if (productToView) {
+        // Buscamos en la lista local el producto para mostrar el modal
+        const productData = products.find(p => p.id === productId);
+        if (productData) {
             setCurrentProduct({
-                id: productToView.id,
-                name: productToView["producto"],
-                salePrice: parseFloat(productToView["p. venta"] || "0"),
-                purchasePrice: parseFloat(productToView["p. compra"] || "0"),
-                tax: parseFloat(productToView["impuesto"] || "0"),
-                stock: parseFloat(productToView["stock"] || "0"),
-                tenantId: "", 
-                supplier: {
-                    name: productToView.proveedor,
-                } as SupplierDAO,
-            });
+                id: productData.id,
+                name: productData.producto,
+                tenantId: "",
+                // Nota: campos como stock/precio vendrán vacíos si no haces un fetchById aquí
+            } as ProductDAO);
             setIsViewModalOpen(true);
         }
     };
 
+    const handleEditProduct = (productId: string) => {
+        const productToEdit = products.find(p => p.id === productId);
+        if (productToEdit) {
+            setCurrentProduct({
+                id: productToEdit.id,
+                name: productToEdit.producto,
+                tenantId: "",
+            } as ProductDAO);
+            setIsEditModalOpen(true);
+        }
+    };
+
     const handleDeleteProduct = async (productId: string) => {
+        if (confirm(t("confirmDelete"))) {
             try {
                 await deleteProduct(productId);
                 fetchAllProducts();
             } catch (err) {
                 console.error("Error al eliminar producto:", err);
-                alert("No se pudo eliminar el producto");
             }
-    };
-
-    const handleEditProduct = (productId: string) => {
-        const productToEdit = products.find(product => product.id === productId);
-        if (productToEdit) {
-            setCurrentProduct({
-                id: productToEdit.id,
-                name: productToEdit.producto,
-                supplier: { name: productToEdit.proveedor } as SupplierDAO,
-                tax: parseFloat(productToEdit.impuesto),
-                stock: parseInt(productToEdit.stock),
-                purchasePrice: parseFloat(productToEdit['p. compra']),
-                salePrice: parseFloat(productToEdit['p. venta']),
-                tenantId: "",
-            });
-            setIsEditModalOpen(true);
         }
     };
 
+    // 3. CABECERAS ESTRICTAS: Solo Código y Producto
     const tableHeaders = [
         { label: t("headers.code"), key: "código"},
-        { label: t("headers.product"), key: "producto"},
-        { label: t("headers.supplier"), key: "proveedor"},
-        { label: t("headers.tax"), key: "impuesto"},
-        { label: t("headers.stock"), key: "stock"},
-        { label: t("headers.purchasePrice"), key: "p. compra"},
-        { label: t("headers.salePrice"), key: "p. venta"}
+        { label: t("headers.product"), key: "producto"}
     ];
 
     return (
         <div className="container mx-auto">
-            <Toolbar
-                title={t("title")}
-                onAddNew={() => setIsAddModalOpen(true)}
-            />
+            <Toolbar title={t("title")} onAddNew={() => setIsAddModalOpen(true)} />
 
+            {/* Modal para Agregar */}
             <CustomModalNoButton 
                 isOpen={isAddModalOpen}
                 onClose={() => {
                     setIsAddModalOpen(false);
-                    currentSort ? fetchAllProducts({ sortBy: currentSort.field, order: currentSort.direction }) : fetchAllProducts();
+                    fetchAllProducts();
                 }}
                 title={t("newProduct")}
             >
-                <ProductForm 
-                    onSuccess={() => {
-                        setIsAddModalOpen(false);
-                        currentSort ? fetchAllProducts({ sortBy: currentSort.field, order: currentSort.direction }) : fetchAllProducts();
-                    }}
-                />
+                <ProductForm onSuccess={() => { setIsAddModalOpen(false); fetchAllProducts(); }} />
             </CustomModalNoButton>
             
             <div className="flex justify-between items-center mb-4 mt-4">
@@ -247,53 +177,43 @@ export default function ScreenProducts({ onSuccess }: ProductFormProps) {
                         onSearchTermChange={setSearchTerm}
                     />
                 </div>
-                <TableFilter 
-                    headers={tableHeaders}
-                    onSort={handleSort} 
-                />
+                <TableFilter headers={tableHeaders} onSort={handleSort} />
             </div>
             
             {isLoading && <p className="text-gray-500 text-sm mb-2">{t("loading")}</p>}
             
-            {/* Show empty state when search has no results */}
             {searchTerm && searchTerm.length >= 2 && products.length === 1 && products[0].id === "no-results" ? (
-                <EmptyState 
-                    message={t("noResults")} 
-                    searchTerm={searchTerm} 
-                />
+                <EmptyState message={t("noResults")} searchTerm={searchTerm} />
             ) : (
                 <CustomTable
                     title={t("tableTitle")}
                     headers={tableHeaders}
                     options={true}
+                    // Filtramos los datos para que NADA extra llegue a la tabla
                     data={products.filter(p => p.id !== "no-results")}
                     contextType="products"
-                    onRowClick={handleRowClick}
+                    onRowDoubleClick={(item) => handleRowClick(item.id)} 
                     customActions={{
                         delete: handleDeleteProduct,
                         edit: handleEditProduct,
-                        view: handleRowClick
+                        view: (id) => handleRowClick(id)
                     }}
                 />
             )}
 
+            {/* Modal para Editar */}
             <CustomModalNoButton 
                 isOpen={isEditModalOpen} 
-                onClose={() => {
-                    setIsEditModalOpen(false); 
-                    setTimeout(() => fetchAllProducts(), 0);
-                }}
+                onClose={() => setIsEditModalOpen(false)}
                 title={t("edit")}
             >
                 <ProductFormEdit 
                     product={currentProduct || undefined}
-                    onSuccess={() => {
-                        fetchAllProducts();
-                        setIsEditModalOpen(false);
-                    }} 
+                    onSuccess={() => { fetchAllProducts(); setIsEditModalOpen(false); }} 
                 />
             </CustomModalNoButton>
                 
+            {/* Modal de Detalle */}
             <ProductDetailModal
                 product={currentProduct}
                 isOpen={isViewModalOpen}

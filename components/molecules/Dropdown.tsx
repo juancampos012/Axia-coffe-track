@@ -1,3 +1,5 @@
+'use client'
+
 import React from "react";
 import { ChevronDown } from "lucide-react";
 
@@ -17,6 +19,7 @@ interface DropdownProps {
     isOpen: boolean;
     onToggle: () => void;
     isLastItem?: boolean; 
+    className?: string; 
 }
 
 export default function Dropdown({ 
@@ -28,8 +31,10 @@ export default function Dropdown({
     icon, 
     isOpen, 
     onToggle,
-    isLastItem = false 
+    isLastItem = false,
+    className = "" 
 }: DropdownProps) {
+    
     const handleSelect = (option: Option) => {
         if (option.action) {
             option.action(); 
@@ -40,37 +45,56 @@ export default function Dropdown({
     };
 
     return (
-        <div className="relative">
+        <div className={`relative ${className}`}>
             <button 
+                type="button"
                 onClick={(e) => {
                     e.stopPropagation();
                     onToggle();
                 }} 
-                className={`p-2 rounded-md ${useIconButton ? "" : "flex justify-between items-center w-full border text-black bg-white shadow-sm"}`}
+                className={`transition-all duration-200 p-2 rounded-xl border border-transparent ${
+                    useIconButton 
+                    ? "hover:bg-zinc-800 text-zinc-400 hover:text-white" 
+                    : "flex justify-between items-center w-full border-zinc-700 text-white bg-zinc-900 shadow-sm px-4"
+                }`}
             >
                 {useIconButton ? icon : (
                     <>
-                        {selected} <ChevronDown className="w-4 h-4" />
+                        <span className="mr-2 truncate">{selected}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                     </>
                 )}
             </button>
 
             {isOpen && (
-                <div 
-                    className={`${style} absolute ${isLastItem ? 'bottom-full mb-1' : 'mt-1'} bg-white border shadow-lg rounded-lg z-50 max-h-32 overflow-y-auto`}
-                    style={isLastItem ? { transform: 'translateY(-4px)' } : {}}
-                >
-                    {options.map((option, index) => (
-                        <button
-                            key={index}
-                            onClick={() => handleSelect(option)}
-                            className="flex items-center w-full text-left p-2 hover:bg-gray-100 text-black"
-                        >
-                            {option.icon}
-                            <span className="ml-2">{option.text}</span>
-                        </button>
-                    ))}
-                </div>
+                <>
+                    {/* Overlay para cerrar al hacer clic fuera */}
+                    <div className="fixed inset-0 z-[90] cursor-default" onClick={onToggle} />
+                    
+                    <div 
+                        className={`
+                            absolute right-0 z-[100] w-48 rounded-xl border border-zinc-700 
+                            bg-zinc-900 shadow-2xl py-1.5 overflow-hidden animate-in fade-in zoom-in duration-150
+                            ${isLastItem ? 'bottom-full mb-2' : 'mt-2'}
+                            ${style}
+                        `}
+                    >
+                        {options.map((option, index) => (
+                            <button
+                                key={index}
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSelect(option);
+                                }}
+                                className="flex items-center w-full px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors border-b border-zinc-800/50 last:border-0"
+                            >
+                                {option.icon && <span className="mr-3 shrink-0">{option.icon}</span>}
+                                <span className="truncate">{option.text}</span>
+                            </button>
+                        ))}
+                    </div>
+                </>
             )}
         </div>
     );

@@ -14,11 +14,11 @@ import {
   ChevronUp, 
   LogOut,
   BarChart2,
-  Banknote,
+  Layers,
+  Wallet
 } from "lucide-react";
 
 import { useUserStore } from "@/store/UserStore";
-import LanguageSelector from "@/components/atoms/LanguageSelector";
 
 type MenuItem = {
   icon: React.ComponentType<{ className?: string }>;
@@ -43,60 +43,38 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
   const [loading, setLoading] = useState(true);
   const { role, setRole } = useUserStore();
 
-  // Handle click outside to close sidebar
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node) && isOpen) {
         onClose();
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose]);
 
-  // Verificar el token al montar el componente
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     const authToken = Cookies.get("authToken");
     if (authToken) {
       try {
         const decoded: { role?: UserRole } = jwtDecode(authToken);
-        if (decoded.role) {
-          setRole(decoded.role);
-        }
+        if (decoded.role) setRole(decoded.role);
       } catch (error) {
         console.error("Token inválido", error);
         Cookies.remove("authToken");
       }
-    } else {
-      console.warn("No authToken in cookies");
     }
     setLoading(false);
   }, [setRole]);
 
-  // Cerrar menús cuando el sidebar se colapsa
-  useEffect(() => {
-    if (!isOpen) setOpenMenu(null);
-  }, [isOpen]);
-
   const toggleMenu = (label: string) => {
-    if (isOpen) {
-      setOpenMenu(openMenu === label ? null : label);
-    }
+    if (isOpen) setOpenMenu(openMenu === label ? null : label);
   };
 
-  if (loading || !role) {
-    return (
-      <aside className="fixed top-16 left-0 h-[calc(100vh-64px)] bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col items-center justify-center w-56 shadow-2xl border-r border-gray-700">
-        <div className="animate-pulse text-gray-300">{t("loading")}</div>
-      </aside>
-    );
-  }
+  if (loading || !role) return null;
 
   const basePath = role === "USER" ? `/${locale}/employee` : `/${locale}/admin`;
-  const baseLoansPath = `/${locale}/loans`;
 
   const menuItems: MenuItem[] = [
     { 
@@ -105,114 +83,71 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
       href: basePath,
       allowedRoles: ["USER", "ADMIN", "SUPERADMIN"]
     },
-    { 
-      icon: Truck, 
-      label: t("shopping"),
-      allowedRoles: ["USER", "ADMIN", "SUPERADMIN"],
-      subOptions: [
-        { 
-          label: t("makeSales"),
-          href: `/${locale}/sales/make-sales`,
-          allowedRoles: ["USER", "ADMIN", "SUPERADMIN"]
-        },
-        { 
-          label: t("viewSales"),
-          href: `/${locale}/sales/sales-invoices`,
-          allowedRoles: ["ADMIN", "SUPERADMIN"]
-        },        
-        { 
-          label: t("products"), 
-          href: `/${locale}/store/products`,
-          allowedRoles: ["USER", "ADMIN", "SUPERADMIN"]
-        },
-      ],
-    },
-    {
-      icon: Banknote,
-      label: 'Préstamos',
-      allowedRoles: ["USER", "ADMIN", "SUPERADMIN"],
-      subOptions: [
-        ...(role === "ADMIN" || role == "USER"|| role === "SUPERADMIN" ? [
-          { 
-            label: 'Crear préstamo',
-            href: `/${locale}/loans/new-loan`,
-            allowedRoles: ["USER", "ADMIN", "SUPERADMIN"]
-          }
-        ] : []),
-        ...(role === "ADMIN" || role == "USER"|| role === "SUPERADMIN" ? [
-          { 
-            label: 'Ver préstamos',
-            href: `/${locale}/loans/view-loan`,
-            allowedRoles: ["USER", "ADMIN", "SUPERADMIN"]
-          }
-        ] : []),
-      ],
-    },
+    // --- 1. OPERACIONES COMERCIALES ---
     { 
       icon: ShoppingCart, 
-      label: t("sales"),
+      label: "Operaciones",
       allowedRoles: ["USER", "ADMIN", "SUPERADMIN"],
       subOptions: [
-        ...(role === "ADMIN" || role === "SUPERADMIN" ? [
-          { 
-            label: t("makePurchase"),
-            href: `/${locale}/shopping/make-purchase`,
-            allowedRoles: ["ADMIN", "SUPERADMIN"]
-          }
-        ] : []),
-        ...(role === "ADMIN" || role === "SUPERADMIN" ? [
-          { 
-            label: t("viewPurchase"),
-            href: `/${locale}/shopping/view-purchases`,
-            allowedRoles: ["ADMIN", "SUPERADMIN"]
-          }
-        ] : []),
-        ...(role === "ADMIN" || role === "SUPERADMIN" ? [
-          { 
-            label: t("supplier"),
-            href: `/${locale}/shopping/suppliers`,
-            allowedRoles: ["ADMIN", "SUPERADMIN"]
-          }
+        { label: "Comprar(caja)", href: `/${locale}/sales/make-sales` },
+        { label: "Ver compras", href: `/${locale}/sales/sales-invoices`, allowedRoles: ["ADMIN", "SUPERADMIN"] },
+        { label: "Inventario Productos", href: `/${locale}/store/products` },
+        ...(role !== "USER" ? [
+          { label: "Crear Ingreso", href: `/${locale}/shopping/make-purchase` },
+          { label: "Ver Ingresos", href: `/${locale}/shopping/view-purchases` },
+          { label: "Proveedores", href: `/${locale}/shopping/suppliers` },
         ] : []),
       ],
     },
-    ...(role === "ADMIN" || role === "SUPERADMIN" ? [
-      { 
-        icon: User, 
-        label: t("users"),
-        allowedRoles: ["ADMIN", "SUPERADMIN"],
-        subOptions: [
-          { 
-            label: t("customers"), 
-            href: `/${locale}/users/customers`,
-            allowedRoles: ["ADMIN", "SUPERADMIN"]
-          },
-          { 
-            label: t("employees"),
-            href: `/${locale}/users/employees`,
-            allowedRoles: ["ADMIN", "SUPERADMIN"]
-          },
-        ],
-      },
-      { 
-        icon: BarChart2, 
-        label: t("dashboard"),
-        href: `/${locale}/admin/dashboard`,
-        allowedRoles: ["ADMIN", "SUPERADMIN"]
-      },
-    ] : []),
+    // --- 2. FINANZAS Y CAJA ---
+    {
+      icon: Wallet,
+      label: "Finanzas",
+      allowedRoles: ["ADMIN", "SUPERADMIN"],
+      subOptions: [
+        { label: "Nuevo Gasto", href: `/${locale}/expenses/new` },
+        { label: "Ver Gastos", href: `/${locale}/expenses` },
+        { label: "Nuevo Préstamo", href: `/${locale}/loans/new-loan` },
+        { label: "Ver Préstamos", href: `/${locale}/loans/view-loan` },
+      ],
+    },
+    // --- 3. LOGÍSTICA Y ALIADOS ---
+    {
+      icon: Truck,
+      label: "Logística",
+      allowedRoles: ["ADMIN", "SUPERADMIN"],
+      subOptions: [
+        { label: "Ver Aliados", href: `/${locale}/partners` },
+        { label: "Nuevo Aliado", href: `/${locale}/partners/new` },
+        { label: "Control de Empaques", href: `/${locale}/packaging` },
+        { label: "Ver Entregas", href: `/${locale}/delivery` },
+        { label: "Nueva Entrega", href: `/${locale}/delivery/new` },
+      ],
+    },
+    // --- 4. GESTIÓN Y COMUNICACIÓN ---
+    { 
+      icon: Layers, 
+      label: "Gestión",
+      allowedRoles: ["ADMIN", "SUPERADMIN"],
+      subOptions: [
+        { label: "Clientes", href: `/${locale}/users/customers` },
+        { label: "Empleados", href: `/${locale}/users/employees` },
+        { label: "Crear Anuncio", href: `/${locale}/announcements` },
+        { label: "Ver Anuncios", href: `/${locale}/announcements/view` },
+      ],
+    },
+    ...(role !== "USER" ? [{ 
+      icon: BarChart2, 
+      label: "Dashboard",
+      href: `/${locale}/admin/dashboard`,
+      allowedRoles: ["ADMIN", "SUPERADMIN"]
+    }] : []),
   ];
 
-  // Filtrar items y subopciones basado en el rol
-  const filteredItems = menuItems
-    .filter(item => !item.allowedRoles || item.allowedRoles.includes(role))
-    .map(item => ({
-      ...item,
-      subOptions: item.subOptions?.filter(
-        sub => !sub.allowedRoles || sub.allowedRoles.includes(role)
-      )
-    }))
-    .filter(item => !item.subOptions || item.subOptions.length > 0);
+  // Filtro de seguridad
+  const filteredItems = menuItems.filter(item => 
+    !item.allowedRoles || item.allowedRoles.includes(role)
+  );
 
   return (
     <aside
@@ -223,9 +158,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
     >
       {filteredItems.map(({ icon: Icon, label, href, subOptions }, index) => (
         <div key={`${label}-${index}`} className="w-full">
-          {/* CORRECCIÓN AQUÍ: Manejar diferente según si tiene subOptions o no */}
           {subOptions ? (
-            // Para items con submenú
             <div 
               className={`flex items-center justify-between p-2 rounded-xl hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group ${
                 openMenu === label ? "bg-gray-700/70" : ""
@@ -233,42 +166,32 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
               onClick={() => toggleMenu(label)}
             >
               <div className="flex items-center gap-4">
-                <Icon className="w-5 text-gray-300 group-hover:text-white transition-colors" />
+                <Icon className="w-5 text-gray-400 group-hover:text-white transition-colors" />
                 {isOpen && <span className="text-gray-200 text-sm font-medium group-hover:text-white">{label}</span>}
               </div>
-
               {isOpen && (
                 <div className="ml-3">
-                  {openMenu === label ? (
-                    <ChevronUp className="h-5 w-5 text-gray-300 group-hover:text-white" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-gray-300 group-hover:text-white" />
-                  )}
+                  {openMenu === label ? <ChevronUp className="h-4 w-4 text-gray-500" /> : <ChevronDown className="h-4 w-4 text-gray-500" />}
                 </div>
               )}
             </div>
           ) : (
-            // Para items SIN submenú (como Préstamos) - usar Link directamente
             <Link 
               href={href || "#"}
-              className={`flex items-center justify-between p-2 rounded-xl hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group ${
-                !isOpen ? "justify-center" : ""
-              }`}
+              className="flex items-center gap-4 p-2 rounded-xl hover:bg-gray-700/50 transition-all duration-200 group"
             >
-              <div className="flex items-center gap-4">
-                <Icon className="w-5 text-gray-300 group-hover:text-white transition-colors" />
-                {isOpen && <span className="text-gray-200 text-sm font-medium group-hover:text-white">{label}</span>}
-              </div>
+              <Icon className="w-5 text-gray-400 group-hover:text-white transition-colors" />
+              {isOpen && <span className="text-gray-200 text-sm font-medium group-hover:text-white">{label}</span>}
             </Link>
           )}
           
           {subOptions && isOpen && openMenu === label && (
-            <div className="pl-10 pt-2 pb-1 bg-gray-800/30 rounded-lg mt-1">
+            <div className="pl-9 pt-1 pb-2 space-y-1">
               {subOptions.map((sub, i) => (
                 <Link 
                   key={`${sub.label}-${i}`} 
                   href={sub.href} 
-                  className="block py-2 text-gray-400 text-sm hover:text-white hover:bg-gray-700/50 rounded-md px-3 transition-all duration-200"
+                  className="block py-1.5 text-gray-400 text-[13px] hover:text-white transition-colors border-l border-gray-700 pl-4"
                 >
                   {sub.label}
                 </Link>
@@ -277,30 +200,21 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
           )}
         </div>
       ))}
-      <div className="w-full">
-        <div className="flex items-center justify-between rounded-xl transition-all duration-200 cursor-pointer  py-2">
-          <LanguageSelector variant="sidebar" isCollapsed={!isOpen} />
-        </div>
-      </div>
 
-      <div className="mt-auto px-3 py-2">
-        <Link 
-          href={`/${locale}/login`}
-          onClick={(e) => {
-            e.preventDefault(); 
-            Cookies.remove("authToken");
+      <div className="mt-auto border-t border-gray-700 pt-4">
+        <button 
+          onClick={() => {
             Cookies.remove("authToken", { path: "/" });
-            Cookies.remove("authToken", { path: "/", domain: ".axiainvoice.lat" });
             useUserStore.getState().setRole(null);
             window.location.href = `/${locale}/login`;
           }}
-          className={`flex items-center gap-4 p-3 rounded-xl text-white transition-all duration-200 hover:bg-gray-700/50 ${
+          className={`flex items-center gap-4 p-3 w-full rounded-xl text-red-400 transition-all duration-200 hover:bg-red-500/10 ${
             !isOpen ? "justify-center" : ""
           }`}
         >
-          <LogOut className="h-6 w-6 text-gray-300 hover:text-white" />
-          {isOpen && <span className="text-gray-200 text-sm font-medium hover:text-white">{t("logout")}</span>}
-        </Link>
+          <LogOut className="h-5 w-5" />
+          {isOpen && <span className="text-sm font-bold uppercase tracking-wider">{t("logout")}</span>}
+        </button>
       </div>
     </aside>
   );

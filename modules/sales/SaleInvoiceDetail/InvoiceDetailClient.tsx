@@ -46,10 +46,11 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                         <p>{invoice.electronicBill ? t("yes") : t("no")}</p>
                     </div>
 
-                    <div className="p-4 border border-gray-600 rounded-lg">
+                    <p className="p-4 border border-gray-600 rounded-lg">
                         <p className="text-sm text-gray-400 mb-2">Total</p>
-                        <p>${invoice.totalPrice?.toFixed(2)}</p>
-                    </div>
+                        {/* Convertimos a Number() para asegurar que toFixed funcione */}
+                        <p>${Number(invoice.totalPrice || 0).toFixed(2)}</p>
+                    </p>
 
                     {/* Cliente */}
                     <div className="md:col-span-2 bg-transparent border border-gray-600 p-4 rounded-lg">

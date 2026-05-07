@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { envVariables } from '@/utils/config';
 
 interface UseWidgetDataProps<T> {
@@ -19,41 +19,55 @@ export default function useWidgetData<T>({
   const [error, setError] = useState<Error | null>(null);
   const [refetchIndex, setRefetchIndex] = useState(0);
 
+  const serializedParams = useMemo(
+    () => JSON.stringify(params),
+    [params]
+  );
+
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
       setError(null);
-      
+
       try {
-        // Build query string from params
         const queryString = new URLSearchParams(params).toString();
-        const url = `${envVariables.API_URL}/analytics/${endpoint}${queryString ? `?${queryString}` : ''}`;
-        
+
+        const url =
+          `${envVariables.API_URL}/analytics/${endpoint}` +
+          (queryString ? `?${queryString}` : '');
+
         const response = await fetch(url, {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json'
           }
         });
-        
+
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
-        
+
         const rawData = await response.json();
-        const processedData = transformResponse ? transformResponse(rawData) : rawData;
-        
+        const processedData = transformResponse
+          ? transformResponse(rawData)
+          : rawData;
+
         setData(processedData);
       } catch (err) {
-        setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+        setError(
+          err instanceof Error
+            ? err
+            : new Error('Unknown error occurred')
+        );
+
         console.error('Error fetching widget data:', err);
       } finally {
         setIsLoading(false);
       }
     }
-    
+
     fetchData();
-  }, [endpoint, refetchIndex, JSON.stringify(params)]);
+  }, [endpoint, refetchIndex, serializedParams, transformResponse]);
 
   const refetch = () => setRefetchIndex(prev => prev + 1);
 

@@ -1,121 +1,102 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import LineChart from '../charts/LineChart'
-import { envVariables } from '@/utils/config'
 import { formatCurrency } from '@/utils/format'
-
-import { SalesMetricsData } from '@/types/Api'
+import { useSalesMetrics } from '../hooks/useSaleMetrics'
 
 export default function SalesWidget() {
   const t = useTranslations('dashboard.sales')
-  const [salesData, setSalesData] = useState<SalesMetricsData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [selectedPeriod, setSelectedPeriod] = useState('month')
-  
-  useEffect(() => {
-    async function fetchSalesData() {
-      try {
-        setIsLoading(true)
-        const response = await fetch(
-          `${envVariables.API_URL}/analytics/sales?period=${selectedPeriod}&limit=6`,
-          { credentials: 'include' }
-        )
-        
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
-        }
-        
-        const data = await response.json()
-        setSalesData(data)
-      } catch (error) {
-        console.error('Error fetching sales data:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    
-    fetchSalesData()
-  }, [selectedPeriod])
-  
-  const chartData = {
-    labels: salesData.map(item => item.period),
+  const [period, setPeriod] = useState<'week' | 'month'>('month')
+
+  const { data, isLoading, isError } = useSalesMetrics(period)
+
+  const totals = useMemo(() => ({
+    revenue: data.reduce((sum, item) => sum + Number(item.revenue), 0),
+    count: data.reduce((sum, item) => sum + Number(item.count), 0)
+  }), [data])
+
+  const chartData = useMemo(() => ({
+    labels: data.map(i => i.period),
     datasets: [
       {
         label: t('revenue'),
-        data: salesData.map(item => item.revenue),
+        data: data.map(i => i.revenue),
         borderColor: '#60a5fa',
-        backgroundColor: 'rgba(96, 165, 250, 0.5)',
+        backgroundColor: 'rgba(96,165,250,0.2)',
         fill: true,
         tension: 0.4
       },
       {
         label: t('count'),
-        data: salesData.map(item => item.count),
+        data: data.map(i => i.count),
         borderColor: '#34d399',
-        backgroundColor: 'rgba(52, 211, 153, 0.5)',
+        backgroundColor: 'rgba(52,211,153,0.2)',
         tension: 0.4
       }
     ]
+  }), [data, t])
+
+  if (isError) {
+    return (
+      <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400">
+        Error cargando métricas de ventas
+      </div>
+    )
   }
-  
-  const totalRevenue = salesData.reduce((sum, item) => sum + item.revenue, 0)
-  const totalCount = salesData.reduce((sum, item) => sum + item.count, 0)
-  
+
   return (
-    <div className="bg-black/50 border border-homePrimary/20 rounded-lg p-5 backdrop-blur-sm col-span-1 md:col-span-2">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-homePrimary">{t('title')}</h2>
-        
-        <div className="flex space-x-2">
-          <button
-            className={`px-3 py-1 text-xs rounded-md ${
-              selectedPeriod === 'week' 
-                ? 'bg-homePrimary text-white' 
-                : 'bg-gray-800 text-gray-300'
-            }`}
-            onClick={() => setSelectedPeriod('week')}
-          >
-            {t('week')}
-          </button>
-          <button
-            className={`px-3 py-1 text-xs rounded-md ${
-              selectedPeriod === 'month' 
-                ? 'bg-homePrimary text-white' 
-                : 'bg-gray-800 text-gray-300'
-            }`}
-            onClick={() => setSelectedPeriod('month')}
-          >
-            {t('month')}
-          </button>
+    <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 backdrop-blur-sm">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-sm font-black uppercase tracking-widest text-blue-400">
+          {t('title')}
+        </h2>
+
+        <div className="flex gap-2">
+          {['week', 'month'].map(p => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p as 'week' | 'month')}
+              className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase transition ${
+                period === p
+                  ? 'bg-[#1E3C8b] text-white'
+                  : 'bg-white/5 text-slate-400 hover:bg-white/10'
+              }`}
+            >
+              {t(p)}
+            </button>
+          ))}
         </div>
       </div>
-      
+
       {isLoading ? (
-        <div className="h-64 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-homePrimary"></div>
+        <div className="h-64 flex justify-center items-center">
+          <div className="animate-spin h-8 w-8 rounded-full border-t-2 border-blue-400 border-b-2" />
         </div>
       ) : (
         <>
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-black/30 p-4 rounded-lg">
-              <div className="text-sm text-gray-400">{t('totalRevenue')}</div>
-              <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
-            </div>
-            <div className="bg-black/30 p-4 rounded-lg">
-              <div className="text-sm text-gray-400">{t('totalSales')}</div>
-              <div className="text-2xl font-bold">{totalCount}</div>
-            </div>
+            <MetricCard label={t('totalRevenue')} value={formatCurrency(totals.revenue)} />
+            <MetricCard label={t('totalSales')} value={totals.count.toString()} />
           </div>
-          
-          <LineChart 
-            labels={chartData.labels} 
+
+          <LineChart
+            labels={chartData.labels}
             datasets={chartData.datasets}
             height={250}
           />
         </>
       )}
+    </div>
+  )
+}
+
+function MetricCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4">
+      <p className="text-xs text-slate-500 font-bold uppercase">{label}</p>
+      <p className="text-2xl font-black text-white">{value}</p>
     </div>
   )
 }

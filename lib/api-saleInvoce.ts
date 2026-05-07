@@ -100,7 +100,8 @@ export const crearFacturaVenta = async (venta: Venta): Promise<CreatedInvoice> =
       productId: p.productId,
       quantity: p.quantity,
       unitPrice: p.unitPrice,
-      tenantId: p.tenantId
+      tenantId: p.tenantId,
+      announcementId: p.announcementId || null
     }))
   };
 

@@ -42,7 +42,9 @@ export function middleware(request: NextRequest) {
         "/store/products", 
         "/sales/make-sales",
         "/loans/view-loan",
-        "/loans/new-loan"
+        "/loans/new-loan",
+        "/announcement",
+        "/announcement/view"
       ],
 
       ADMIN: [
@@ -59,7 +61,18 @@ export function middleware(request: NextRequest) {
         "/users/customers", 
         "/users/employees",
         "/loans/view-loan",
-        "/loans/new-loan"
+        "/loans/new-loan",
+        "/announcement",
+        "/announcement/view",
+        "/partners", 
+        "/partners/new",
+        "/packaging",
+        "/delivery",
+        "/delivery/new",
+        "/delivery/view",
+        "/expenses",
+        "/expenses/new",
+        "/expenses/view"
       ],
 
       SUPERADMIN:[
@@ -76,7 +89,13 @@ export function middleware(request: NextRequest) {
         "/users/customers", 
         "/users/employees",
         "/loans/view-loan",
-        "/loans/new-loan"
+        "/loans/new-loan",
+        "/announcement",
+        "/announcement/view",
+        "/partners",
+        "/partners/new",
+        "/packaging"
+        
       ],
     
     };

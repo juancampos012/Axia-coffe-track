@@ -39,10 +39,6 @@ export default function ProductDetailModal({
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div className="p-4 border border-gray-600 rounded-lg">
-              <p className="text-sm font-semibold text-gray-400 mb-2">{t("supplier")}</p>
-              <p className="text-white">{product.supplier.name}</p>
-            </div>
-            <div className="p-4 border border-gray-600 rounded-lg">
               <p className="text-sm font-semibold text-gray-400 mb-2">{t("tax")}</p>
               <p className="text-white">{product.tax}%</p>
             </div>

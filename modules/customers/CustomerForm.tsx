@@ -1,8 +1,9 @@
-import Cookies from "js-cookie"; 
+'use client'
+
+import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import React, { forwardRef } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Input from "@/components/atoms/Input";
@@ -12,25 +13,32 @@ import { customertSchema } from "@/schemes/customerScheme";
 
 type CustomerFormData = {
     tenantId: string;
-    identification: string; 
+    identification: string;
     firstName: string;
+    middleName?: string;
     lastName: string;
+    secondLastName?: string;
     phone?: string;
-    email: string; 
+    email?: string;
 };
 
 interface CustomerFormProps {
-    onSuccess?: () => void; 
+    onSuccess?: () => void;
 }
 
-const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuccess }, ref) => {
-    const t = useTranslations("customerForm"); 
-    const createCustomerSchema = customertSchema(t) 
+const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(
+({ onSuccess }, ref) => {
+    const createCustomerSchema = customertSchema();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const {
         register,
         handleSubmit,
-        reset, 
+        reset,
         formState: { errors },
     } = useForm<CustomerFormData>({
         resolver: zodResolver(createCustomerSchema),
@@ -38,108 +46,125 @@ const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuccess
 
     const onSubmit = async (data: CustomerFormData) => {
         const authToken = Cookies.get("authToken");
-        if (!authToken) {
-            throw new Error(t("authTokenMissing"));
-        }
-        
+        if (!authToken) return;
+
         const decoded: any = jwtDecode(authToken);
-        const tenantId = decoded.tenantId;
-        
+
         const formData = {
-            ...data,         
-            tenantId,
-            id: "", 
+            ...data,
+            tenantId: decoded.tenantId,
+            id: "",
         };
-        console.log("Datos enviados:", formData);
 
-        try {                
-        const response = await createCustomer(formData, authToken);
+        try {
+            const response = await createCustomer(formData as any, authToken);
 
-        if (response.status === 201) {
-            const responseData = await response.json();
-            alert(t("successMessage"));
-            reset(); 
-            if (onSuccess) onSuccess();
-        } else {
-            const errorData = await response.json();
-            console.log(t("creationError"), errorData);
-        }
+            if (response.status === 201) {
+                alert("Cliente creado correctamente");
+                reset();
+                onSuccess?.();
+            }
         } catch (error) {
-        console.error(error);
-            alert(t("connectionError"));
-        }     
+            console.error(error);
+            alert("Error de conexión");
+        }
     };
 
+    if (!mounted) return null;
+
     return (
-        <form ref={ref} onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4"> 
-            <div>
-                <label className="text-sm font-semibold text-gray-500">{t("codeLabel")}</label>
-                <Input placeholder={t("codePlaceholder")} type="text" disabled={true} />
+        <form ref={ref} onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+
+            <div className="col-span-2 md:col-span-1">
+                <label className="text-sm font-semibold text-gray-500">Identificación</label>
+                <Input
+                    className="text-homePrimary-200 bg-transparent"
+                    placeholder="Ingrese identificación"
+                    {...register("identification")}
+                />
+                {errors.identification && (
+                    <p className="text-red-500 text-xs">{errors.identification.message}</p>
+                )}
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("identificationLabel")}</label>
-                <Input 
-                    className="text-homePrimary-200 bg-transparent" 
-                    placeholder={t("identificationPlaceholder")} 
-                    type="text" 
-                    {...register("identification")} 
+                <label className="text-sm font-semibold text-gray-500">Primer Nombre</label>
+                <Input
+                    className="text-homePrimary-200 bg-transparent"
+                    {...register("firstName")}
                 />
-                {errors.identification && <p className="text-red-500 text-xs">{errors.identification.message}</p>}
+                {errors.firstName && (
+                    <p className="text-red-500 text-xs">{errors.firstName.message}</p>
+                )}
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("firstNameLabel")}</label>
-                <Input 
-                    className="text-homePrimary-200 bg-transparent" 
-                    placeholder={t("firstNamePlaceholder")} 
-                    type="text" 
-                    {...register("firstName")} 
+                <label className="text-sm font-semibold text-gray-500">Segundo Nombre</label>
+                <Input
+                    className="text-homePrimary-200 bg-transparent"
+                    placeholder="Opcional"
+                    {...register("middleName")}
                 />
-                {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName.message}</p>}
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("lastNameLabel")}</label>
-                <Input 
-                    className="text-homePrimary-200 bg-transparent" 
-                    placeholder={t("lastNamePlaceholder")}  
-                    type="text" 
-                    {...register("lastName")} 
+                <label className="text-sm font-semibold text-gray-500">Primer Apellido</label>
+                <Input
+                    className="text-homePrimary-200 bg-transparent"
+                    {...register("lastName")}
                 />
-                {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName.message}</p>}
+                {errors.lastName && (
+                    <p className="text-red-500 text-xs">{errors.lastName.message}</p>
+                )}
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{'Telefono'}</label>
-                <Input 
-                    className="text-homePrimary-200 bg-transparent" 
-                    placeholder={'EJ. 1234567890'} 
-                    type="number" 
-                    {...register("phone")} 
+                <label className="text-sm font-semibold text-gray-500">Segundo Apellido</label>
+                <Input
+                    className="text-homePrimary-200 bg-transparent"
+                    placeholder="Opcional"
+                    {...register("secondLastName")}
                 />
-                {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("emailLabel")}</label>
-                <Input 
-                    className="text-homePrimary-200 bg-transparent" 
-                    placeholder={t("emailPlaceholder")} 
-                    type="email" 
-                    {...register("email")} 
+                <label className="text-sm font-semibold text-gray-500">Teléfono</label>
+                <Input
+                    className="text-homePrimary-200 bg-transparent"
+                    type="text"
+                    {...register("phone")}
                 />
-                {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
+            </div>
+
+            <div>
+                <label className="text-sm font-semibold text-gray-500">Correo Electrónico</label>
+                <Input
+                    className="text-homePrimary-200 bg-transparent"
+                    type="email"
+                    {...register("email")}
+                />
+                {errors.email && (
+                    <p className="text-red-500 text-xs">{errors.email.message}</p>
+                )}
             </div>
 
             <div className="col-span-2 flex justify-end gap-2 mt-4">
-                <CustomButton text={t("closeButton")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="button" onClickButton={onSuccess}  />
-                <CustomButton text={t("submitButton")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="submit" />
-            </div>               
-            
+                <CustomButton
+                    text="Cerrar"
+                    style="border text-white bg-homePrimary hover:bg-blue-500"
+                    typeButton="button"
+                    onClickButton={onSuccess}
+                />
+                <CustomButton
+                    text="Guardar Cliente"
+                    style="border text-white bg-homePrimary hover:bg-blue-500"
+                    typeButton="submit"
+                />
+            </div>
         </form>
     );
 });
 
 CustomerForm.displayName = "CustomerForm";
+
 export default CustomerForm;

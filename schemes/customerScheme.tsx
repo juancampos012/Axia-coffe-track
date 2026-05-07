@@ -1,41 +1,63 @@
 import { z } from "zod";
-import { useTranslations } from "next-intl";
 
-export const customertSchema = (t: ReturnType<typeof useTranslations>) => z.object({
-    firstName: z.string()
-            .nonempty({ message: t("errors.firstName.required") })
-            .min(4, {message: t("errors.firstName.min") })
-            .max(40, t("errors.firstName.max"))
-			.refine(
-				(value) => /^[a-zA-Z]+$/.test(value ?? ""),
-				{ message: t("errors.firstName.invalid") }
-			),
+export const customertSchema = () =>
+  z.object({
+    identification: z
+      .string()
+      .nonempty("La identificación es obligatoria"),
 
-    lastName: z.string()
-                .nonempty({ message: t("errors.lastName.required")  })
-                .min(4, {message: t("errors.lastName.min") })
-                .max(40, t("errors.lastName.max"))
-                .refine(
-                    (value) => /^[a-zA-Z]+$/.test(value ?? ""),
-                    { message: t("errors.lastName.invalid") }
-                ),
+    firstName: z
+      .string()
+      .nonempty("El primer nombre es obligatorio")
+      .min(3, "El primer nombre debe tener al menos 3 caracteres")
+      .max(40, "El primer nombre no puede superar 40 caracteres")
+      .refine(
+        (value) => /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value),
+        { message: "El primer nombre solo puede contener letras" }
+      ),
 
-    identification: z.string()
-                .nonempty({ message: t("errors.identification.required") })
-                .min(6, {message: t("errors.identification.min")})
-                .max(15, {message: t("errors.identification.max")})
-                .refine(
-                    (value) => /^[0-9]+$/.test(value ?? ""),
-                     { message: t("errors.identification.invalid") }
-                ),
+    middleName: z
+      .string()
+      .max(40, "El segundo nombre no puede superar 40 caracteres")
+      .refine(
+        (value) => !value || /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(value),
+        { message: "El segundo nombre solo puede contener letras" }
+      )
+      .optional()
+      .or(z.literal("")),
 
-    email: z.string()
-			.nonempty({ message: t("errors.email.required") })
-			.email({message: t("errors.email.invalid") })
-			.max(40, t("errors.email.max")),
+    lastName: z
+      .string()
+      .nonempty("El apellido es obligatorio")
+      .min(3, "El apellido debe tener al menos 3 caracteres")
+      .max(40, "El apellido no puede superar 40 caracteres")
+      .refine(
+        (value) => /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value),
+        { message: "El apellido solo puede contener letras" }
+      ),
 
-    phone: z.string()
-                .nonempty({ message: t("errors.phone.required") })
-                .min(10, {message: t("errors.phone.min")})
-                .max(10, {message: t("errors.phone.max")})
-});
+    secondLastName: z
+      .string()
+      .max(40, "El segundo apellido no puede superar 40 caracteres")
+      .refine(
+        (value) => !value || /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(value),
+        { message: "El segundo apellido solo puede contener letras" }
+      )
+      .optional()
+      .or(z.literal("")),
+
+    phone: z
+      .string()
+      .optional()
+      .or(z.literal(""))
+      .refine(
+        (value) => !value || /^[0-9]{10}$/.test(value),
+        { message: "El teléfono debe tener exactamente 10 dígitos" }
+      ),
+
+    email: z
+      .string()
+      .nonempty("El correo es obligatorio")
+      .email("Correo inválido")
+      .max(40, "El correo no puede superar 40 caracteres"),
+  });

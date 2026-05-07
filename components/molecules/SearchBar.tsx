@@ -151,9 +151,6 @@ const SearchBarUniversal: React.FC<SearchBarUniversalProps> = ({
     <div className="w-full relative">
       {/* Input de búsqueda */}
       <div className="relative flex items-center">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
-          <Search size={20} />
-        </div>
         
         <input
           type="text"

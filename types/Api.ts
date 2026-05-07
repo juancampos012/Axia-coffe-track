@@ -62,6 +62,7 @@ export interface SaleItem {
     price: number;
     basePrice: number;
     tenantId: string;
+    announcementId?: string | null;
 }  
 
 export interface Venta {
@@ -132,7 +133,9 @@ export interface ClientDAO {
     tenantId: string;
     identification: string;
     firstName: string;
+    middleName?: string;      // Agregado: Segundo nombre
     lastName: string;
+    secondLastName?: string;  // Agregado: Segundo apellido
     email?: string;
     phone?: string;
     address?: string;
@@ -196,6 +199,7 @@ export interface ProductFormProps {
 }
 
 export interface SaleItemForAPI {
+  announcementId: null;
   tenantId: string;
   productId: string;
   quantity: number;
@@ -241,21 +245,6 @@ export interface CustomerMetricsData {
     name: string;
     count: number;
   }>;
-}
-
-export interface DashboardMetricsData {
-  sales: {
-    count: number;
-    total: number;
-  };
-  purchases: {
-    count: number;
-    total: number;
-  };
-  productsTotal: number;
-  clientsTotal: number;
-  suppliersTotal: number;  
-  pendingOrders: number;  
 }
 
 export interface ProfitabilityMetricsData {
@@ -330,3 +319,114 @@ export type Company = {
   createdAt: string;
   updatedAt: string;
 };
+
+export interface AnnouncementDAO {
+  id: string;
+  tenantId: string;
+  clientId: string;
+
+  title: string;
+  description?: string | null;
+
+  // Lógica de fijación (Kilos y Precios)
+  // Nota: En Prisma son Decimal, en el Frontend los tratamos como number
+  totalQuantity: number;
+  remantQuantity: number;
+  price: number;
+
+  isActive: boolean;
+
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+
+  // Relaciones opcionales
+  client?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    identification: string;
+  };
+
+  // Metadatos para el frontend (Opcional si los necesitas para el listado)
+  _count?: {
+    saleItems: number;
+    purchaseItems: number;
+  };
+}
+
+// @/types/Api.ts
+
+export interface SaleInvoice {
+  id: string;
+  tenantId: string;
+  clientId: string;
+  date: string;
+  totalPrice: number;
+  createdAt: string;
+  client?: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
+// BUSCA Y REEMPLAZA TODAS LAS APARICIONES DE DashboardMetricsData POR ESTA:
+export interface DashboardMetricsData {
+  inventory: {
+    balance: number;
+    stock: {
+      coffee: number;
+      wetCoffee: number;
+      bean: number;
+      pasilla: number;
+      cacao: number;
+    };
+  };
+  sales: {
+    totalRevenue: number; 
+    count: number;
+    recent: SaleInvoice[]; // <--- Esto es lo que causaba el conflicto
+  };
+  topProducts: {
+    name: string;
+    total: number;
+  }[];
+  operations: {
+    pendingLoans: number;
+    activeContracts: number;
+  };
+}
+
+// types/Api.ts
+
+export interface PartnerDAO {
+  id: string;
+
+  tenantId: string;
+
+  name: string;
+  identification?: string;
+
+  phone?: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DeliveryDAO {
+  id: string;
+
+  tenantId: string;
+  partnerId: string;
+  productId: string;
+
+  productKg: number;
+
+  createdAt?: string;
+  updatedAt?: string;
+
+  partner?: PartnerDAO;
+  product?: ProductDAO;
+}

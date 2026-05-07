@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useRef } from "react";
-import { FaFileInvoiceDollar, FaMoneyCheckAlt, FaChartLine, FaUniversity } from 'react-icons/fa';
+// Iconos: Facturación, Préstamos/Adelantos, Reportes, y Caja
+import { FaFileInvoice, FaHandHoldingUsd, FaChartBar, FaCashRegister } from 'react-icons/fa';
 
 import CardHeroBlur from './cardHeroBlur';
 
@@ -13,26 +14,27 @@ export default function HeroBlur() {
   const [isMobile, setIsMobile] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
+  // Características enfocadas en CONTABILIDAD Y PRÉSTAMOS
   const features = [
     {
-      icon: <FaFileInvoiceDollar className="text-3xl text-homePrimary-200 mb-4" />,
-      title: t("features.invoicing.title"),
-      description: t("features.invoicing.description"),
+      icon: <FaFileInvoice className="text-3xl text-[#D4A373] mb-4" />,
+      title: "Facturación POS", 
+      description: "Emite facturas y comprobantes de compra de café de forma organizada.",
     },
     {
-      icon: <FaMoneyCheckAlt className="text-3xl text-homePrimary-200 mb-4" />,
-      title: t("features.collection.title"),
-      description: t("features.collection.description"),
+      icon: <FaHandHoldingUsd className="text-3xl text-[#D4A373] mb-4" />,
+      title: "Control de Préstamos", 
+      description: "Gestiona adelantos a proveedores y descuéntalos automáticamente en la liquidación.",
     },
     {
-      icon: <FaChartLine className="text-3xl text-homePrimary-200 mb-4" />,
-      title: t("features.realTimeAccounting.title"),
-      description: t("features.realTimeAccounting.description"),
+      icon: <FaCashRegister className="text-3xl text-[#D4A373] mb-4" />,
+      title: "Cierre de Caja", 
+      description: "Monitorea el flujo de efectivo diario y evita descuadres en tu compraventa.",
     },
     {
-      icon: <FaUniversity className="text-3xl text-homePrimary-200 mb-4" />,
-      title: t("features.bankIntegration.title"),
-      description: t("features.bankIntegration.description"),
+      icon: <FaChartBar className="text-3xl text-[#D4A373] mb-4" />,
+      title: "Contabilidad Real", 
+      description: "Reportes de ingresos, egresos y utilidades netas por periodo.",
     },
   ];
 
@@ -55,14 +57,13 @@ export default function HeroBlur() {
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
       },
-      { 
-        threshold
-      }
+      { threshold }
     );
 
     if (sectionRef.current) observer.observe(sectionRef.current);
     
     return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       if (sectionRef.current) observer.unobserve(sectionRef.current);
     };
   }, [isMobile]); 
@@ -70,48 +71,46 @@ export default function HeroBlur() {
   return (
     <section 
       ref={sectionRef}
-      className="relative overflow-hidden bg-black py-20 flex flex-col items-center justify-center"
+      className="relative overflow-hidden bg-black py-24 flex flex-col items-center justify-center"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-homePrimary/30 via-black/90 to-black opacity-95 blur-[100px]" />
+      {/* Brillo de fondo sutil */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D4A373]/15 via-black/95 to-black opacity-80 blur-[120px]" />
 
-      <div className="relative z-10 max-w-4xl text-center px-4 ml">
-        <h1 className={`text-5xl font-bold text-white mb-8 transition-all duration-700 ease-out transform ${
+      <div className="relative z-10 max-w-6xl text-center px-6">
+        <h2 className={`text-4xl md:text-5xl font-bold text-white mb-6 transition-all duration-1000 ease-out transform ${
           isVisible 
             ? 'opacity-100 translate-y-0' 
             : 'opacity-0 translate-y-10'
           }`}
         >
-          {t("heroBlur.headline")}
-        </h1>
+          Orden administrativo para tu negocio cafetero
+        </h2>
         
-        <p className={`text-gray-300 mb-16 transition-all duration-700 ease-out transform delay-150 ${
+        <p className={`text-gray-400 text-lg max-w-3xl mx-auto mb-16 transition-all duration-1000 ease-out transform delay-200 ${
           isVisible 
             ? 'opacity-100 translate-y-0' 
             : 'opacity-0 translate-y-10'
           }`}
         >
-          {t("heroBlur.subheadline")}
+          Lleva el control de cada peso. Desde la factura de compra hasta el seguimiento de deudas 
+          y préstamos a tus proveedores de café.
         </p>
         
-        <div className={`flex flex-col sm:flex-row gap-4 justify-center transition-all duration-700 ease-out transform delay-300 ${
+        <div className={`transition-all duration-1000 ease-out transform delay-500 ${
           isVisible 
             ? 'opacity-100 translate-y-0' 
             : 'opacity-0 translate-y-10'
           }`}
         >
-          <div>
-            <div className="max-w-6xl mx-auto">
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {features.map((feature, index) => (
-                  <CardHeroBlur
-                    key={index}
-                    icon={feature.icon}
-                    title={feature.title}
-                    description={feature.description}
-                  />
-                ))}
-              </div>
-            </div>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {features.map((feature, index) => (
+              <CardHeroBlur
+                key={index}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+              />
+            ))}
           </div>
         </div>
       </div>

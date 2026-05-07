@@ -1,3 +1,5 @@
+'use client'
+
 import React, { forwardRef, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -10,21 +12,27 @@ import { updateCustomer } from "@/request/users";
 import CustomButton from "@/components/atoms/CustomButton";
 import { customertEditSchema } from "@/schemes/customerEditScheme";
 
+// 1. Agregamos los campos al tipo de datos del formulario
 type CustomerFormData = {
     id?: string;
     identification: string; 
     firstName: string;
+    middleName?: string;  // Nuevo
     lastName: string;
+    secondLastName?: string; // Nuevo
     phone?: string;
     email: string; 
 };
 
+// 2. Actualizamos la interfaz de las Props para que coincida con lo que envías desde la tabla
 interface CustomerFormProps {
     client?: {    
         id?: string;
         identification: string; 
         firstName: string;
+        middleName?: string; // Nuevo
         lastName: string;
+        secondLastName?: string; // Nuevo
         phone?: string;
         email: string; 
     };
@@ -46,12 +54,20 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
         resolver: zodResolver(editCustomerSchema),
     }); 
 
+    // 3. Cargamos los valores iniciales cuando se abre el modal
     useEffect(() => {
         if (client) {
-            const formattedIdentification = client.identification.slice(2); 
+            // Suponiendo que el prefijo de identificación se maneja igual
+            const formattedIdentification = client.identification.includes('-') 
+                ? client.identification.split('-')[1] 
+                : client.identification;
+
             setValue('identification', formattedIdentification);
             setValue('firstName', client.firstName);
+            setValue('middleName', client.middleName || "");
             setValue('lastName', client.lastName);
+            setValue('secondLastName', client.secondLastName || "");
+            setValue('phone', client.phone || "");
             setValue('email', client.email);
             
             if (client.id) {
@@ -63,20 +79,21 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
     }, [client, reset, setValue]);      
 
     const onSubmit = async (data: CustomerFormData) => {
-        const authToken = Cookies.get("authToken");
-    
         if (!client?.id) {
             alert(t("alerts.noClientId"));
             return;
         }
     
         try {
+            // 4. Enviamos el objeto completo al backend
             const requestBody: ClientDAO = {
                 id: client.id,
-                tenantId: "",
+                tenantId: "", // El backend suele tomar esto del token
                 identification: data.identification,
                 firstName: data.firstName,
+                middleName: data.middleName,
                 lastName: data.lastName,
+                secondLastName: data.secondLastName,
                 phone: data.phone || "",
                 email: data.email,
             };
@@ -101,20 +118,18 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
         <form ref={ref} onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4"> 
             {client?.id && (
                 <div className="col-span-2">
-                    <label className="text-sm font-semibold text-gray-500">{t("fields.id")}</label>
+                    <label className="text-sm font-semibold text-zinc-500">{t("fields.id")}</label>
                     <Input 
                         value={client.id}
                         type="text" 
                         disabled={true}
-                        placeholder={t("placeholders.id")}
                     />
                 </div>
             )}
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("fields.identification")}*</label>
+                <label className="text-sm font-semibold text-zinc-500">{t("fields.identification")}*</label>
                 <Input 
-                    placeholder={t("placeholders.identification")}
                     type="text" 
                     {...register("identification")} 
                     disabled={!!client?.id} 
@@ -122,46 +137,47 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
                 {errors.identification && <p className="text-red-500 text-xs">{errors.identification.message}</p>}
             </div>
 
+            {/* Fila: Nombre y Segundo Nombre */}
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("fields.firstName")}*</label>
-                <Input 
-                    placeholder={t("placeholders.firstName")}
-                    type="text" 
-                    {...register("firstName")} 
-                />
+                <label className="text-sm font-semibold text-zinc-500">{t("fields.firstName")}*</label>
+                <Input type="text" {...register("firstName")} />
                 {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName.message}</p>}
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("fields.lastName")}*</label>
-                <Input 
-                    placeholder={t("placeholders.lastName")}
-                    type="text" 
-                    {...register("lastName")} 
-                />
+                <label className="text-sm font-semibold text-zinc-500">Segundo Nombre</label>
+                <Input type="text" {...register("middleName")} />
+            </div>
+
+            {/* Fila: Apellido y Segundo Apellido */}
+            <div>
+                <label className="text-sm font-semibold text-zinc-500">{t("fields.lastName")}*</label>
+                <Input type="text" {...register("lastName")} />
                 {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName.message}</p>}
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("fields.email")}*</label>
-                <Input 
-                    placeholder={t("placeholders.email")}
-                    type="email" 
-                    {...register("email")} 
-                />
+                <label className="text-sm font-semibold text-zinc-500">Segundo Apellido</label>
+                <Input type="text" {...register("secondLastName")} />
+            </div>
+
+            {/* Fila: Email y Teléfono */}
+            <div>
+                <label className="text-sm font-semibold text-zinc-500">{t("fields.email")}*</label>
+                <Input type="email" {...register("email")} />
                 {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
+            </div>
+
+            <div>
+                <label className="text-sm font-semibold text-zinc-500">Teléfono</label>
+                <Input type="text" {...register("phone")} />
+                {errors.phone && <p className="text-red-500 text-xs">{errors.phone.message}</p>}
             </div>
             
             <div className="col-span-2 flex justify-end gap-2 mt-4">
-                <CustomButton text={t("buttons.close")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="button" onClickButton={onSuccess}  />
+                <CustomButton text={t("buttons.close")} style="border text-white bg-zinc-800" typeButton="button" onClickButton={onSuccess}  />
                 <CustomButton
-                    text={
-                    isSubmitting
-                        ? t("buttons.processing")
-                        : client?.id
-                        ? t("buttons.update")
-                        : t("buttons.create")
-                    }
+                    text={isSubmitting ? t("buttons.processing") : t("buttons.update")}
                     style="border text-white bg-homePrimary hover:bg-blue-500"
                     typeButton="submit"
                 />

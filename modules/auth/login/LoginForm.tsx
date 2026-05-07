@@ -1,19 +1,16 @@
 "use client";
-
-import Link from 'next/link';
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation"; 
-import { loginUser } from "@/request/access";
+import { useRouter } from "next/navigation";
 import Input from "../../../components/atoms/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginScheme } from "../../../schemes/loginScheme"; 
+import { loginScheme } from "../../../schemes/loginScheme";
 import CustomButton from "../../../components/atoms/CustomButton";
 import { AppleIcon, GoogleIcon } from "../../../components/atoms/icons";
 import { useLocale, useTranslations } from 'next-intl';
-import { useBalance } from "@/context/BalanceContext"; // ajusta la ruta si es diferente
+import { useBalance } from "@/context/BalanceContext";
 import { getCompanyById } from '@/request/companies';
-import { get } from 'http';
+import { useAuth } from '@/context/AuthContext';
 
 type LoginFormData = {
   email: string;
@@ -25,7 +22,8 @@ const LoginForm: React.FC = () => {
   const t = useTranslations('login');
   const loginValidationSchema = loginScheme(t);
   const { setBalance } = useBalance();
-  
+  const { login } = useAuth();
+
   const {
     register,
     handleSubmit,
@@ -42,37 +40,40 @@ const LoginForm: React.FC = () => {
     setLoading(true);
     setErrorMessage("");
 
-    try {                
-      const response = await loginUser(data);
+    try {
+      await login(data.email, data.password);
 
-      if (response.status === 200) {
-        const responseData = await response.json();
-        const userRole = responseData.user?.role;
+      const authToken = document.cookie
+        .split("; ")
+        .find(row => row.startsWith("authToken="))
+        ?.split("=")[1];
 
-        try {
-          const balanceData = await getCompanyById(responseData.user.tenantId);
-          setBalance(balanceData.currentBalance);
-        } catch (e) {
-          console.error("Error fetching balance:", e);
-        }
-
-        // Redirigir según el rol del usuario
-        if (userRole === "ADMIN" || userRole === "SUPERADMIN") {
-          router.push(`/${locale}/admin`);
-        } else if (userRole === "USER") {
-          router.push(`/${locale}/employee`);
-        } else {
-          router.push(`/${locale}/`);
-        }
+      if (!authToken) {
+        throw new Error("No se encontró token después del login");
       }
-      else {
-        // Manejar respuesta de error
-        const errorData = await response.json();
-        setErrorMessage(errorData.error || t("authError"));
+
+      const payload = JSON.parse(atob(authToken.split(".")[1]));
+      const userRole = payload.role;
+      const tenantId = payload.tenantId;
+
+      try {
+        const balanceData = await getCompanyById(tenantId);
+        setBalance(balanceData.currentBalance);
+      } catch (e) {
+        console.error("Error fetching balance:", e);
       }
-    } catch (error) {
+
+      if (userRole === "ADMIN" || userRole === "SUPERADMIN") {
+        router.push(`/${locale}/admin`);
+      } else if (userRole === "USER") {
+        router.push(`/${locale}/employee`);
+      } else {
+        router.push(`/${locale}/`);
+      }
+
+    } catch (error: any) {
       console.error(error);
-      setErrorMessage(t("connectionError"));
+      setErrorMessage(error.message || t("connectionError"));
     } finally {
       setLoading(false);
     }
@@ -108,14 +109,14 @@ const LoginForm: React.FC = () => {
         )}
 
         <div className="w-full">
-          <CustomButton 
+          <CustomButton
             text={loading ? t("loading") : t("loginButton")}
             style="w-full text-white bg-homePrimary"
             typeButton='submit'
             disabled={loading}
           />
         </div>
-      </form> 
+      </form>
 
       <div className="w-full items-center pl-3 pr-3">
         <div className="flex justify-between w-full text-sm text-white mt-2">

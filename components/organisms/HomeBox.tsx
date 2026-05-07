@@ -2,19 +2,27 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Menu } from "lucide-react";
+import { Menu, Eye, EyeOff } from "lucide-react"; // Importamos los iconos del ojo
 import Cookies from "js-cookie";
 
 import CustomButton from "../atoms/CustomButton";
 import Sidebar from "@/components/molecules/Sidebar";
 import { getCompanyById } from "@/request/companies";
-import { useBalance } from "@/context/BalanceContext"; // Importa tu context
+import { useBalance } from "@/context/BalanceContext"; 
 
 type UserRole = "USER" | "ADMIN" | "SUPERADMIN" | null;
 
 export default function HomeBox({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const { balance: currentBalance, setBalance } = useBalance(); // Usamos el context aquí
+  
+  // Extraemos lo necesario del context de balance
+  const { 
+    setBalance, 
+    displayBalance, 
+    isVisible, 
+    toggleVisibility 
+  } = useBalance(); 
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>(null);
 
@@ -33,7 +41,6 @@ export default function HomeBox({ children }: { children: React.ReactNode }) {
       const companyId = user.tenantId;
       try {
         const company = await getCompanyById(companyId);
-        console.log("Balance actual de la empresa:", company.currentBalance);
         setBalance(company.currentBalance);  
       } catch (error) {
         console.error("Error al obtener el balance:", error);
@@ -59,12 +66,26 @@ export default function HomeBox({ children }: { children: React.ReactNode }) {
             iconColor="h-7 w-7 cursor-pointer text-gray-200 hover:text-white"
           />
           <div className="flex flex-col">
-            <span className="font-bold text-xl tracking-tight">AXIA</span>
-            {currentBalance !== null && (
-              <span className="text-green-400 font-semibold text-sm">
-                Saldo: ${currentBalance.toLocaleString()}
-              </span>
-            )}
+            <span className="font-bold text-xl tracking-tight leading-none mb-1">AXIA</span>
+            
+            {/* CONTENEDOR DEL SALDO CON EL OJITO */}
+            <div className="flex items-center gap-2">
+            <span className="text-green-400 font-mono font-bold text-sm">
+              Saldo: {displayBalance}
+            </span>
+              
+              <button 
+                onClick={toggleVisibility}
+                className="p-1 hover:bg-white/10 rounded-md transition-colors"
+                title={isVisible ? "Ocultar saldo" : "Mostrar saldo"}
+              >
+                {isVisible ? (
+                  <EyeOff size={14} className="text-gray-400" />
+                ) : (
+                  <Eye size={14} className="text-green-500" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -73,7 +94,7 @@ export default function HomeBox({ children }: { children: React.ReactNode }) {
         <Sidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} />
         <main
           className={`flex-1 p-6 overflow-auto transition-all duration-300 ${
-            isSidebarOpen ? "ml-64" : "ml-16"
+            isSidebarOpen ? "ml-64" : "ml-0 md:ml-16"
           }`}
         >
           {children}
