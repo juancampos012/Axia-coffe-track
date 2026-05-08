@@ -100,7 +100,7 @@ export default function DashboardScreen() {
               <div className="flex flex-col">
                 <span className="text-blue-400 text-[9px] font-black uppercase tracking-widest">Balance de Caja</span>
                 <span className="text-2xl font-mono font-black tracking-tighter">
-                  {formatCurrency(companyData?.inventory.balance || balance)}
+                  {formatCurrency(companyData?.inventory?.balance || balance)}
                 </span>
               </div>
               <button 
@@ -125,41 +125,41 @@ export default function DashboardScreen() {
         ) : (
           <div className="space-y-8 animate-in fade-in duration-700">
             
-            {/* 1. SECCIÓN DE INVENTARIO FÍSICO (6 Tarjetas) */}
+            {/* 1. SECCIÓN DE INVENTARIO FÍSICO (6 Tarjetas con protección contra undefined) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                <InventoryCard 
                   title="Café Seco" 
-                  value={companyData?.inventory.stock.coffee} 
+                  value={companyData?.inventory?.stock?.coffee || 0} 
                   icon={<Coffee />} 
                   color="text-amber-500" 
                />
                <InventoryCard 
                   title="Cacao" 
-                  value={companyData?.inventory.stock.cacao} 
+                  value={companyData?.inventory?.stock?.cacao || 0} 
                   icon={<Bean />} 
                   color="text-orange-800" 
                />
                <InventoryCard 
                   title="Café Mojado" 
-                  value={companyData?.inventory.stock.wetCoffee} 
+                  value={companyData?.inventory?.stock?.wetCoffee || 0} 
                   icon={<Package />} 
                   color="text-blue-400" 
                />
                <InventoryCard 
                   title="Pasilla" 
-                  value={companyData?.inventory.stock.pasilla} 
+                  value={companyData?.inventory?.stock?.pasilla || 0} 
                   icon={<Scale />} 
                   color="text-yellow-600" 
                />
                <InventoryCard 
                   title="Frijol" 
-                  value={companyData?.inventory.stock.bean} 
+                  value={companyData?.inventory?.stock?.bean || 0} 
                   icon={<Layers />} 
                   color="text-emerald-600" 
                />
                <InventoryCard 
                   title="Préstamos" 
-                  value={companyData?.operations.pendingLoans} 
+                  value={companyData?.operations?.pendingLoans || 0} 
                   icon={<Briefcase />} 
                   color="text-red-500" 
                   isCurrency 
@@ -178,11 +178,11 @@ export default function DashboardScreen() {
                         <TrendingUp size={14} /> Contratos Activos
                       </h3>
                       <span className="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-[10px] font-bold">
-                        {companyData?.operations.activeContracts} Fijaciones
+                        {companyData?.operations?.activeContracts || 0} Fijaciones
                       </span>
                    </div>
                    <p className="text-slate-400 text-xs italic">
-                     Actualmente tienes {companyData?.operations.activeContracts} negociaciones pendientes por liquidar.
+                     Actualmente tienes {companyData?.operations?.activeContracts || 0} negociaciones pendientes por liquidar.
                    </p>
                 </div>
               </div>
@@ -193,7 +193,7 @@ export default function DashboardScreen() {
                       <FileText size={14} /> Facturación Reciente
                     </h3>
                     <div className="space-y-4">
-                      {companyData?.sales.recent && companyData.sales.recent.length > 0 ? (
+                      {companyData?.sales?.recent && companyData.sales.recent.length > 0 ? (
                         companyData.sales.recent.slice(0, 6).map((inv: any) => (
                           <div key={inv.id} className="flex justify-between items-center p-4 bg-white/[0.03] hover:bg-white/[0.06] rounded-2xl border border-white/5 transition-colors group">
                              <div>
@@ -201,7 +201,7 @@ export default function DashboardScreen() {
                                  {inv.client?.firstName} {inv.client?.lastName}
                                </p>
                                <p className="text-[9px] text-slate-500 font-mono">
-                                 {new Date(inv.date).toLocaleDateString()}
+                                 {inv.date ? new Date(inv.date).toLocaleDateString() : '---'}
                                </p>
                              </div>
                              <span className="text-xs font-mono font-bold text-emerald-400">
@@ -226,6 +226,9 @@ export default function DashboardScreen() {
 }
 
 function InventoryCard({ title, value, icon, color, isCurrency = false }: any) {
+  // Aseguramos que value siempre sea un número para evitar errores de renderizado
+  const displayValue = Number(value || 0);
+
   return (
     <div className="bg-white/5 border border-white/10 p-6 rounded-[2.5rem] hover:border-[#1E3C8b]/50 transition-all group relative overflow-hidden shadow-xl">
       <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -241,9 +244,13 @@ function InventoryCard({ title, value, icon, color, isCurrency = false }: any) {
       <div className="flex items-baseline gap-1 mt-1">
         <h4 className="text-2xl font-black text-white tracking-tighter">
           {isCurrency ? (
-            new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(Number(value || 0))
+            new Intl.NumberFormat('es-CO', { 
+              style: 'currency', 
+              currency: 'COP', 
+              maximumFractionDigits: 0 
+            }).format(displayValue)
           ) : (
-            Number(value || 0).toLocaleString()
+            displayValue.toLocaleString()
           )}
         </h4>
         {!isCurrency && <span className="text-[10px] font-bold text-slate-600 uppercase">Kg</span>}
