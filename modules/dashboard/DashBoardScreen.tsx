@@ -14,7 +14,9 @@ import {
   Coffee, 
   Bean, 
   AlertCircle, 
-  Briefcase 
+  Briefcase,
+  Layers,
+  Scale
 } from 'lucide-react'
 
 import DashBoardLayout from './DashBoardLayout'
@@ -26,7 +28,6 @@ export default function DashboardScreen() {
   const [isLoadingUI, setIsLoadingUI] = useState(true)
   const [mounted, setMounted] = useState(false)
   
-  // Consumimos el hook que ya tiene la nueva interfaz DashboardMetricsData
   const { data: companyData, isError, isLoading: isDataLoading } = useDashboardData()
 
   useEffect(() => {
@@ -65,7 +66,6 @@ export default function DashboardScreen() {
     )
   }
 
-  // Combinamos el loading de la UI inicial con el del fetch de datos
   const showSpinner = isLoadingUI || isDataLoading
 
   return (
@@ -125,8 +125,8 @@ export default function DashboardScreen() {
         ) : (
           <div className="space-y-8 animate-in fade-in duration-700">
             
-            {/* 1. SECCIÓN DE INVENTARIO FÍSICO (Datos de Company) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 1. SECCIÓN DE INVENTARIO FÍSICO (6 Tarjetas) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                <InventoryCard 
                   title="Café Seco" 
                   value={companyData?.inventory.stock.coffee} 
@@ -146,6 +146,18 @@ export default function DashboardScreen() {
                   color="text-blue-400" 
                />
                <InventoryCard 
+                  title="Pasilla" 
+                  value={companyData?.inventory.stock.pasilla} 
+                  icon={<Scale />} 
+                  color="text-yellow-600" 
+               />
+               <InventoryCard 
+                  title="Frijol" 
+                  value={companyData?.inventory.stock.bean} 
+                  icon={<Layers />} 
+                  color="text-emerald-600" 
+               />
+               <InventoryCard 
                   title="Préstamos" 
                   value={companyData?.operations.pendingLoans} 
                   icon={<Briefcase />} 
@@ -157,11 +169,9 @@ export default function DashboardScreen() {
             {/* 2. LAYOUT DE WIDGETS Y REPORTES */}
             <DashBoardLayout>
               
-              {/* Columna de Ventas (Ocupa 2 espacios en grid si es necesario) */}
               <div className="lg:col-span-2 space-y-6">
                 <SalesWidget/>
                 
-                {/* Mini reporte de contratos activos */}
                 <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6">
                    <div className="flex justify-between items-center mb-4">
                       <h3 className="text-xs font-black uppercase tracking-widest text-emerald-400 flex items-center gap-2">
@@ -177,7 +187,6 @@ export default function DashboardScreen() {
                 </div>
               </div>
 
-              {/* 3. COLUMNA LATERAL: FACTURACIÓN RECIENTE */}
               <div className="lg:col-span-1">
                  <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 h-full backdrop-blur-sm">
                     <h3 className="text-xs font-black uppercase tracking-widest text-blue-400 mb-6 flex items-center gap-2">
@@ -216,11 +225,9 @@ export default function DashboardScreen() {
   )
 }
 
-// Subcomponente estilizado para las tarjetas de inventario
 function InventoryCard({ title, value, icon, color, isCurrency = false }: any) {
   return (
     <div className="bg-white/5 border border-white/10 p-6 rounded-[2.5rem] hover:border-[#1E3C8b]/50 transition-all group relative overflow-hidden shadow-xl">
-      {/* Decoración de fondo de la card */}
       <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
         {React.cloneElement(icon, { size: 100 })}
       </div>

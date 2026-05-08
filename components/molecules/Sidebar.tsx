@@ -91,7 +91,6 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
       subOptions: [
         { label: "Comprar(caja)", href: `/${locale}/sales/make-sales` },
         { label: "Ver compras", href: `/${locale}/sales/sales-invoices`, allowedRoles: ["ADMIN", "SUPERADMIN"] },
-        { label: "Inventario Productos", href: `/${locale}/store/products` },
         ...(role !== "USER" ? [
           { label: "Crear Ingreso", href: `/${locale}/shopping/make-purchase` },
           { label: "Ver Ingresos", href: `/${locale}/shopping/view-purchases` },

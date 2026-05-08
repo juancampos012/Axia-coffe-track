@@ -3,10 +3,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 
 export const metadata = {
-  title: "Axia Invoice",
-  icons: {
-    icon: "/Images/logo_blanco.png",
-  },
+  title: "Axia Coffee",
 };
 
 export default async function LocaleLayout({
