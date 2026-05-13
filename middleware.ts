@@ -104,11 +104,22 @@ export function middleware(request: NextRequest) {
 
     const fallback = userRole === "ADMIN" || userRole === "SUPERADMIN" ? "/admin" : "/employee";
 
-    // Solo redirige si NO está en la ruta esperada
-    if (!userRoutes?.some(route => pathname.startsWith(route))) {
-      if (pathname !== fallback) {
-        return NextResponse.redirect(new URL(`/${locale}${fallback}`, request.nextUrl.origin));
+    const targetPath = `/${locale}${fallback}`.replace(/\/+/g, '/');
+
+    let cleanPathname = pathname.replace(/(\/admin)+\/admin$/, "/admin");
+
+    if (!userRoutes?.some(route => cleanPathname.startsWith(route))) {
+      if (cleanPathname !== fallback) {
+        return NextResponse.redirect(
+          new URL(targetPath, request.nextUrl.origin)
+        );
       }
+    }
+
+    if (pathname === "/admin/admin") {
+      return NextResponse.redirect(
+        new URL(`/${locale}/admin`, request.nextUrl.origin)
+      );
     }
 
     const response = intlResponse;

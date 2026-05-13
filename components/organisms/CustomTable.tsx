@@ -124,6 +124,8 @@ export default function CustomTable({
                       onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(30,60,139,0.08)")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                       onDoubleClick={() => onRowDoubleClick?.(item)}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(30,60,139,0.08)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
                       {headers.map((h, idx) => (
                         <td
