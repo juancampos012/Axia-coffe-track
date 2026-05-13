@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronUp, SlidersHorizontal } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import React, { useState } from "react";
+import { ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface HeaderItem {
   label: string;
@@ -9,27 +9,18 @@ interface HeaderItem {
 
 interface TableFilterProps {
   headers: HeaderItem[];
-  onSort: (field: string, direction: 'asc' | 'desc') => void;
+  onSort: (field: string, direction: "asc" | "desc") => void;
 }
 
 const TableFilter: React.FC<TableFilterProps> = ({ headers, onSort }) => {
   const t = useTranslations("TableFilter");
   const [isOpen, setIsOpen] = useState(false);
   const [sortField, setSortField] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const ref = useRef<HTMLDivElement>(null);
-
-  // Cierra al hacer click fuera
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const handleSort = (field: string) => {
-    const newDir = field === sortField && sortDirection === 'asc' ? 'desc' : 'asc';
+    const newDirection =
+      field === sortField && sortDirection === "asc" ? "desc" : "asc";
     setSortField(field);
     setSortDirection(newDir);
     onSort(field, newDir);
@@ -37,91 +28,55 @@ const TableFilter: React.FC<TableFilterProps> = ({ headers, onSort }) => {
   };
 
   return (
-    <div ref={ref} className="relative inline-block text-left">
+    <div className="relative inline-block text-left">
       <button
         type="button"
-        onClick={() => setIsOpen(v => !v)}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+        className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-white/5"
         style={{
-          background: isOpen ? 'rgba(30,60,139,0.25)' : 'rgba(255,255,255,0.04)',
-          border: `1px solid ${isOpen ? 'rgba(74,127,255,0.45)' : 'rgba(255,255,255,0.08)'}`,
-          color: isOpen ? '#fff' : 'rgba(255,255,255,0.5)',
-          fontFamily: 'Syne, sans-serif',
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(30,60,139,0.35)",
+          color: "rgba(255,255,255,0.5)",
         }}
-        onMouseEnter={e => {
-          if (!isOpen) {
-            e.currentTarget.style.background = 'rgba(30,60,139,0.15)';
-            e.currentTarget.style.borderColor = 'rgba(30,60,139,0.4)';
-            e.currentTarget.style.color = 'rgba(255,255,255,0.8)';
-          }
-        }}
-        onMouseLeave={e => {
-          if (!isOpen) {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-            e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
-          }
-        }}
+        onClick={() => setIsOpen(!isOpen)}
       >
-        <SlidersHorizontal size={14} />
+        <SlidersHorizontal size={15} style={{ color: "rgba(74,127,255,0.7)" }} />
         {t("filter")}
-        {isOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+        {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
       </button>
 
       {isOpen && (
-        <div
-          className="absolute right-0 z-50 mt-2 w-52 rounded-xl overflow-hidden"
-          style={{
-            background: 'rgba(8,12,28,0.97)',
-            border: '1px solid rgba(30,60,139,0.35)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(30,60,139,0.1)',
-          }}
-        >
-          {/* Header del dropdown */}
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div
-            className="px-4 py-2.5 border-b"
-            style={{ borderColor: 'rgba(30,60,139,0.2)' }}
+            className="absolute right-0 z-50 mt-2 w-52 rounded-xl py-1.5 shadow-2xl"
+            style={{
+              background: "rgba(4,6,18,0.97)",
+              border: "1px solid rgba(30,60,139,0.4)",
+              backdropFilter: "blur(20px)",
+            }}
           >
-            <span className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: 'rgba(74,127,255,0.7)' }}>
-              Ordenar por
-            </span>
+            {headers.map(({ label, key }) => (
+              <button
+                key={key}
+                className="flex items-center justify-between w-full px-4 py-2.5 text-sm transition-colors hover:bg-white/5"
+                style={{
+                  color:
+                    sortField === key.toLowerCase()
+                      ? "rgba(74,127,255,0.9)"
+                      : "rgba(255,255,255,0.5)",
+                }}
+                onClick={() => handleSort(key.toLowerCase())}
+              >
+                <span>{label}</span>
+                {sortField === key.toLowerCase() && (
+                  <span className="text-xs" style={{ color: "#4a7fff" }}>
+                    {sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
-
-          <div className="py-1">
-            {headers.map(({ label, key }) => {
-              const isActive = sortField === key.toLowerCase();
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => handleSort(key.toLowerCase())}
-                  className="w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors duration-150"
-                  style={{
-                    background: isActive ? 'rgba(30,60,139,0.2)' : 'transparent',
-                    color: isActive ? '#fff' : 'rgba(255,255,255,0.5)',
-                    textAlign: 'left',
-                  }}
-                  onMouseEnter={e => {
-                    if (!isActive) e.currentTarget.style.background = 'rgba(30,60,139,0.12)';
-                    e.currentTarget.style.color = 'rgba(255,255,255,0.85)';
-                  }}
-                  onMouseLeave={e => {
-                    if (!isActive) e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = isActive ? '#fff' : 'rgba(255,255,255,0.5)';
-                  }}
-                >
-                  <span>{label}</span>
-                  {isActive && (
-                    <span style={{ color: '#4a7fff', fontSize: 13, fontWeight: 700 }}>
-                      {sortDirection === 'asc' ? '↑' : '↓'}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        </>
       )}
     </div>
   );

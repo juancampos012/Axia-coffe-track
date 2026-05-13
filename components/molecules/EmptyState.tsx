@@ -11,39 +11,31 @@ interface EmptyStateProps {
 const EmptyState: React.FC<EmptyStateProps> = ({
   message,
   searchTerm,
-  icon,
+  icon = <SearchX size={32} style={{ color: "rgba(74,127,255,0.4)" }} />,
 }) => {
   const t = useTranslations("searchBar");
 
   return (
     <div
-      className="w-full py-16 flex flex-col items-center justify-center rounded-2xl"
+      className="w-full py-14 flex flex-col items-center justify-center rounded-2xl"
       style={{
-        background: 'rgba(8,12,28,0.5)',
-        border: '1px dashed rgba(30,60,139,0.3)',
+        background: "rgba(255,255,255,0.02)",
+        border: "1px dashed rgba(30,60,139,0.35)",
       }}
     >
-      <div
-        className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-        style={{
-          background: 'rgba(30,60,139,0.15)',
-          border: '1px solid rgba(30,60,139,0.3)',
-        }}
-      >
-        {icon ?? <SearchX size={24} style={{ color: '#4a7fff' }} />}
+      <div className="mb-4 p-4 rounded-full" style={{ background: "rgba(30,60,139,0.12)" }}>
+        {icon}
       </div>
       <h3
-        className="text-base font-medium mb-1"
-        style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Syne, sans-serif' }}
+        className="text-sm font-semibold mb-1"
+        style={{ color: "rgba(255,255,255,0.5)" }}
       >
         {message}
       </h3>
       {searchTerm && (
-        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.2)' }}>
-          {t("noResultsFor")}{' '}
-          <span className="font-medium" style={{ color: 'rgba(74,127,255,0.7)' }}>
-            "{searchTerm}"
-          </span>
+        <p className="text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>
+          {t("noResultsFor")}{" "}
+          <span style={{ color: "rgba(74,127,255,0.7)" }}>"{searchTerm}"</span>
         </p>
       )}
     </div>
