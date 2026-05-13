@@ -59,14 +59,14 @@ export default function DashboardPage() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-white">Dashboard</h2>
-          <p className="text-gray-400 text-sm">Vista general de tu negocio</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: "rgba(255,255,255,0.3)" }}>Vista general de tu negocio</p>
         </div>
       </div>
 
       <MetricCharts />
       
       <div className="pt-6">
-        {isLoading && <p className="text-zinc-500 text-sm mb-2">Cargando productos...</p>}
+        {isLoading && <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "rgba(74,127,255,0.6)" }}>Cargando productos...</p>}
         
         <CustomTable
           title={t("tableTitle")}

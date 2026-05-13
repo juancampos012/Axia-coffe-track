@@ -79,15 +79,14 @@ const EmployeeForm = forwardRef<HTMLFormElement, EmployeeFormProps>(({ onSuccess
     return (
         <form ref={ref} onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4"> 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("codeLabel")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("codeLabel")}</label>
                 <Input placeholder={t("codePlaceholder")} type="text" disabled={true} />
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("nameLabel")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("nameLabel")}</label>
                 <Input 
-                    className="text-homePrimary-200 bg-transparent" 
-                    placeholder={t("namePlaceholder")}
+placeholder={t("namePlaceholder")}
                     type="text" 
                     {...register("name")} 
                 />
@@ -95,10 +94,9 @@ const EmployeeForm = forwardRef<HTMLFormElement, EmployeeFormProps>(({ onSuccess
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("namePlaceholder")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("namePlaceholder")}</label>
                 <Input 
-                    className="text-homePrimary-200 bg-transparent" 
-                    placeholder={t("emailPlaceholder")}
+placeholder={t("emailPlaceholder")}
                     type="email" 
                     {...register("email")} 
                 />
@@ -106,10 +104,9 @@ const EmployeeForm = forwardRef<HTMLFormElement, EmployeeFormProps>(({ onSuccess
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("passwordLabel")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("passwordLabel")}</label>
                 <Input 
-                    className="text-homePrimary-200 bg-transparent" 
-                    placeholder={t("passwordPlaceholder")}
+placeholder={t("passwordPlaceholder")}
                     type="password" 
                     {...register("password")} 
                 />
@@ -117,10 +114,9 @@ const EmployeeForm = forwardRef<HTMLFormElement, EmployeeFormProps>(({ onSuccess
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("roleLabel")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("roleLabel")}</label>
                 <Input 
-                    className="text-homePrimary-200 bg-transparent" 
-                    placeholder={t("rolePlaceholder")} 
+placeholder={t("rolePlaceholder")} 
                     type="text" 
                     {...register("role")} 
                 />
@@ -128,8 +124,8 @@ const EmployeeForm = forwardRef<HTMLFormElement, EmployeeFormProps>(({ onSuccess
             </div>
 
             <div className="col-span-2 flex justify-end gap-2 mt-4">
-                <CustomButton text={t("closeButton")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="button" onClickButton={onSuccess}  />
-                <CustomButton text={t("createButton")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="submit" />
+                <CustomButton text={t("closeButton")} variant="ghost" typeButton="button" onClickButton={onSuccess}  />
+                <CustomButton text={t("createButton")} variant="primary" typeButton="submit" />
             </div>    
         </form>
     );

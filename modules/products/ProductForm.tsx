@@ -118,7 +118,7 @@ const ProductForm = forwardRef<HTMLFormElement, ProductFormProps>(
         className="grid grid-cols-2 gap-4"
       >
         <div>
-          <label className="text-sm font-semibold text-gray-500">
+          <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
             {t("code")}
           </label>
           <Input
@@ -129,11 +129,10 @@ const ProductForm = forwardRef<HTMLFormElement, ProductFormProps>(
         </div>
 
         <div>
-          <label className="text-sm font-semibold text-gray-500">
+          <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
             {t("supplier")}
           </label>
           <Select
-            className="text-homePrimary-200"
             placeholder={t("selectSupplier")}
             options={proveedores.map((proveedor) => ({
               value: proveedor.id,
@@ -144,7 +143,7 @@ const ProductForm = forwardRef<HTMLFormElement, ProductFormProps>(
         </div>
 
         <div>
-          <label className="text-sm font-semibold text-gray-500">
+          <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
             {t("name")}
           </label>
           <Input
@@ -158,7 +157,7 @@ const ProductForm = forwardRef<HTMLFormElement, ProductFormProps>(
         </div>
 
         <div>
-          <label className="text-sm font-semibold text-gray-500">
+          <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
             {t("stock")}
           </label>
           <Input
@@ -172,7 +171,7 @@ const ProductForm = forwardRef<HTMLFormElement, ProductFormProps>(
         </div>
 
         <div>
-          <label className="text-sm font-semibold text-gray-500">
+          <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
             {t("tax")}
           </label>
           <Input
@@ -186,7 +185,7 @@ const ProductForm = forwardRef<HTMLFormElement, ProductFormProps>(
         </div>
 
         <div>
-          <label className="text-sm font-semibold text-gray-500">
+          <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
             {t("purchasePrice")}
           </label>
           <Input
@@ -202,7 +201,7 @@ const ProductForm = forwardRef<HTMLFormElement, ProductFormProps>(
         </div>
 
         <div>
-          <label className="text-sm font-semibold text-gray-500">
+          <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
             {t("salePrice")}
           </label>
           <Input
@@ -218,8 +217,8 @@ const ProductForm = forwardRef<HTMLFormElement, ProductFormProps>(
         </div>
 
         <div className="col-span-2 flex justify-end gap-2 mt-4">
-          <CustomButton text={t("close")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="button" onClickButton={onSuccess}  />
-          <CustomButton text={t("createProduct")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="submit" />
+          <CustomButton text={t("close")} variant="ghost" typeButton="button" onClickButton={onSuccess}  />
+          <CustomButton text={t("createProduct")} variant="primary" typeButton="submit" />
         </div>    
       </form>
     );

@@ -118,7 +118,7 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
         <form ref={ref} onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4"> 
             {client?.id && (
                 <div className="col-span-2">
-                    <label className="text-sm font-semibold text-zinc-500">{t("fields.id")}</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.id")}</label>
                     <Input 
                         value={client.id}
                         type="text" 
@@ -128,7 +128,7 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
             )}
 
             <div>
-                <label className="text-sm font-semibold text-zinc-500">{t("fields.identification")}*</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.identification")}*</label>
                 <Input 
                     type="text" 
                     {...register("identification")} 
@@ -139,46 +139,46 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
 
             {/* Fila: Nombre y Segundo Nombre */}
             <div>
-                <label className="text-sm font-semibold text-zinc-500">{t("fields.firstName")}*</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.firstName")}*</label>
                 <Input type="text" {...register("firstName")} />
                 {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName.message}</p>}
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-zinc-500">Segundo Nombre</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Segundo Nombre</label>
                 <Input type="text" {...register("middleName")} />
             </div>
 
             {/* Fila: Apellido y Segundo Apellido */}
             <div>
-                <label className="text-sm font-semibold text-zinc-500">{t("fields.lastName")}*</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.lastName")}*</label>
                 <Input type="text" {...register("lastName")} />
                 {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName.message}</p>}
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-zinc-500">Segundo Apellido</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Segundo Apellido</label>
                 <Input type="text" {...register("secondLastName")} />
             </div>
 
             {/* Fila: Email y Teléfono */}
             <div>
-                <label className="text-sm font-semibold text-zinc-500">{t("fields.email")}*</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.email")}*</label>
                 <Input type="email" {...register("email")} />
                 {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-zinc-500">Teléfono</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Teléfono</label>
                 <Input type="text" {...register("phone")} />
                 {errors.phone && <p className="text-red-500 text-xs">{errors.phone.message}</p>}
             </div>
             
             <div className="col-span-2 flex justify-end gap-2 mt-4">
-                <CustomButton text={t("buttons.close")} style="border text-white bg-zinc-800" typeButton="button" onClickButton={onSuccess}  />
+                <CustomButton text={t("buttons.close")} variant="ghost" typeButton="button" onClickButton={onSuccess}  />
                 <CustomButton
                     text={isSubmitting ? t("buttons.processing") : t("buttons.update")}
-                    style="border text-white bg-homePrimary hover:bg-blue-500"
+                    variant="primary"
                     typeButton="submit"
                 />
             </div>

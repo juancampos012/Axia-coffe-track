@@ -205,7 +205,9 @@ export default function ScreenEmployees() {
                 />
             </div>
             
-            {isLoading && <p className="text-gray-500 text-sm mb-2">{t("loading")}</p>}
+            {isLoading && (
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "rgba(74,127,255,0.6)" }}>{t("loading")}</p>
+            )}
             
             {/* Show empty state when search has no results */}
             {searchTerm && searchTerm.length >= 2 && employees.length === 1 && employees[0].id === "no-results" ? (

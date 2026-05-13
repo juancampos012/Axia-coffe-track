@@ -201,7 +201,8 @@ const handleExportExcel = async () => {
                     <button
                         onClick={handleExportExcel}
                         disabled={!invoices.length}
-                        className="px-6 py-2 bg-homePrimary text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all"
+                        className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                        style={{ background: "linear-gradient(135deg, #059669 0%, #047857 100%)" }}
                         >
                         Descargar Excel
                     </button>
@@ -217,7 +218,12 @@ const handleExportExcel = async () => {
                             label="Fecha inicio"
                             value={startDate}
                             onChange={(newValue) => setStartDate(newValue)}
-                            className="rounded-lg bg-white"
+                            sx={{
+                              "& .MuiInputBase-root": { background: "rgba(255,255,255,0.04)", borderRadius: "12px", color: "white", fontSize: "13px" },
+                              "& .MuiOutlinedInput-notchedOutline": { border: "1px solid rgba(30,60,139,0.4)" },
+                              "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.4)", fontSize: "12px" },
+                              "& .MuiSvgIcon-root": { color: "rgba(74,127,255,0.7)" },
+                            }}
                             />
                         </div>
                         
@@ -227,14 +233,20 @@ const handleExportExcel = async () => {
                                 label="Fecha fin"
                                 value={endDate}
                                 onChange={(newValue) => setEndDate(newValue)}
-                                className="rounded-lg bg-white"
+                                sx={{
+                              "& .MuiInputBase-root": { background: "rgba(255,255,255,0.04)", borderRadius: "12px", color: "white", fontSize: "13px" },
+                              "& .MuiOutlinedInput-notchedOutline": { border: "1px solid rgba(30,60,139,0.4)" },
+                              "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.4)", fontSize: "12px" },
+                              "& .MuiSvgIcon-root": { color: "rgba(74,127,255,0.7)" },
+                            }}
                             />
                         </div>
                         
                         <button
                             onClick={handleDateSearch}
                             disabled={!startDate || !endDate || isLoading}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all"
+                            className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                            style={{ background: "linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)" }}
                         >
                             {isLoading ? "Buscando..." : "Buscar"}
                         </button>
@@ -242,7 +254,8 @@ const handleExportExcel = async () => {
                         {hasSearched && (
                             <button
                                 onClick={handleClearSearch}
-                                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
+                                className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80"
+                                style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}
                             >
                                 Limpiar
                             </button>
@@ -257,10 +270,10 @@ const handleExportExcel = async () => {
             </div>
 
             {isLoading ? (
-                <p className="text-gray-500 text-sm mb-2 mt-4">{t("loading")}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2 mt-4" style={{ color: "rgba(74,127,255,0.6)" }}>{t("loading")}</p>
             ) : !hasSearched ? (
                 <div className="text-center py-8">
-                    <p className="text-gray-500 text-lg">
+                    <p className="text-sm font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>
                         Selecciona un rango de fechas para buscar facturas
                     </p>
                 </div>

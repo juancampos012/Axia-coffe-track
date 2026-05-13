@@ -89,7 +89,7 @@ const EmployeeFormEdit = forwardRef<HTMLFormElement, EmployeeFormProps>(({ emplo
     return (
         <form ref={ref} onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-                <label className="text-sm font-semibold text-gray-500">{t("id")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("id")}</label>
                 <Input
                     placeholder={t("generated")}
                     type="text"
@@ -99,7 +99,7 @@ const EmployeeFormEdit = forwardRef<HTMLFormElement, EmployeeFormProps>(({ emplo
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("role")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("role")}</label>
                 <Input 
                     placeholder={t("roleExample")} 
                     type="text" 
@@ -110,7 +110,7 @@ const EmployeeFormEdit = forwardRef<HTMLFormElement, EmployeeFormProps>(({ emplo
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("name")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("name")}</label>
                 <Input 
                     placeholder={t("nameExample")}
                     type="text" 
@@ -120,7 +120,7 @@ const EmployeeFormEdit = forwardRef<HTMLFormElement, EmployeeFormProps>(({ emplo
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("email")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("email")}</label>
                 <Input 
                     placeholder={t("emailExample")} 
                     type="email" 
@@ -130,7 +130,7 @@ const EmployeeFormEdit = forwardRef<HTMLFormElement, EmployeeFormProps>(({ emplo
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
                     {employee?.id ? t("newPassword") : t("password")}
                 </label>
                 <Input 
@@ -142,8 +142,8 @@ const EmployeeFormEdit = forwardRef<HTMLFormElement, EmployeeFormProps>(({ emplo
             </div>
 
             <div className="col-span-2 flex justify-end gap-2 mt-4">
-                <CustomButton text={t("close")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="button" onClickButton={onSuccess}  />
-                <CustomButton text={employee?.id ? t("update") : t("create")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="submit" />
+                <CustomButton text={t("close")} variant="ghost" typeButton="button" onClickButton={onSuccess}  />
+                <CustomButton text={employee?.id ? t("update") : t("create")} variant="primary" typeButton="submit" />
             </div>
         </form>
     );

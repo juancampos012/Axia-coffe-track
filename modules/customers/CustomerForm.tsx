@@ -76,10 +76,9 @@ const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(
         <form ref={ref} onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
 
             <div className="col-span-2 md:col-span-1">
-                <label className="text-sm font-semibold text-gray-500">Identificación</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Identificación</label>
                 <Input
-                    className="text-homePrimary-200 bg-transparent"
-                    placeholder="Ingrese identificación"
+placeholder="Ingrese identificación"
                     {...register("identification")}
                 />
                 {errors.identification && (
@@ -88,10 +87,9 @@ const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">Primer Nombre</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Primer Nombre</label>
                 <Input
-                    className="text-homePrimary-200 bg-transparent"
-                    {...register("firstName")}
+{...register("firstName")}
                 />
                 {errors.firstName && (
                     <p className="text-red-500 text-xs">{errors.firstName.message}</p>
@@ -99,19 +97,17 @@ const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">Segundo Nombre</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Segundo Nombre</label>
                 <Input
-                    className="text-homePrimary-200 bg-transparent"
-                    placeholder="Opcional"
+placeholder="Opcional"
                     {...register("middleName")}
                 />
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">Primer Apellido</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Primer Apellido</label>
                 <Input
-                    className="text-homePrimary-200 bg-transparent"
-                    {...register("lastName")}
+{...register("lastName")}
                 />
                 {errors.lastName && (
                     <p className="text-red-500 text-xs">{errors.lastName.message}</p>
@@ -119,28 +115,25 @@ const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">Segundo Apellido</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Segundo Apellido</label>
                 <Input
-                    className="text-homePrimary-200 bg-transparent"
-                    placeholder="Opcional"
+placeholder="Opcional"
                     {...register("secondLastName")}
                 />
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">Teléfono</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Teléfono</label>
                 <Input
-                    className="text-homePrimary-200 bg-transparent"
-                    type="text"
+type="text"
                     {...register("phone")}
                 />
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">Correo Electrónico</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Correo Electrónico</label>
                 <Input
-                    className="text-homePrimary-200 bg-transparent"
-                    type="email"
+type="email"
                     {...register("email")}
                 />
                 {errors.email && (
@@ -151,13 +144,13 @@ const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(
             <div className="col-span-2 flex justify-end gap-2 mt-4">
                 <CustomButton
                     text="Cerrar"
-                    style="border text-white bg-homePrimary hover:bg-blue-500"
+                    variant="ghost"
                     typeButton="button"
                     onClickButton={onSuccess}
                 />
                 <CustomButton
                     text="Guardar Cliente"
-                    style="border text-white bg-homePrimary hover:bg-blue-500"
+                    variant="primary"
                     typeButton="submit"
                 />
             </div>

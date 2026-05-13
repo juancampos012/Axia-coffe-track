@@ -180,7 +180,9 @@ export default function ScreenProducts({ onSuccess }: ProductFormProps) {
                 <TableFilter headers={tableHeaders} onSort={handleSort} />
             </div>
             
-            {isLoading && <p className="text-gray-500 text-sm mb-2">{t("loading")}</p>}
+            {isLoading && (
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "rgba(74,127,255,0.6)" }}>{t("loading")}</p>
+            )}
             
             {searchTerm && searchTerm.length >= 2 && products.length === 1 && products[0].id === "no-results" ? (
                 <EmptyState message={t("noResults")} searchTerm={searchTerm} />
