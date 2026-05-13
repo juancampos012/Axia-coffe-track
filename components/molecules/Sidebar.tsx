@@ -120,7 +120,7 @@ export default function Sidebar({
       allowedRoles: ["ADMIN", "SUPERADMIN"],
       subOptions: [
         { label: "Nuevo Gasto", href: `/${locale}/expenses/new` },
-        { label: "Ver Gastos", href: `/${locale}/expenses` },
+        { label: "Ver Gastos", href: `/${locale}/expenses/view` },
         { label: "Nuevo Préstamo", href: `/${locale}/loans/new-loan` },
         { label: "Ver Préstamos", href: `/${locale}/loans/view-loan` },
       ],

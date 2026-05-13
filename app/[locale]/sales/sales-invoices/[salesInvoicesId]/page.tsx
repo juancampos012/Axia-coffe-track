@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 
 import { Invoice } from "@/types/Api";
 import { envVariables } from "@/utils/config";
-import { getPublicSaleInvoices } from "@/lib/api-saleInvoce";
 import InvoiceDetailServer from "@/modules/sales/SaleInvoiceDetail/InvoiceDetailServer";
 
 export const dynamic = 'force-dynamic';
