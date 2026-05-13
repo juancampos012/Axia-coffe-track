@@ -105,7 +105,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
       allowedRoles: ["ADMIN", "SUPERADMIN"],
       subOptions: [
         { label: "Nuevo Gasto", href: `/${locale}/expenses/new` },
-        { label: "Ver Gastos", href: `/${locale}/expenses` },
+        { label: "Ver Gastos", href: `/${locale}/expenses/view` },
         { label: "Nuevo Préstamo", href: `/${locale}/loans/new-loan` },
         { label: "Ver Préstamos", href: `/${locale}/loans/view-loan` },
       ],

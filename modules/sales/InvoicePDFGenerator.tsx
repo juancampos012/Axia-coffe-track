@@ -226,7 +226,7 @@ static async generatePDF({
       doc.setTextColor(0, 0, 0);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
-      centerText('¡Gracias por su compra!', yPosition);
+      centerText('¡Gracias por su venta!', yPosition);
       yPosition += 4;
       
       doc.setFont('helvetica', 'italic');
