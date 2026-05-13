@@ -9,16 +9,21 @@ interface SelectProps {
 
 const Select: React.FC<SelectProps> = ({ className, options, placeholder, ...props }) => (
   <select
-    className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 appearance-none bg-black text-gray-500 ${className}`}
+    className={`w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all appearance-none cursor-pointer ${className ?? ''}`}
+    style={{
+      background: "rgba(255,255,255,0.04)",
+      border: "1px solid rgba(30,60,139,0.35)",
+      color: "rgba(255,255,255,0.7)",
+    }}
     {...props}
   >
     {placeholder && (
-      <option value="" disabled>
+      <option value="" disabled style={{ background: "#0a1120" }}>
         {placeholder}
       </option>
     )}
     {options.map((option) => (
-      <option key={option.value} value={option.value}>
+      <option key={option.value} value={option.value} style={{ background: "#0a1120", color: "white" }}>
         {option.label}
       </option>
     ))}

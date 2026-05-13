@@ -5,23 +5,23 @@ import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { useTranslations, useLocale } from "next-intl";
 import React, { useState, useEffect, useRef } from "react";
-import { 
-  User, 
-  Home, 
-  Truck, 
+import {
+  User,
+  Home,
+  Truck,
   ShoppingCart,
-  ChevronDown, 
-  ChevronUp, 
+  ChevronDown,
+  ChevronUp,
   LogOut,
   BarChart2,
   Layers,
-  Wallet
+  Wallet,
 } from "lucide-react";
 
 import { useUserStore } from "@/store/UserStore";
 
 type MenuItem = {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
   label: string;
   href?: string;
   subOptions?: {
@@ -34,7 +34,13 @@ type MenuItem = {
 
 type UserRole = "USER" | "ADMIN" | "SUPERADMIN" | null;
 
-export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+export default function Sidebar({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const t = useTranslations("sidebar");
   const locale = useLocale();
   const sidebarRef = useRef<HTMLElement>(null);
@@ -45,7 +51,11 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node) && isOpen) {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node) &&
+        isOpen
+      ) {
         onClose();
       }
     };
@@ -74,31 +84,36 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
 
   if (loading || !role) return null;
 
-  const basePath = role === "USER" ? `/${locale}/employee` : `/${locale}/admin`;
+  const basePath =
+    role === "USER" ? `/${locale}/employee` : `/${locale}/admin`;
 
   const menuItems: MenuItem[] = [
-    { 
-      icon: Home, 
-      label: t("home"), 
+    {
+      icon: Home,
+      label: t("home"),
       href: basePath,
-      allowedRoles: ["USER", "ADMIN", "SUPERADMIN"]
+      allowedRoles: ["USER", "ADMIN", "SUPERADMIN"],
     },
-    // --- 1. OPERACIONES COMERCIALES ---
-    { 
-      icon: ShoppingCart, 
+    {
+      icon: ShoppingCart,
       label: "Operaciones",
       allowedRoles: ["USER", "ADMIN", "SUPERADMIN"],
       subOptions: [
-        { label: "Comprar(caja)", href: `/${locale}/sales/make-sales` },
-        { label: "Ver compras", href: `/${locale}/sales/sales-invoices`, allowedRoles: ["ADMIN", "SUPERADMIN"] },
-        ...(role !== "USER" ? [
-          { label: "Crear Ingreso", href: `/${locale}/shopping/make-purchase` },
-          { label: "Ver Ingresos", href: `/${locale}/shopping/view-purchases` },
-          { label: "Proveedores", href: `/${locale}/shopping/suppliers` },
-        ] : []),
+        { label: "Comprar (caja)", href: `/${locale}/sales/make-sales` },
+        {
+          label: "Ver compras",
+          href: `/${locale}/sales/sales-invoices`,
+          allowedRoles: ["ADMIN", "SUPERADMIN"],
+        },
+        ...(role !== "USER"
+          ? [
+              { label: "Crear Ingreso", href: `/${locale}/shopping/make-purchase` },
+              { label: "Ver Ingresos", href: `/${locale}/shopping/view-purchases` },
+              { label: "Proveedores", href: `/${locale}/shopping/suppliers` },
+            ]
+          : []),
       ],
     },
-    // --- 2. FINANZAS Y CAJA ---
     {
       icon: Wallet,
       label: "Finanzas",
@@ -110,7 +125,6 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
         { label: "Ver Préstamos", href: `/${locale}/loans/view-loan` },
       ],
     },
-    // --- 3. LOGÍSTICA Y ALIADOS ---
     {
       icon: Truck,
       label: "Logística",
@@ -123,9 +137,8 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
         { label: "Nueva Entrega", href: `/${locale}/delivery/new` },
       ],
     },
-    // --- 4. GESTIÓN Y COMUNICACIÓN ---
-    { 
-      icon: Layers, 
+    {
+      icon: Layers,
       label: "Gestión",
       allowedRoles: ["ADMIN", "SUPERADMIN"],
       subOptions: [
@@ -135,84 +148,144 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
         { label: "Ver Anuncios", href: `/${locale}/announcements/view` },
       ],
     },
-    ...(role !== "USER" ? [{ 
-      icon: BarChart2, 
-      label: "Dashboard",
-      href: `/${locale}/admin/dashboard`,
-      allowedRoles: ["ADMIN", "SUPERADMIN"]
-    }] : []),
+    ...(role !== "USER"
+      ? [
+          {
+            icon: BarChart2,
+            label: "Dashboard",
+            href: `/${locale}/admin/dashboard`,
+            allowedRoles: ["ADMIN", "SUPERADMIN"] as string[],
+          },
+        ]
+      : []),
   ];
 
-  // Filtro de seguridad
-  const filteredItems = menuItems.filter(item => 
-    !item.allowedRoles || item.allowedRoles.includes(role)
+  const filteredItems = menuItems.filter(
+    (item) => !item.allowedRoles || item.allowedRoles.includes(role)
   );
 
   return (
     <aside
       ref={sidebarRef}
-      className={`fixed left-0 h-[calc(100vh-64px)] bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col py-6 px-3 gap-2 transition-all duration-300 ease-in-out shadow-2xl border-r border-gray-700 z-50 ${
+      className={`fixed left-0 top-[57px] h-[calc(100vh-57px)] flex flex-col py-4 gap-1 transition-all duration-300 ease-in-out z-50 ${
         isOpen ? "w-64" : "w-16 items-center"
       }`}
+      style={{
+        background: "rgba(4,6,18,0.95)",
+        backdropFilter: "blur(20px)",
+        borderRight: "1px solid rgba(30,60,139,0.2)",
+      }}
     >
-      {filteredItems.map(({ icon: Icon, label, href, subOptions }, index) => (
-        <div key={`${label}-${index}`} className="w-full">
-          {subOptions ? (
-            <div 
-              className={`flex items-center justify-between p-2 rounded-xl hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group ${
-                openMenu === label ? "bg-gray-700/70" : ""
-              }`}
-              onClick={() => toggleMenu(label)}
-            >
-              <div className="flex items-center gap-4">
-                <Icon className="w-5 text-gray-400 group-hover:text-white transition-colors" />
-                {isOpen && <span className="text-gray-200 text-sm font-medium group-hover:text-white">{label}</span>}
-              </div>
-              {isOpen && (
-                <div className="ml-3">
-                  {openMenu === label ? <ChevronUp className="h-4 w-4 text-gray-500" /> : <ChevronDown className="h-4 w-4 text-gray-500" />}
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link 
-              href={href || "#"}
-              className="flex items-center gap-4 p-2 rounded-xl hover:bg-gray-700/50 transition-all duration-200 group"
-            >
-              <Icon className="w-5 text-gray-400 group-hover:text-white transition-colors" />
-              {isOpen && <span className="text-gray-200 text-sm font-medium group-hover:text-white">{label}</span>}
-            </Link>
-          )}
-          
-          {subOptions && isOpen && openMenu === label && (
-            <div className="pl-9 pt-1 pb-2 space-y-1">
-              {subOptions.map((sub, i) => (
-                <Link 
-                  key={`${sub.label}-${i}`} 
-                  href={sub.href} 
-                  className="block py-1.5 text-gray-400 text-[13px] hover:text-white transition-colors border-l border-gray-700 pl-4"
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 space-y-0.5">
+        {filteredItems.map(({ icon: Icon, label, href, subOptions }, index) => (
+          <div key={`${label}-${index}`} className="w-full">
+            {subOptions ? (
+              <>
+                <button
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group ${
+                    openMenu === label ? "bg-white/5" : "hover:bg-white/[0.04]"
+                  } ${!isOpen ? "justify-center" : ""}`}
+                  onClick={() => toggleMenu(label)}
                 >
-                  {sub.label}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      size={18}
+                      className={`flex-shrink-0 transition-colors ${
+                        openMenu === label
+                          ? "text-[#4a7fff]"
+                          : "text-white/35 group-hover:text-white/70"
+                      }`}
+                    />
+                    {isOpen && (
+                      <span
+                        className={`text-sm font-medium transition-colors ${
+                          openMenu === label
+                            ? "text-white"
+                            : "text-white/50 group-hover:text-white/80"
+                        }`}
+                      >
+                        {label}
+                      </span>
+                    )}
+                  </div>
+                  {isOpen && (
+                    openMenu === label ? (
+                      <ChevronUp size={14} className="text-white/30 flex-shrink-0" />
+                    ) : (
+                      <ChevronDown size={14} className="text-white/20 flex-shrink-0 group-hover:text-white/40" />
+                    )
+                  )}
+                </button>
 
-      <div className="mt-auto border-t border-gray-700 pt-4">
-        <button 
+                {subOptions && isOpen && openMenu === label && (
+                  <div className="mt-0.5 mb-1 ml-4 pl-4 space-y-0.5"
+                    style={{ borderLeft: "1px solid rgba(30,60,139,0.35)" }}
+                  >
+                    {subOptions.map((sub, i) => (
+                      <Link
+                        key={`${sub.label}-${i}`}
+                        href={sub.href}
+                        className="block py-2 px-2 text-xs rounded-lg transition-all duration-150 hover:bg-white/5"
+                        style={{ color: "rgba(255,255,255,0.4)" }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.color = "rgba(74,127,255,0.9)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.color = "rgba(255,255,255,0.4)")
+                        }
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <Link
+                href={href || "#"}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group hover:bg-white/[0.04] ${
+                  !isOpen ? "justify-center" : ""
+                }`}
+              >
+                <Icon
+                  size={18}
+                  className="flex-shrink-0 text-white/35 group-hover:text-[#4a7fff] transition-colors"
+                />
+                {isOpen && (
+                  <span className="text-sm font-medium text-white/50 group-hover:text-white/80 transition-colors">
+                    {label}
+                  </span>
+                )}
+              </Link>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Logout */}
+      <div
+        className="px-2 pt-3 mt-2 flex-shrink-0"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+      >
+        <button
           onClick={() => {
             Cookies.remove("authToken", { path: "/" });
             useUserStore.getState().setRole(null);
             window.location.href = `/${locale}/login`;
           }}
-          className={`flex items-center gap-4 p-3 w-full rounded-xl text-red-400 transition-all duration-200 hover:bg-red-500/10 ${
+          className={`flex items-center gap-3 px-3 py-2.5 w-full rounded-xl transition-all duration-200 hover:bg-red-500/10 group ${
             !isOpen ? "justify-center" : ""
           }`}
         >
-          <LogOut className="h-5 w-5" />
-          {isOpen && <span className="text-sm font-bold uppercase tracking-wider">{t("logout")}</span>}
+          <LogOut
+            size={18}
+            className="flex-shrink-0 text-red-500/50 group-hover:text-red-400 transition-colors"
+          />
+          {isOpen && (
+            <span className="text-sm font-medium text-red-500/50 group-hover:text-red-400 uppercase tracking-wider transition-colors">
+              {t("logout")}
+            </span>
+          )}
         </button>
       </div>
     </aside>

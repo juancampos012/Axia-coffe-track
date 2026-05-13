@@ -1,43 +1,70 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { ClipboardPenLine } from 'lucide-react';
+import { ClipboardPenLine, X } from "lucide-react";
 import React, { useRef, ReactElement, cloneElement } from "react";
-import CustomButton from "../atoms/CustomButton";
 
 interface CustomModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    title: string; 
-    children: ReactElement;
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactElement;
 }
 
-export default function CustomModalNoButton({ isOpen, onClose, title, children }: CustomModalProps) {
-    const formRef = useRef<HTMLFormElement>(null); 
+export default function CustomModalNoButton({
+  isOpen,
+  onClose,
+  title,
+  children,
+}: CustomModalProps) {
+  const formRef = useRef<HTMLFormElement>(null);
 
-    const handleSubmit = () => {
-        if (formRef.current) {
-            formRef.current.dispatchEvent(new Event("submit", { bubbles: true }));
-        }
-    };
-    return (
-        <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <Dialog.Portal>
-                <Dialog.Overlay className="fixed inset-0 bg-black/30" />
-                <Dialog.Content className="fixed inset-0 flex items-center justify-center p-4">
-                    <div className="w-full border max-w-lg bg-black rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto">
-                        <div className="flex flex-row gap-x-3">
-                            <ClipboardPenLine color="white" />
-                            <Dialog.Title className="text-lg font-bold border-b pb-2 mb-4 text-homePrimary-200">{title}</Dialog.Title>
-                        </div>
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay
+          className="fixed inset-0 z-50 backdrop-blur-sm"
+          style={{ background: "rgba(4,6,18,0.7)" }}
+        />
+        <Dialog.Content className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="w-full max-w-lg rounded-2xl p-px shadow-2xl"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(30,60,139,0.5) 0%, rgba(19,39,90,0.2) 50%, rgba(74,127,255,0.2) 100%)",
+            }}
+          >
+            <div
+              className="rounded-[15px] p-6 max-h-[85vh] overflow-y-auto"
+              style={{ background: "rgba(4,6,18,0.96)", backdropFilter: "blur(24px)" }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2.5">
+                  <ClipboardPenLine size={18} style={{ color: "#4a7fff" }} />
+                  <Dialog.Title
+                    className="font-bold text-white text-lg"
+                    style={{ fontFamily: "Syne, sans-serif", letterSpacing: "-0.02em" }}
+                  >
+                    {title}
+                  </Dialog.Title>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="p-1.5 rounded-lg transition-all hover:bg-white/10"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
 
-                        {React.isValidElement(children) &&
-                            cloneElement(children, { 
-                                ref: formRef,
-                                onSuccess: onClose
-                            } as any)
-                        }
-                    </div>
-                </Dialog.Content>
-            </Dialog.Portal>
-        </Dialog.Root>
-    );
+              {React.isValidElement(children) &&
+                cloneElement(children, {
+                  ref: formRef,
+                  onSuccess: onClose,
+                } as any)}
+            </div>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
 }
