@@ -1,12 +1,11 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, Mail, Shield } from "lucide-react";
 
 import { EmployeeDAO } from "@/types/Api";
-import CustomButton from "@/components/atoms/CustomButton";
 
 interface EmployeeDetailClientProps {
     employee: EmployeeDAO;
@@ -16,44 +15,75 @@ export default function EmployeeDetailClient({ employee }: EmployeeDetailClientP
     const router = useRouter();
     const t = useTranslations("EmployeeDetailClient");
 
-
     return (
-        <div className="relative w-full min-h-screen text-white flex justify-center">
-            <Image 
-                src="/Images/fondoHerooo.png" 
-                alt="Background Image" 
-                fill 
-                className="absolute top-0 left-0 w-full h-full object-cover"
-                priority
-            />
-            
-            <div className="relative w-full max-w-4xl bg-blac bg-opacity-50 rounded-lg shadow-lg mt-20">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-semibold text-white">{t("title")}</h2>
-                    <CustomButton 
-                        text={t("backButton")}
-                        style="bg-tertiary text-white hover:bg-blue-800"
-                        onClickButton={() => router.back()}
-                    />
+        <div className="w-full max-w-2xl mx-auto py-8 px-4">
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h1
+                        className="text-2xl font-bold text-white tracking-tight"
+                        style={{ fontFamily: "Syne, sans-serif", letterSpacing: "-0.02em" }}
+                    >
+                        {t("title")}<span style={{ color: "#4a7fff" }}>.</span>
+                    </h1>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
+                        Perfil del empleado
+                    </p>
                 </div>
-                
-                <div className="grid grid-cols-1 gap-8">
-                    <div className="bg-black bg-opacity-30 p-6 rounded-lg">
-                        <h3 className="font-bold text-2xl mb-3 text-tertiary text-center">{employee.name}</h3>
-                        <p className="text-sm text-gray-300 text-center mb-16"> {t("id")}: {employee.id}</p>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            <div className="p-4 border border-gray-600 rounded-lg">
-                                <p className="text-sm font-semibold text-gray-400 mb-2">{t("email")}</p>
-                                <p className="text-white">{employee.email}</p>
-                            </div>
+                <button
+                    onClick={() => router.back()}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
+                    style={{ border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                >
+                    <ArrowLeft size={14} /> {t("backButton")}
+                </button>
+            </div>
 
-                            <div className="p-4 border border-gray-600 rounded-lg">
-                                <p className="text-sm font-semibold text-gray-400 mb-2">{t("role")}</p>
-                                <p className="text-white">{employee.role}</p>
-                            </div>
-                        </div>
+            <div
+                className="rounded-2xl p-px mb-6"
+                style={{ background: "linear-gradient(135deg, rgba(30,60,139,0.5) 0%, rgba(74,127,255,0.15) 100%)" }}
+            >
+                <div
+                    className="rounded-[15px] p-8 text-center"
+                    style={{ background: "rgba(4,6,18,0.96)", backdropFilter: "blur(20px)" }}
+                >
+                    <div
+                        className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-4"
+                        style={{ background: "rgba(74,127,255,0.2)", border: "1px solid rgba(74,127,255,0.3)" }}
+                    >
+                        {employee.name?.charAt(0)}
                     </div>
+                    <h3 className="text-xl font-bold text-white mb-1" style={{ fontFamily: "Syne, sans-serif" }}>
+                        {employee.name}
+                    </h3>
+                    <p className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>
+                        {t("id")}: {employee.id}
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                    className="p-5 rounded-2xl"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(30,60,139,0.25)" }}
+                >
+                    <div className="flex items-center gap-2 mb-3">
+                        <Mail size={14} style={{ color: "rgba(74,127,255,0.7)" }} />
+                        <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>{t("email")}</span>
+                    </div>
+                    <p className="text-sm text-white font-medium">{employee.email || "—"}</p>
+                </div>
+
+                <div
+                    className="p-5 rounded-2xl"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(30,60,139,0.25)" }}
+                >
+                    <div className="flex items-center gap-2 mb-3">
+                        <Shield size={14} style={{ color: "rgba(74,127,255,0.7)" }} />
+                        <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>{t("role")}</span>
+                    </div>
+                    <p className="text-sm text-white font-medium">{employee.role || "—"}</p>
                 </div>
             </div>
         </div>

@@ -53,15 +53,15 @@ export default function ProductsWidget() {
             <div key={index} className="bg-black/30 p-4 rounded-lg">
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium text-white">{product.productName}</span>
-                <span className="text-sm font-medium text-gray-400">{product.totalSold} {t('units')}</span>
+                <span className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>{product.totalSold} {t('units')}</span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2.5">
-                <div 
-                  className="bg-homePrimary h-2.5 rounded-full" 
-                  style={{ width: `${(product.totalSold / maxSold) * 100}%` }}
+              <div className="w-full rounded-full h-2" style={{ background: "rgba(30,60,139,0.3)" }}>
+                <div
+                  className="h-2 rounded-full"
+                  style={{ width: `${(product.totalSold / maxSold) * 100}%`, background: "linear-gradient(90deg, #1e3c8b, #4a7fff)" }}
                 ></div>
               </div>
-              <div className="mt-2 text-right text-xs text-gray-400">
+              <div className="mt-2 text-right text-xs" style={{ color: "rgba(74,127,255,0.7)" }}>
                 {formatCurrency(product.revenue)}
               </div>
             </div>

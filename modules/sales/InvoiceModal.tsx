@@ -290,10 +290,10 @@ export default function InvoiceModal({
 
   return (
     <div className="p-4">
-      <h2 className="text-lg font-semibold mb-4 text-white">{t('title')}</h2>
-      
+      <h2 className="text-lg font-bold mb-5 text-white">{t('title')}</h2>
+
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1 text-white">{t('client')}</label>
+        <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t('client')}</label>
         <SearchBarUniversal
           searchType="clients"
           onAddToCart={(item) => setSelectedClient(item as ClientDAO)} 
@@ -303,11 +303,11 @@ export default function InvoiceModal({
       </div>
       
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1 text-white">{t('payment')}</label>
+        <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t('payment')}</label>
         <Select
           value={paymentMethod}
           onChange={(e: any) => setPaymentMethod(e.target.value)}
-          className="w-full p-2 border rounded"
+          className=""
           options={[
             { value: "CASH", label: t("paymentMethods.CASH") },
             { value: "CARD", label: t("paymentMethods.CARD") },
@@ -355,12 +355,16 @@ export default function InvoiceModal({
             width="100%"
             height="500px"
             title="Vista previa de la factura"
-            className="border border-gray-300 mb-4"
+            className="mb-4 rounded-xl"
+          style={{ border: "1px solid rgba(30,60,139,0.35)" }}
           />
           <div className="flex justify-end space-x-4 mt-6">
             <button
               onClick={handleDownloadAndClose}
-              className="px-4 py-2 text-white border border-gray-300 rounded hover:bg-gray-100 hover:text-black"
+              className="px-4 py-2 rounded-xl text-sm font-bold transition-all"
+            style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               disabled={isLoading}
             >
               {t('preview.finish')}
@@ -368,7 +372,8 @@ export default function InvoiceModal({
             <a
               href={pdfUrl}
               download={`factura_${new Date().toISOString().split('T')[0]}.pdf`}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
+              style={{ background: "linear-gradient(135deg, #059669 0%, #047857 100%)" }}
               onClick={handleDownloadAndClose}
             >
               {t('preview.download')}
@@ -379,14 +384,18 @@ export default function InvoiceModal({
         <div className="flex justify-end space-x-4 mt-6">
           <button
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded text-white hover:bg-gray-100 hover:text-black"
+            className="px-4 py-2 rounded-xl text-sm font-bold transition-all"
+            style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             disabled={isLoading}
           >
             {t('cancel')}
           </button>
           <button
             onClick={handleProcessSale}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400"
+            className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{ background: "linear-gradient(135deg, #059669 0%, #047857 100%)" }}
             disabled={isLoading || !selectedClient}
           >
             {isLoading ? t('processing') : t('submit')}

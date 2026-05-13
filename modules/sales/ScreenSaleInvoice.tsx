@@ -307,62 +307,112 @@ export default function ScreenInvoices() {
               </button>
             )}
 
-            {/* TableFilter alineado al final */}
-            <div className="ml-auto">
-              <TableFilter headers={tableHeaders} onSort={handleSort} />
+  // Exportar el archivo
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buffer]), "reporte_facturas.xlsx");
+};
+    return (
+        <div className="container mx-auto">
+            <div className="p-4 shadow">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold text-homePrimary-200">Facturas de compras</h2>
+                    <button
+                        onClick={handleExportExcel}
+                        disabled={!invoices.length}
+                        className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                        style={{ background: "linear-gradient(135deg, #059669 0%, #047857 100%)" }}
+                        >
+                        Descargar Excel
+                    </button>
+                </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Contenido principal ── */}
-      {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <div
-            className="w-10 h-10 rounded-full border-2 animate-spin"
-            style={{ borderColor: 'rgba(30,60,139,0.2)', borderTopColor: '#4a7fff' }}
-          />
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>{t("loading")}</p>
-        </div>
+            <div className="flex justify-between items-center mb-4 mt-4">
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <div className="flex items-center gap-6 my-4 p-4 rounded-lg shadow-md">
+                        <div className="flex items-center gap-3">
+                            <label className="text-sm font-medium text-white">Desde:</label>
+                            <DatePicker
+                            label="Fecha inicio"
+                            value={startDate}
+                            onChange={(newValue) => setStartDate(newValue)}
+                            sx={{
+                              "& .MuiInputBase-root": { background: "rgba(255,255,255,0.04)", borderRadius: "12px", color: "white", fontSize: "13px" },
+                              "& .MuiOutlinedInput-notchedOutline": { border: "1px solid rgba(30,60,139,0.4)" },
+                              "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.4)", fontSize: "12px" },
+                              "& .MuiSvgIcon-root": { color: "rgba(74,127,255,0.7)" },
+                            }}
+                            />
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                            <label className="text-sm font-medium text-white">Hasta:</label>
+                            <DatePicker
+                                label="Fecha fin"
+                                value={endDate}
+                                onChange={(newValue) => setEndDate(newValue)}
+                                sx={{
+                              "& .MuiInputBase-root": { background: "rgba(255,255,255,0.04)", borderRadius: "12px", color: "white", fontSize: "13px" },
+                              "& .MuiOutlinedInput-notchedOutline": { border: "1px solid rgba(30,60,139,0.4)" },
+                              "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.4)", fontSize: "12px" },
+                              "& .MuiSvgIcon-root": { color: "rgba(74,127,255,0.7)" },
+                            }}
+                            />
+                        </div>
+                        
+                        <button
+                            onClick={handleDateSearch}
+                            disabled={!startDate || !endDate || isLoading}
+                            className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+                            style={{ background: "linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)" }}
+                        >
+                            {isLoading ? "Buscando..." : "Buscar"}
+                        </button>
+                        
+                        {hasSearched && (
+                            <button
+                                onClick={handleClearSearch}
+                                className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80"
+                                style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}
+                            >
+                                Limpiar
+                            </button>
+                        )}
+                    </div>
+                </LocalizationProvider>
+                
+                <TableFilter
+                    headers={tableHeaders}
+                    onSort={handleSort}
+                />
+            </div>
 
-      ) : !hasSearched ? (
-        <div
-          className="flex flex-col items-center justify-center py-20 rounded-2xl"
-          style={{ background: 'rgba(8,12,28,0.5)', border: '1px dashed rgba(30,60,139,0.25)' }}
-        >
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-            style={{ background: 'rgba(30,60,139,0.15)', border: '1px solid rgba(30,60,139,0.3)' }}
-          >
-            <Calendar size={24} style={{ color: '#4a7fff' }} />
-          </div>
-          <p className="text-base font-medium mb-1" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Syne, sans-serif' }}>
-            Selecciona un rango de fechas
-          </p>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.2)' }}>
-            Las facturas aparecerán aquí una vez que busques
-          </p>
-        </div>
-
-      ) : invoices.length === 0 ? (
-        <EmptyState message="No se encontraron facturas en el rango de fechas seleccionado" />
-
-      ) : (
-        <div
-          className="rounded-2xl overflow-hidden"
-          style={{ border: '1px solid rgba(30,60,139,0.2)', background: 'rgba(8,12,28,0.6)', backdropFilter: 'blur(12px)' }}
-        >
-          <CustomTable
-            title={t("tableTitle")}
-            headers={tableHeaders}
-            options={true}
-            data={invoices}
-            contextType="invoices"
-            customActions={{
-              view: handleViewInvoice,
-              delete: handleDeleteInvoice,
-            }}
-          />
+            {isLoading ? (
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-2 mt-4" style={{ color: "rgba(74,127,255,0.6)" }}>{t("loading")}</p>
+            ) : !hasSearched ? (
+                <div className="text-center py-8">
+                    <p className="text-sm font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>
+                        Selecciona un rango de fechas para buscar facturas
+                    </p>
+                </div>
+            ) : invoices.length === 0 ? (
+                <EmptyState message="No se encontraron facturas en el rango de fechas seleccionado" />
+            ) : (
+                <CustomTable
+                    title={t("tableTitle")}
+                    headers={tableHeaders}
+                    options={true}
+                    data={invoices}
+                    contextType="invoices"
+                    customActions={{
+                        view: handleViewInvoice,
+                        delete: handleDeleteInvoice,
+                    }}
+                />
+            )}
         </div>
       )}
     </div>

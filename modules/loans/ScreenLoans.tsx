@@ -1,18 +1,27 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from '@/context/AuthContext';
-import { useBalance } from '@/context/BalanceContext'; // Importar useBalance
+import { useAuth } from "@/context/AuthContext";
+import { useBalance } from "@/context/BalanceContext";
 import { createSimpleLoan } from "@/request/loans";
 import { ClientDAO } from "@/types/Api";
 import SearchBarUniversal from "@/components/molecules/SearchBar";
 import LoanReceiptGenerator from "./LoanReceiptGenerator";
+import {
+  User,
+  DollarSign,
+  FileText,
+  CheckCircle2,
+  Receipt,
+  Printer,
+  RefreshCw,
+  Loader2,
+} from "lucide-react";
 
-// Función para formatear moneda
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
@@ -20,7 +29,7 @@ function formatCurrency(amount: number): string {
 
 export default function ScreenSimpleLoans() {
   const { user } = useAuth();
-  const { balance, setBalance } = useBalance(); // Obtener balance del contexto
+  const { balance, setBalance } = useBalance();
   const [selectedClient, setSelectedClient] = useState<ClientDAO | null>(null);
   const [amountText, setAmountText] = useState("");
   const [amount, setAmount] = useState(0);
@@ -33,99 +42,39 @@ export default function ScreenSimpleLoans() {
     let raw = e.target.value.replace(/\./g, "");
     if (!/^\d*$/.test(raw)) return;
     if (/^0[0-9]/.test(raw)) raw = raw.replace(/^0+/, "");
-    if (raw === "") {
-      setAmountText("");
-      setAmount(0);
-      return;
-    }
-    const numberValue = parseInt(raw, 10);
-    if (!isNaN(numberValue)) {
-      setAmountText(numberValue.toLocaleString("es-CO"));
-      setAmount(numberValue);
-    }
+    if (raw === "") { setAmountText(""); setAmount(0); return; }
+    const n = parseInt(raw, 10);
+    if (!isNaN(n)) { setAmountText(n.toLocaleString("es-CO")); setAmount(n); }
   };
 
   const generateLoanReceiptPDF = async () => {
     if (!selectedClient || !amount) return null;
-
-    try {
-      const pdfBlob = await LoanReceiptGenerator.generatePDF({
-        client: selectedClient,
-        amount: amount,
-        description: description
-      });
-
-      const url = URL.createObjectURL(pdfBlob);
-      setPdfUrl(url);
-      return url;
-    } catch (error) {
-      console.error("Error generando PDF:", error);
-      throw error;
-    }
+    const pdfBlob = await LoanReceiptGenerator.generatePDF({ client: selectedClient, amount, description });
+    const url = URL.createObjectURL(pdfBlob);
+    setPdfUrl(url);
+    return url;
   };
 
   const handleCreateSimpleLoan = async () => {
-    if (!selectedClient) {
-      alert("Por favor, selecciona una persona.");
-      return;
-    }
-
-    if (!amount || amount <= 0) {
-      alert("La cantidad debe ser mayor a 0.");
-      return;
-    }
-
-    if (!user) {
-      alert("No hay usuario autenticado");
-      return;
-    }
-
+    if (!selectedClient || !amount || amount <= 0 || !user) return;
     try {
       setLoading(true);
-
-      const loanData = {
+      await createSimpleLoan({
         clientId: selectedClient.id,
         clientName: `${selectedClient.firstName} ${selectedClient.lastName}`,
         clientIdentification: selectedClient.identification,
-        amount: amount,
+        amount,
         description: description.trim(),
-        status: false, // Préstamo pendiente por defecto
-        tenantId: user.tenantId
-      };
-
-      // Crear el préstamo
-      const createdLoan = await createSimpleLoan(loanData);
-      
-      console.log("Préstamo creado:", createdLoan);
-      
-      // ACTUALIZAR BALANCE - Cuando se crea un préstamo pendiente, el dinero sale de la caja
-      if (balance !== null) {
-        setBalance(balance - amount);
-      }
-      
-      // Generar el recibo PDF
+        status: false,
+        tenantId: user.tenantId,
+      });
+      if (balance !== null) setBalance(balance - amount);
       await generateLoanReceiptPDF();
-      
       setLoanCompleted(true);
-      
     } catch (error: any) {
-      console.error("Error:", error);
       alert(error.message || "Error al entregar el dinero.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleViewReceipt = () => {
-    if (pdfUrl) {
-      window.open(pdfUrl, '_blank');
-    }
-  };
-
-  const handlePrintReceipt = () => {
-    if (pdfUrl) {
-      const printWindow = window.open(pdfUrl, '_blank');
-      printWindow?.print();
     }
   };
 
@@ -134,147 +83,275 @@ export default function ScreenSimpleLoans() {
     setAmountText("");
     setAmount(0);
     setDescription("");
-    if (pdfUrl) {
-      URL.revokeObjectURL(pdfUrl);
-      setPdfUrl(null);
-    }
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    setPdfUrl(null);
     setLoanCompleted(false);
   };
 
   return (
-    <div className="w-full min-h-screen p-4 text-white">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold">Entregar Dinero</h2>
-        </div>
+    <div className="w-full">
+      {/* Header */}
+      <div className="mb-8">
+        <h1
+          className="text-2xl font-bold text-white tracking-tight"
+          style={{ fontFamily: "Syne, sans-serif", letterSpacing: "-0.02em" }}
+        >
+          Entregar Dinero<span style={{ color: "#4a7fff" }}>.</span>
+        </h1>
+        <p
+          className="text-[10px] font-bold uppercase tracking-[0.2em] mt-0.5"
+          style={{ color: "rgba(255,255,255,0.3)" }}
+        >
+          Registro de préstamos y adelantos
+        </p>
+      </div>
 
-        {!loanCompleted ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Columna Izquierda: Formulario */}
-            <div className="lg:col-span-2 space-y-4">
-              {/* Cliente */}
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-                <label className="block text-sm font-medium mb-2">👤 Persona</label>
-                <SearchBarUniversal 
-                  onAddToCart={(item) => {
-                    const client = item as ClientDAO;
-                    setSelectedClient(client);
-                  }}
-                  showResults={true}
-                  placeholder="Buscar persona por nombre o identificación"
-                  searchType="clients"
-                />
-              </div>
+      {!loanCompleted ? (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Columna principal */}
+          <div className="lg:col-span-8 space-y-5">
 
-              {/* Monto */}
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-                <label className="block text-sm font-medium mb-2">💰 Monto del Préstamo</label>
-                <div className="space-y-3">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      value={amountText}
-                      onChange={handleAmountChange}
-                      placeholder="Ej: 50.000"
-                      className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white text-lg font-semibold focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
+            {/* Cliente */}
+            <div
+              className="rounded-2xl p-6"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(30,60,139,0.25)" }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-xl" style={{ background: "rgba(74,127,255,0.1)" }}>
+                  <User size={15} style={{ color: "#4a7fff" }} />
                 </div>
+                <span
+                  className="text-[10px] font-bold uppercase tracking-widest"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
+                  Persona
+                </span>
               </div>
+              <SearchBarUniversal
+                onAddToCart={(item) => setSelectedClient(item as ClientDAO)}
+                showResults={true}
+                placeholder="Buscar por nombre o identificación..."
+                searchType="clients"
+              />
+              {selectedClient && (
+                <div
+                  className="mt-4 flex items-center gap-3 p-3 rounded-xl"
+                  style={{ background: "rgba(74,127,255,0.08)", border: "1px solid rgba(74,127,255,0.2)" }}
+                >
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                    style={{ background: "rgba(74,127,255,0.3)" }}
+                  >
+                    {selectedClient.firstName.charAt(0)}
+                  </div>
+                  <span className="text-sm font-bold text-white">
+                    {selectedClient.firstName} {selectedClient.lastName}
+                  </span>
+                  <span
+                    className="text-[9px] uppercase tracking-widest ml-auto"
+                    style={{ color: "rgba(74,127,255,0.7)" }}
+                  >
+                    {selectedClient.identification}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* Columna Derecha: Resumen */}
-            <div className="lg:col-span-1">
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6 sticky top-4">
-                <h3 className="text-xl font-bold mb-6">📋 Resumen</h3>
-                
-                <div className="space-y-4 mb-6">
-                  <div className="bg-gray-900/30 border border-gray-600 rounded-lg p-4">
-                    <p className="text-sm text-gray-400 mb-2">Persona</p>
-                    {selectedClient ? (
-                      <p className="font-medium">
-                        {selectedClient.firstName} {selectedClient.lastName}
-                      </p>
-                    ) : (
-                      <p className="text-gray-500 italic text-sm">No seleccionada</p>
-                    )}
+            {/* Monto */}
+            <div
+              className="rounded-2xl p-6"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(30,60,139,0.25)" }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-xl" style={{ background: "rgba(74,127,255,0.1)" }}>
+                  <DollarSign size={15} style={{ color: "#4a7fff" }} />
+                </div>
+                <span
+                  className="text-[10px] font-bold uppercase tracking-widest"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
+                  Monto del Préstamo (COP)
+                </span>
+              </div>
+              <input
+                type="text"
+                value={amountText}
+                onChange={handleAmountChange}
+                placeholder="0"
+                className="w-full bg-transparent outline-none text-4xl font-mono font-bold text-white placeholder:text-white/10"
+                style={{ borderBottom: "1px solid rgba(30,60,139,0.4)" }}
+                onFocus={(e) => (e.currentTarget.style.borderBottomColor = "rgba(74,127,255,0.7)")}
+                onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(30,60,139,0.4)")}
+              />
+            </div>
+
+            {/* Descripción */}
+            <div
+              className="rounded-2xl p-6"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(30,60,139,0.25)" }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-xl" style={{ background: "rgba(74,127,255,0.1)" }}>
+                  <FileText size={15} style={{ color: "#4a7fff" }} />
+                </div>
+                <span
+                  className="text-[10px] font-bold uppercase tracking-widest"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
+                  Notas (opcional)
+                </span>
+              </div>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Motivo del préstamo..."
+                rows={3}
+                className="w-full bg-transparent outline-none text-sm text-white resize-none placeholder:text-white/15"
+                style={{ borderBottom: "1px solid rgba(30,60,139,0.3)" }}
+              />
+            </div>
+          </div>
+
+          {/* Panel de resumen */}
+          <div className="lg:col-span-4">
+            <div
+              className="sticky top-6 rounded-2xl p-px"
+              style={{
+                background: "linear-gradient(135deg, rgba(30,60,139,0.5) 0%, rgba(74,127,255,0.15) 100%)",
+              }}
+            >
+              <div
+                className="rounded-[15px] p-6"
+                style={{ background: "rgba(4,6,18,0.96)", backdropFilter: "blur(20px)" }}
+              >
+                <h3
+                  className="text-[10px] font-bold uppercase tracking-[0.2em] mb-6 pb-4"
+                  style={{
+                    color: "rgba(255,255,255,0.3)",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  }}
+                >
+                  Resumen de Operación
+                </h3>
+
+                <div className="space-y-5 mb-8">
+                  <div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.25)" }}>
+                      Beneficiario
+                    </span>
+                    <span className="text-sm font-bold text-white">
+                      {selectedClient
+                        ? `${selectedClient.firstName} ${selectedClient.lastName}`
+                        : <span style={{ color: "rgba(255,255,255,0.2)" }} className="italic text-xs">Sin seleccionar</span>}
+                    </span>
                   </div>
-                  
-                  <div className="bg-gray-900/30 border border-gray-600 rounded-lg p-4">
-                    <p className="text-sm text-gray-400 mb-2">Monto</p>
-                    <p className={`text-2xl font-bold ${amount > 0 ? 'text-green-400' : 'text-gray-500'}`}>
-                      {amount > 0 ? formatCurrency(amount) : '$0'}
-                    </p>
+
+                  <div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.25)" }}>
+                      Total a Entregar
+                    </span>
+                    <span
+                      className="text-3xl font-mono font-bold"
+                      style={{ color: amount > 0 ? "#4a7fff" : "rgba(255,255,255,0.15)" }}
+                    >
+                      {amount > 0 ? formatCurrency(amount) : "$0"}
+                    </span>
                   </div>
+
+                  {balance !== null && (
+                    <div
+                      className="p-3 rounded-xl"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+                    >
+                      <span className="text-[9px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.25)" }}>
+                        Saldo Restante
+                      </span>
+                      <span className="text-sm font-mono font-bold" style={{ color: "rgba(74,127,255,0.8)" }}>
+                        {formatCurrency(balance - amount)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <button
                   onClick={handleCreateSimpleLoan}
-                  disabled={
-                    loading || 
-                    !selectedClient || 
-                    amount <= 0 
-                  }
-                  className="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors text-lg font-bold"
+                  disabled={loading || !selectedClient || amount <= 0}
+                  className="w-full py-4 rounded-xl font-bold text-white text-sm transition-all duration-200 hover:opacity-90 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  style={{ background: "linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)", boxShadow: "0 4px 14px rgba(30,60,139,0.4)" }}
                 >
                   {loading ? (
-                    <span className="flex items-center justify-center">
-                      <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></span>
-                      Procesando...
-                    </span>
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Procesando...
+                    </>
                   ) : (
-                    '✓ Entregar Dinero'
+                    "Entregar Dinero"
                   )}
                 </button>
               </div>
             </div>
           </div>
-        ) : (
-          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-12 text-center max-w-2xl mx-auto">
-            <div className="text-7xl mb-6">✅</div>
-            <h3 className="text-3xl font-bold mb-4">¡Préstamo Registrado!</h3>
-            <p className="text-gray-300 mb-8">El dinero ha sido entregado y el recibo generado</p>
-            
-            <div className="bg-gray-900/50 border border-gray-600 rounded-lg p-6 mb-8">
-              <p className="text-lg mb-2">Persona: <span className="font-bold">{selectedClient?.firstName} {selectedClient?.lastName}</span></p>
-              <p className="text-3xl font-bold text-green-400">{formatCurrency(amount)}</p>
-              {description && (
-                <p className="text-gray-400 mt-2 text-sm">{description}</p>
-              )}
-              {balance !== null && (
-                <div className="mt-4 pt-4 border-t border-gray-600">
-                  <p className="text-sm text-gray-400">Nuevo balance:</p>
-                  <p className="text-xl font-bold text-blue-300">
-                    {formatCurrency(balance)}
-                  </p>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex gap-4 justify-center">
-              <button
-                onClick={handleViewReceipt}
-                className="px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
+        </div>
+      ) : (
+        /* Estado de éxito */
+        <div className="flex items-center justify-center py-12">
+          <div
+            className="w-full max-w-md rounded-2xl p-px"
+            style={{ background: "linear-gradient(135deg, rgba(30,60,139,0.5) 0%, rgba(74,127,255,0.2) 100%)" }}
+          >
+            <div
+              className="rounded-[15px] p-10 text-center"
+              style={{ background: "rgba(4,6,18,0.96)", backdropFilter: "blur(24px)" }}
+            >
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
+                style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)" }}
               >
-                📄 Ver Recibo
-              </button>
-              <button
-                onClick={handlePrintReceipt}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                <CheckCircle2 size={32} style={{ color: "#10b981" }} />
+              </div>
+
+              <h3
+                className="text-xl font-bold text-white mb-2"
+                style={{ fontFamily: "Syne, sans-serif" }}
               >
-                🖨️ Imprimir
-              </button>
-              <button
-                onClick={resetLoanForm}
-                className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                Préstamo Registrado
+              </h3>
+              <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>
+                {selectedClient?.firstName} {selectedClient?.lastName}
+              </p>
+              <p
+                className="text-3xl font-mono font-bold mb-8"
+                style={{ color: "#10b981" }}
               >
-                + Nuevo Préstamo
-              </button>
+                {formatCurrency(amount)}
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => pdfUrl && window.open(pdfUrl, "_blank")}
+                  className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/10"
+                  style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
+                >
+                  <Receipt size={14} /> Ver Recibo
+                </button>
+                <button
+                  onClick={() => { const w = window.open(pdfUrl!, "_blank"); w?.print(); }}
+                  className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:opacity-90 text-white"
+                  style={{ background: "linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)" }}
+                >
+                  <Printer size={14} /> Imprimir
+                </button>
+                <button
+                  onClick={resetLoanForm}
+                  className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:bg-white/5"
+                  style={{ color: "rgba(255,255,255,0.3)" }}
+                >
+                  <RefreshCw size={14} /> Nuevo Préstamo
+                </button>
+              </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -86,12 +86,12 @@ const SupplierFormEdit = forwardRef<HTMLFormElement, SupplierFormProps>(({ onSuc
     return (
         <form ref={ref} onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("fields.id")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.id")}</label>
                 <Input placeholder={t("placeholders.id")} type="text" disabled={true} {...register("id")}/>
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("fields.name")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.name")}</label>
                 <Input 
                     placeholder={t("placeholders.name")} 
                     type="text" 
@@ -101,7 +101,7 @@ const SupplierFormEdit = forwardRef<HTMLFormElement, SupplierFormProps>(({ onSuc
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("fields.nit")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.nit")}</label>
                 <Input  
                     placeholder={t("placeholders.nit")}
                     type="text" 
@@ -111,7 +111,7 @@ const SupplierFormEdit = forwardRef<HTMLFormElement, SupplierFormProps>(({ onSuc
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("fields.phone")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.phone")}</label>
                 <Input 
                     placeholder={t("placeholders.phone")}
                     type="text" 
@@ -122,7 +122,7 @@ const SupplierFormEdit = forwardRef<HTMLFormElement, SupplierFormProps>(({ onSuc
 
 
             <div>
-                <label className="text-sm font-semibold text-gray-500">{t("fields.address")}</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.address")}</label>
                 <Input 
                     placeholder={t("placeholders.address")}
                     type="text" 
@@ -132,10 +132,8 @@ const SupplierFormEdit = forwardRef<HTMLFormElement, SupplierFormProps>(({ onSuc
             </div>
 
             <div className="col-span-2 flex justify-end gap-2 mt-4">
-            <div className="col-span-2 flex justify-end gap-2 mt-4">
-                <CustomButton text={t("buttons.close")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="button" onClickButton={onSuccess}  />
-                <CustomButton text={t("buttons.update")} style="border text-white bg-homePrimary hover:bg-blue-500" typeButton="submit" />
-            </div>   
+                <CustomButton text={t("buttons.close")} variant="ghost" typeButton="button" onClickButton={onSuccess}  />
+                <CustomButton text={t("buttons.update")} variant="primary" typeButton="submit" />
             </div>
         </form>
     );
