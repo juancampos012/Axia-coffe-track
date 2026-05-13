@@ -2,10 +2,9 @@
 
 import React, { useState, ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { FilePenLine, Eye, Trash2, MoreVertical } from "lucide-react"; 
+import { FilePenLine, Eye, Trash2, MoreVertical, ChevronLeft, ChevronRight } from "lucide-react";
 
 import Dropdown from "../molecules/Dropdown";
-import CustomButton from "../atoms/CustomButton";
 
 interface HeaderItem {
   label: string;
@@ -38,13 +37,12 @@ interface CustomTableProps {
   onRowDoubleClick?: (item: any) => void;
 }
 
-export default function CustomTable({ 
-  title, headers, options, data = [], contextType = 'products', 
-  customActions, actionLabels, statusColumn, showDetails, onRowDoubleClick 
+export default function CustomTable({
+  title, headers, options, data = [], contextType = 'products',
+  customActions, actionLabels, statusColumn, showDetails, onRowDoubleClick
 }: CustomTableProps) {
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const t = useTranslations("CustomTable");
   const itemsPerPage = 10;
 
@@ -59,51 +57,114 @@ export default function CustomTable({
 
   return (
     <div className="w-full">
-      <div className="w-full bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800 overflow-visible shadow-xl">
-        {title && <div className="p-6 border-b border-zinc-800"><h2 className="text-xl font-bold text-white">{title}</h2></div>}
+      <div
+        className="w-full rounded-2xl overflow-visible shadow-xl"
+        style={{
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(30,60,139,0.25)",
+          backdropFilter: "blur(12px)",
+        }}
+      >
+        {title && (
+          <div
+            className="px-6 py-4"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            <h2
+              className="text-lg font-bold text-white"
+              style={{ fontFamily: "Syne, sans-serif", letterSpacing: "-0.02em" }}
+            >
+              {title}
+            </h2>
+          </div>
+        )}
 
-        {/* CONTENEDOR CLAVE: min-h y overflow visible para que el dropdown no se corte */}
-        <div className="relative overflow-visible min-h-[450px]">
+        <div className="relative overflow-visible min-h-[420px]">
           <table className="w-full border-separate border-spacing-0">
             <thead>
-              <tr className="bg-zinc-900/20">
+              <tr>
                 {headers.map((h, i) => (
-                  <th key={i} className="px-6 py-4 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider border-b border-zinc-800">{h.label}</th>
+                  <th
+                    key={i}
+                    className="px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-widest"
+                    style={{
+                      color: "rgba(74,127,255,0.7)",
+                      borderBottom: "1px solid rgba(30,60,139,0.25)",
+                      background: "rgba(30,60,139,0.08)",
+                    }}
+                  >
+                    {h.label}
+                  </th>
                 ))}
-                {options && <th className="px-6 py-4 text-right text-xs font-semibold text-zinc-500 border-b border-zinc-800">{t('options')}</th>}
+                {options && (
+                  <th
+                    className="px-6 py-3.5 text-right text-[10px] font-bold uppercase tracking-widest"
+                    style={{
+                      color: "rgba(74,127,255,0.7)",
+                      borderBottom: "1px solid rgba(30,60,139,0.25)",
+                      background: "rgba(30,60,139,0.08)",
+                    }}
+                  >
+                    {t('options')}
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="overflow-visible">
               {paginatedData.map((item, index) => {
                 const globalIndex = (currentPage - 1) * itemsPerPage + index;
-                // Z-INDEX INVERSO: La primera fila tiene Z mas alto que la segunda
                 const zIndexStyle = { zIndex: paginatedData.length - index };
+                const isLast = index === paginatedData.length - 1;
 
                 return (
                   <React.Fragment key={globalIndex}>
-                    <tr 
+                    <tr
                       style={zIndexStyle}
-                      className="relative group hover:bg-zinc-800/30 transition-colors duration-150"
+                      className="relative group transition-colors duration-150 cursor-default"
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(30,60,139,0.08)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                       onDoubleClick={() => onRowDoubleClick?.(item)}
                     >
                       {headers.map((h, idx) => (
-                        <td key={idx} className="px-6 py-4 text-sm text-zinc-300 border-b border-zinc-800/50 truncate max-w-[200px]">
+                        <td
+                          key={idx}
+                          className="px-6 py-4 text-sm truncate max-w-[200px]"
+                          style={{
+                            color: "rgba(255,255,255,0.65)",
+                            borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)",
+                          }}
+                        >
                           {item[h.key] || '-'}
                         </td>
                       ))}
                       {options && (
-                        <td className="px-6 py-4 text-right border-b border-zinc-800/50 overflow-visible">
+                        <td
+                          className="px-6 py-4 text-right overflow-visible"
+                          style={{
+                            borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)",
+                          }}
+                        >
                           <Dropdown
-                            icon={<MoreVertical size={18} />}
+                            icon={<MoreVertical size={16} />}
                             isOpen={openDropdown === globalIndex}
-                            onToggle={() => setOpenDropdown(openDropdown === globalIndex ? null : globalIndex)}
+                            onToggle={() =>
+                              setOpenDropdown(openDropdown === globalIndex ? null : globalIndex)
+                            }
                             useIconButton={true}
                             className="inline-block"
-                            isLastItem={index > paginatedData.length - 3 && paginatedData.length > 3} // Si es de los últimos, abre hacia arriba
+                            isLastItem={
+                              index > paginatedData.length - 3 && paginatedData.length > 3
+                            }
                             options={[
-                                ...(customActions?.edit ? [{ text: labels.edit, icon: <FilePenLine size={16} className="text-blue-400" />, action: () => customActions.edit?.(item.id) }] : []),
-                                ...(customActions?.view ? [{ text: labels.view, icon: <Eye size={16} className="text-zinc-400" />, action: () => customActions.view?.(item.id) }] : []),
-                                ...(customActions?.delete ? [{ text: labels.delete, icon: <Trash2 size={16} className="text-red-400" />, action: () => customActions.delete?.(item.id) }] : []),
+                              ...(customActions?.edit
+                                ? [{ text: labels.edit, icon: <FilePenLine size={14} className="text-[#4a7fff]" />, action: () => customActions.edit?.(item.id) }]
+                                : []),
+                              ...(customActions?.view
+                                ? [{ text: labels.view, icon: <Eye size={14} className="text-white/40" />, action: () => customActions.view?.(item.id) }]
+                                : []),
+                              ...(customActions?.delete
+                                ? [{ text: labels.delete, icon: <Trash2 size={14} className="text-red-400" />, action: () => customActions.delete?.(item.id) }]
+                                : []),
                             ]}
                           />
                         </td>
@@ -115,13 +176,35 @@ export default function CustomTable({
             </tbody>
           </table>
         </div>
-        
-        {/* Paginación simple */}
+
+        {/* Paginación */}
         {totalPages > 1 && (
-            <div className="p-4 border-t border-zinc-800 flex justify-end gap-2">
-                <CustomButton text="Anterior" disabled={currentPage === 1} onClickButton={() => setCurrentPage(p => p - 1)} style="bg-zinc-800 text-white px-4 py-1 rounded-lg" />
-                <CustomButton text="Siguiente" disabled={currentPage === totalPages} onClickButton={() => setCurrentPage(p => p + 1)} style="bg-homePrimary text-white px-4 py-1 rounded-lg" />
+          <div
+            className="px-6 py-4 flex items-center justify-between"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+          >
+            <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+              Página {currentPage} de {totalPages}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                <ChevronLeft size={14} /> Anterior
+              </button>
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed text-white"
+                style={{ background: "linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)" }}
+              >
+                Siguiente <ChevronRight size={14} />
+              </button>
             </div>
+          </div>
         )}
       </div>
     </div>

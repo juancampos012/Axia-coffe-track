@@ -1,27 +1,26 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import React, { useState } from "react";
+import { ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface HeaderItem {
-  label: string; // texto visible, traducido
-  key: string;   // clave de acceso a los datos (en inglés, como en la DB)
+  label: string;
+  key: string;
 }
 
 interface TableFilterProps {
   headers: HeaderItem[];
-  onSort: (field: string, direction: 'asc' | 'desc') => void;
+  onSort: (field: string, direction: "asc" | "desc") => void;
 }
 
 const TableFilter: React.FC<TableFilterProps> = ({ headers, onSort }) => {
   const t = useTranslations("TableFilter");
-
   const [isOpen, setIsOpen] = useState(false);
   const [sortField, setSortField] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const handleSort = (field: string) => {
-    // Si se selecciona el mismo campo, se cambia la dirección, si no, se pone ascendente
-    const newDirection = field === sortField && sortDirection === 'asc' ? 'desc' : 'asc';
+    const newDirection =
+      field === sortField && sortDirection === "asc" ? "desc" : "asc";
     setSortField(field);
     setSortDirection(newDirection);
     onSort(field, newDirection);
@@ -30,45 +29,54 @@ const TableFilter: React.FC<TableFilterProps> = ({ headers, onSort }) => {
 
   return (
     <div className="relative inline-block text-left">
-      <div>
-        <button
-          type="button"
-          className="inline-flex justify-center items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <Filter className="h-5 w-5 text-gray-400" aria-hidden="true" />
-          {t("filter")}
-          {isOpen ? (
-            <ChevronUp className="h-4 w-4 ml-1" />
-          ) : (
-            <ChevronDown className="h-4 w-4 ml-1" />
-          )}
-        </button>
-      </div>
+      <button
+        type="button"
+        className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-white/5"
+        style={{
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(30,60,139,0.35)",
+          color: "rgba(255,255,255,0.5)",
+        }}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <SlidersHorizontal size={15} style={{ color: "rgba(74,127,255,0.7)" }} />
+        {t("filter")}
+        {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+      </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1">
-            {headers.map(({label, key}) => (
-              <a
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div
+            className="absolute right-0 z-50 mt-2 w-52 rounded-xl py-1.5 shadow-2xl"
+            style={{
+              background: "rgba(4,6,18,0.97)",
+              border: "1px solid rgba(30,60,139,0.4)",
+              backdropFilter: "blur(20px)",
+            }}
+          >
+            {headers.map(({ label, key }) => (
+              <button
                 key={key}
-                href="#"
-                className={`block px-4 py-2 text-sm ${sortField === key.toLowerCase() ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} hover:bg-gray-100`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleSort(key.toLowerCase());
+                className="flex items-center justify-between w-full px-4 py-2.5 text-sm transition-colors hover:bg-white/5"
+                style={{
+                  color:
+                    sortField === key.toLowerCase()
+                      ? "rgba(74,127,255,0.9)"
+                      : "rgba(255,255,255,0.5)",
                 }}
+                onClick={() => handleSort(key.toLowerCase())}
               >
-                {label}
+                <span>{label}</span>
                 {sortField === key.toLowerCase() && (
-                  <span className="ml-2">
-                    {sortDirection === 'asc' ? '↑' : '↓'}
+                  <span className="text-xs" style={{ color: "#4a7fff" }}>
+                    {sortDirection === "asc" ? "↑" : "↓"}
                   </span>
                 )}
-              </a>
+              </button>
             ))}
           </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -151,14 +151,27 @@ const SearchBarUniversal: React.FC<SearchBarUniversalProps> = ({
     <div className="w-full relative">
       {/* Input de búsqueda */}
       <div className="relative flex items-center">
-        
+        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(74,127,255,0.5)" }} />
         <input
           type="text"
           placeholder={placeholder}
           value={searchTerm}
           disabled={disabled}
           onChange={handleSearch}
-          className="w-full pl-11 pr-12 py-3 bg-gray-900 border-2 border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:bg-gray-800 disabled:cursor-not-allowed text-base"
+          className="w-full pl-11 pr-12 py-3 rounded-xl text-white text-sm outline-none transition-all disabled:cursor-not-allowed"
+        style={{
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(30,60,139,0.35)",
+          color: "white",
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.border = "1px solid rgba(74,127,255,0.6)";
+          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(74,127,255,0.1)";
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.border = "1px solid rgba(30,60,139,0.35)";
+          e.currentTarget.style.boxShadow = "none";
+        }}
         />
 
         {/* Loading o Clear button */}
@@ -178,7 +191,7 @@ const SearchBarUniversal: React.FC<SearchBarUniversalProps> = ({
 
       {/* Resultados */}
       {showResultsInternal && searchTerm && (
-        <div className="absolute z-50 w-full mt-2 bg-gray-900 border-2 border-gray-700 rounded-xl shadow-2xl overflow-hidden">
+        <div className="absolute z-50 w-full mt-2 rounded-xl shadow-2xl overflow-hidden" style={{ background: "rgba(4,6,18,0.97)", border: "1px solid rgba(30,60,139,0.4)", backdropFilter: "blur(20px)" }}>
           {error ? (
             <div className="p-4 text-center">
               <p className="text-gray-400 text-sm">😕 {error}</p>
@@ -188,8 +201,8 @@ const SearchBarUniversal: React.FC<SearchBarUniversalProps> = ({
               {results.map((item, index) => (
                 <div
                   key={(item as any).id}
-                  className={`flex justify-between items-center p-4 hover:bg-gray-800 transition-colors cursor-pointer ${
-                    index !== results.length - 1 ? 'border-b border-gray-800' : ''
+                  className={`flex justify-between items-center p-4 hover:bg-white/5 transition-colors cursor-pointer ${
+                    index !== results.length - 1 ? 'border-b border-white/[0.05]' : ''
                   }`}
                   onClick={() => {
                     if (onAddToCart && (searchType === "products" || searchType === "clients" || searchType === "suppliers")) {
@@ -240,7 +253,8 @@ const SearchBarUniversal: React.FC<SearchBarUniversalProps> = ({
                         setSearchTerm(name);
                         setShowResultsInternal(false);
                       }}
-                      className="ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex-shrink-0"
+                      className="ml-4 px-3 py-1.5 text-white text-xs font-semibold rounded-lg transition-all duration-200 hover:opacity-90 flex-shrink-0"
+                      style={{ background: "linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)" }}
                     >
                       Seleccionar
                     </button>
