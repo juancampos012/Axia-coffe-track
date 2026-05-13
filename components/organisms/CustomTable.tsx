@@ -125,8 +125,6 @@ export default function CustomTable({
                       onMouseEnter={() => setHoveredRow(globalIndex)}
                       onMouseLeave={() => setHoveredRow(null)}
                       onDoubleClick={() => onRowDoubleClick?.(item)}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(30,60,139,0.08)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
                       {headers.map((h, idx) => (
                         <td
