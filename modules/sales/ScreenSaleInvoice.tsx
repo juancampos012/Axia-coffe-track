@@ -339,11 +339,15 @@ export default function ScreenInvoices() {
                             label="Fecha inicio"
                             value={startDate}
                             onChange={(newValue) => setStartDate(newValue)}
-                            sx={{
-                              "& .MuiInputBase-root": { background: "rgba(255,255,255,0.04)", borderRadius: "12px", color: "white", fontSize: "13px" },
-                              "& .MuiOutlinedInput-notchedOutline": { border: "1px solid rgba(30,60,139,0.4)" },
-                              "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.4)", fontSize: "12px" },
-                              "& .MuiSvgIcon-root": { color: "rgba(74,127,255,0.7)" },
+                            slotProps={{
+                              textField: {
+                                sx: {
+                                  "& .MuiInputBase-root": { background: "rgba(255,255,255,0.04)", borderRadius: "12px", color: "white", fontSize: "13px" },
+                                  "& .MuiOutlinedInput-notchedOutline": { border: "1px solid rgba(30,60,139,0.4)" },
+                                  "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.4)", fontSize: "12px" },
+                                  "& .MuiSvgIcon-root": { color: "rgba(74,127,255,0.7)" },
+                                },
+                              },
                             }}
                             />
                         </div>
@@ -354,12 +358,16 @@ export default function ScreenInvoices() {
                                 label="Fecha fin"
                                 value={endDate}
                                 onChange={(newValue) => setEndDate(newValue)}
-                                sx={{
-                              "& .MuiInputBase-root": { background: "rgba(255,255,255,0.04)", borderRadius: "12px", color: "white", fontSize: "13px" },
-                              "& .MuiOutlinedInput-notchedOutline": { border: "1px solid rgba(30,60,139,0.4)" },
-                              "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.4)", fontSize: "12px" },
-                              "& .MuiSvgIcon-root": { color: "rgba(74,127,255,0.7)" },
-                            }}
+                                slotProps={{
+                                  textField: {
+                                    sx: {
+                                      "& .MuiInputBase-root": { background: "rgba(255,255,255,0.04)", borderRadius: "12px", color: "white", fontSize: "13px" },
+                                      "& .MuiOutlinedInput-notchedOutline": { border: "1px solid rgba(30,60,139,0.4)" },
+                                      "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.4)", fontSize: "12px" },
+                                      "& .MuiSvgIcon-root": { color: "rgba(74,127,255,0.7)" },
+                                    },
+                                  },
+                                }}
                             />
                         </div>
                         

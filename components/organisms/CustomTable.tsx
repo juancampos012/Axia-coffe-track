@@ -43,6 +43,7 @@ export default function CustomTable({
 }: CustomTableProps) {
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const t = useTranslations("CustomTable");
   const itemsPerPage = 10;
 
@@ -119,10 +120,10 @@ export default function CustomTable({
                 return (
                   <React.Fragment key={globalIndex}>
                     <tr
-                      style={zIndexStyle}
                       className="relative group transition-colors duration-150 cursor-default"
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(30,60,139,0.08)")}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                      style={{ ...zIndexStyle, background: hoveredRow === globalIndex ? "rgba(30,60,139,0.08)" : "transparent" }}
+                      onMouseEnter={() => setHoveredRow(globalIndex)}
+                      onMouseLeave={() => setHoveredRow(null)}
                       onDoubleClick={() => onRowDoubleClick?.(item)}
                       onMouseEnter={e => (e.currentTarget.style.background = 'rgba(30,60,139,0.08)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
