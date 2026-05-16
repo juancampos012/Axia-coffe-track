@@ -1,4 +1,4 @@
-import { Compra, CreatedPurchase } from "@/types/Api";
+import { Compra, CreatedPurchase, FactorCompra } from "@/types/Api";
 import { envVariables } from "@/utils/config";
 
 const fetchWithCredentials = async <T>(url: string, options: RequestInit): Promise<T> => {
@@ -103,6 +103,35 @@ export const getPurchaseById = async (id: string): Promise<Compra> => {
     headers: {
       "Content-Type": "application/json",
     },
+  });
+};
+
+/**
+ * Crear compra por factor.
+ * Usa el endpoint de SaleInvoice (compra AL cliente/productor).
+ * → Aparece en /sales/sales-invoices
+ * → Incrementa el stock del producto
+ * → Decrementa el balance de caja (se paga al cliente)
+ */
+export const crearCompraFactor = async (compra: FactorCompra): Promise<any> => {
+  const urlSale = `${envVariables.API_URL}/sale-invoices`;
+
+  const payload = {
+    tenantId:      compra.tenantId,
+    clientId:      compra.clientId,
+    totalPrice:    compra.totalPrice,
+    electronicBill: compra.electronicBill ?? false,
+    products: compra.products.map(p => ({
+      productId: p.productId,
+      quantity:  p.quantity,
+      unitPrice: p.unitPrice,
+    })),
+  };
+
+  return fetchWithCredentials<any>(urlSale, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
   });
 };
 

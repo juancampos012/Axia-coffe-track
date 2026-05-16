@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="justify-center items-center bg-black">
+    <main className="justify-center items-center bg-[#0a1120]">
       <HomeBox>
         {children}
       </HomeBox>

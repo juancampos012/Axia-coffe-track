@@ -72,7 +72,12 @@ export function middleware(request: NextRequest) {
         "/delivery/view",
         "/expenses",
         "/expenses/new",
-        "/expenses/view"
+        "/expenses/view",
+        "/accounts",
+        "/accounts/clients",
+        "/accounts/partners",
+        "/accounts/suppliers",
+        "/shopping/factor-purchase"
       ],
 
       SUPERADMIN:[

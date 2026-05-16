@@ -32,7 +32,7 @@ export default function HomeBox({ children }: { children: React.ReactNode }) {
   }, [user, setBalance]);
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: "#04060f" }}>
+    <div className="flex flex-col min-h-screen" style={{ background: "#0a1120" }}>
       {/* ── Header ── */}
       <header
         className="sticky top-0 z-50 flex items-center justify-between px-5 py-3"
@@ -114,7 +114,7 @@ export default function HomeBox({ children }: { children: React.ReactNode }) {
           className={`flex-1 p-6 overflow-auto transition-all duration-300 min-h-[calc(100vh-57px)] ${
             isSidebarOpen ? "md:ml-64" : "md:ml-16"
           }`}
-          style={{ background: "#04060f" }}
+          style={{ background: "#0a1120" }}
         >
           {children}
         </main>

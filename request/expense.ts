@@ -16,11 +16,26 @@ const fetchWithCredentials = async (url: string, options: RequestInit): Promise<
 };
 
 /**
- * OBTENER TODOS LOS GASTOS
- * Ruta: GET /expenses
+ * OBTENER GASTOS CON PAGINACIÓN Y FILTRO DE FECHAS
+ * Ruta: GET /expenses?page=1&limit=10&startDate=2024-01-01&endDate=2024-12-31
+ *
+ * Backend note: debe soportar los parámetros page, limit, startDate, endDate.
+ * Si el backend aún retorna array plano, el hook usePaginatedFetch lo normaliza.
  */
-export const getExpenses = async (): Promise<any[]> => {
-  const response = await fetchWithCredentials(`${API_URL}/expenses`, {
+export const getExpenses = async (
+  page = 1,
+  limit = 10,
+  startDate?: string,
+  endDate?: string,
+): Promise<any> => {
+  const params = new URLSearchParams({
+    page:  String(page),
+    limit: String(limit),
+  });
+  if (startDate) params.append('startDate', startDate);
+  if (endDate)   params.append('endDate',   endDate);
+
+  const response = await fetchWithCredentials(`${API_URL}/expenses?${params.toString()}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });

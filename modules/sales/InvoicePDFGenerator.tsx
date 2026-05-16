@@ -11,6 +11,13 @@ interface User {
   role: string;
 }
 
+interface CompanyInfo {
+  name?: string;
+  address?: string;
+  nit?: string;
+  phone?: string;
+}
+
 interface GeneratePDFProps {
   items: SaleItem[];
   subtotal: number;
@@ -19,6 +26,7 @@ interface GeneratePDFProps {
   client: ClientDAO;
   user: User | null;
   t: (key: string) => string;
+  company?: CompanyInfo;
 }
 
 export default class InvoicePDFGenerator {
@@ -31,7 +39,8 @@ static async generatePDF({
     total,
     client,
     user,
-    t
+    t,
+    company,
   }: GeneratePDFProps): Promise<Blob> {
     return new Promise((resolve) => {
       const doc = new jsPDF({
@@ -78,11 +87,21 @@ static async generatePDF({
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(60, 60, 60);
-      centerText('Cra 5 Cll 3 esquina', yPosition);
-      yPosition += 3.5;
-      centerText('NIT: 901214632-2', yPosition);
-      yPosition += 3.5;
-      centerText('Tel: 317 858 2593', yPosition);
+      if (company?.address) {
+        centerText(company.address, yPosition);
+        yPosition += 3.5;
+      }
+      if (company?.nit) {
+        centerText(`NIT: ${company.nit}`, yPosition);
+        yPosition += 3.5;
+      }
+      if (company?.phone) {
+        centerText(`Tel: ${company.phone}`, yPosition);
+        yPosition += 3.5;
+      }
+      if (!company?.address && !company?.nit && !company?.phone) {
+        yPosition += 3.5; // espacio mínimo si no hay datos
+      }
       yPosition += 6;
 
       // Caja para factura con bordes
@@ -93,7 +112,7 @@ static async generatePDF({
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(0, 0, 0);
-      centerText('FACTURA DE VENTA', yPosition + 4);
+      centerText('FACTURA DE COMPRA', yPosition + 4);
       
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7);

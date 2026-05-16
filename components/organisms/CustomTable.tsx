@@ -19,6 +19,15 @@ interface CustomAction {
   condition?: (item: any) => boolean;
 }
 
+/** Props para paginación controlada desde el padre (servidor) */
+interface ServerPagination {
+  currentPage: number;
+  totalPages: number;
+  total: number;
+  onPageChange: (page: number) => void;
+  loading?: boolean;
+}
+
 interface CustomTableProps {
   title?: string;
   headers: HeaderItem[];
@@ -35,11 +44,18 @@ interface CustomTableProps {
   statusColumn?: { key: string; statusMap: { [key: string]: string } };
   showDetails?: (item: any) => ReactNode;
   onRowDoubleClick?: (item: any) => void;
+  /**
+   * Cuando se pasa, desactiva la paginación interna (client-side) y
+   * delega el control al padre. El padre es responsable de pasar
+   * solo los datos de la página actual en `data`.
+   */
+  serverPagination?: ServerPagination;
 }
 
 export default function CustomTable({
   title, headers, options, data = [], contextType = 'products',
-  customActions, actionLabels, statusColumn, showDetails, onRowDoubleClick
+  customActions, actionLabels, statusColumn, showDetails, onRowDoubleClick,
+  serverPagination,
 }: CustomTableProps) {
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -53,8 +69,18 @@ export default function CustomTable({
     delete: actionLabels?.delete || t(`delete.${contextType}`) || "Eliminar",
   };
 
-  const paginatedData = data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  // Modo servidor: el padre ya pasó solo los datos de la página actual
+  const isServerPaginated = !!serverPagination;
+  const paginatedData = isServerPaginated
+    ? data
+    : data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = isServerPaginated
+    ? serverPagination.totalPages
+    : Math.ceil(data.length / itemsPerPage);
+  const activePage = isServerPaginated ? serverPagination.currentPage : currentPage;
+  const handlePageChange = isServerPaginated
+    ? serverPagination.onPageChange
+    : setCurrentPage;
 
   return (
     <div className="w-full">
@@ -184,21 +210,33 @@ export default function CustomTable({
             className="px-6 py-4 flex items-center justify-between"
             style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
           >
-            <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
-              Página {currentPage} de {totalPages}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+                Página {activePage} de {totalPages}
+              </span>
+              {isServerPaginated && serverPagination.total > 0 && (
+                <span className="text-xs" style={{ color: "rgba(74,127,255,0.5)" }}>
+                  · {serverPagination.total} registros
+                </span>
+              )}
+              {isServerPaginated && serverPagination.loading && (
+                <span className="text-xs animate-pulse" style={{ color: "rgba(74,127,255,0.5)" }}>
+                  Cargando...
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
+                disabled={activePage === 1 || (isServerPaginated && serverPagination.loading)}
+                onClick={() => handlePageChange(activePage - 1)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
                 style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 <ChevronLeft size={14} /> Anterior
               </button>
               <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={activePage === totalPages || (isServerPaginated && serverPagination.loading)}
+                onClick={() => handlePageChange(activePage + 1)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed text-white"
                 style={{ background: "linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)" }}
               >

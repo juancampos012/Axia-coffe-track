@@ -43,7 +43,6 @@ export default function ScreenInvoices() {
     setHasSearched(true);
     try {
       const res = await searchInvoicesByDateRange(start, end);
-      setInvoicesXlsx(res || []);
       if (res && Array.isArray(res)) {
         setInvoicesXlsx(res);
         const formatted = res.map((invoice) => ({
@@ -95,7 +94,6 @@ export default function ScreenInvoices() {
     }));
   }, []);
 
-  // — Excel export (sin cambios de lógica) —
   const handleExportExcel = async () => {
     if (!invoicesXlsx.length) return;
     const workbook = new ExcelJS.Workbook();
@@ -144,20 +142,14 @@ export default function ScreenInvoices() {
   };
 
   return (
-    <div
-      className="min-h-screen p-6 md:p-8"
-      style={{ background: '#04060f' }}
-    >
+    <div className="min-h-screen p-6 md:p-8" style={{ background: '#0a1120', width: '100%' }}>
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.15em] mb-1" style={{ color: 'rgba(74,127,255,0.7)' }}>
             Módulo de ventas
           </p>
-          <h1
-            className="text-2xl md:text-3xl font-bold text-white"
-            style={{ fontFamily: 'Syne, sans-serif', letterSpacing: '-0.02em' }}
-          >
+          <h1 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Syne, sans-serif', letterSpacing: '-0.02em' }}>
             Facturas de Compras
           </h1>
         </div>
@@ -167,14 +159,11 @@ export default function ScreenInvoices() {
           disabled={!invoices.length}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200"
           style={{
-            background: invoices.length
-              ? 'linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)'
-              : 'rgba(255,255,255,0.05)',
+            background: invoices.length ? 'linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)' : 'rgba(255,255,255,0.05)',
             color: invoices.length ? '#fff' : 'rgba(255,255,255,0.25)',
             border: `1px solid ${invoices.length ? 'rgba(30,60,139,0.5)' : 'rgba(255,255,255,0.07)'}`,
             boxShadow: invoices.length ? '0 4px 16px rgba(30,60,139,0.3)' : 'none',
             cursor: invoices.length ? 'pointer' : 'not-allowed',
-            fontFamily: 'Syne, sans-serif',
           }}
         >
           <FileSpreadsheet size={15} />
@@ -182,98 +171,40 @@ export default function ScreenInvoices() {
         </button>
       </div>
 
-      {/* ── Filtros de fecha ── */}
-      <div
-        className="rounded-2xl p-px mb-6"
-        style={{ background: 'linear-gradient(135deg, rgba(30,60,139,0.4) 0%, rgba(74,127,255,0.1) 100%)' }}
-      >
-        <div
-          className="rounded-2xl p-5"
-          style={{ background: 'rgba(8,12,28,0.9)', backdropFilter: 'blur(20px)' }}
-        >
+      {/* ── Filtros ── */}
+      <div className="rounded-2xl p-px mb-6" style={{ background: 'linear-gradient(135deg, rgba(30,60,139,0.4) 0%, rgba(74,127,255,0.1) 100%)' }}>
+        <div className="rounded-2xl p-5" style={{ background: 'rgba(8,12,28,0.9)', backdropFilter: 'blur(20px)' }}>
           <div className="flex flex-wrap items-end gap-5">
-            {/* Icono decorativo */}
-            <div
-              className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0"
-              style={{ background: 'rgba(30,60,139,0.2)', border: '1px solid rgba(30,60,139,0.35)' }}
-            >
+            <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0" style={{ background: 'rgba(30,60,139,0.2)', border: '1px solid rgba(30,60,139,0.35)' }}>
               <Calendar size={16} style={{ color: '#4a7fff' }} />
             </div>
 
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              {/* Fecha inicio */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  Desde
-                </label>
+                <label className="text-xs font-medium uppercase tracking-wider text-white/40">Desde</label>
                 <DatePicker
-                  label="Fecha inicio"
                   value={startDate}
                   onChange={(v) => setStartDate(v)}
-                  slotProps={{
-                    textField: {
-                      size: 'small',
-                      sx: {
-                        '& .MuiOutlinedInput-root': {
-                          background: 'rgba(255,255,255,0.04)',
-                          borderRadius: '10px',
-                          color: '#fff',
-                          '& fieldset': { borderColor: 'rgba(30,60,139,0.35)' },
-                          '&:hover fieldset': { borderColor: 'rgba(74,127,255,0.5)' },
-                          '&.Mui-focused fieldset': { borderColor: 'rgba(74,127,255,0.7)' },
-                        },
-                        '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.3)' },
-                        '& .MuiSvgIcon-root': { color: 'rgba(74,127,255,0.7)' },
-                      },
-                    },
-                  }}
+                  slotProps={{ textField: { size: 'small', sx: { '& .MuiOutlinedInput-root': { color: '#fff' } } } }}
                 />
               </div>
-
-              {/* Fecha fin */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  Hasta
-                </label>
+                <label className="text-xs font-medium uppercase tracking-wider text-white/40">Hasta</label>
                 <DatePicker
-                  label="Fecha fin"
                   value={endDate}
                   onChange={(v) => setEndDate(v)}
-                  slotProps={{
-                    textField: {
-                      size: 'small',
-                      sx: {
-                        '& .MuiOutlinedInput-root': {
-                          background: 'rgba(255,255,255,0.04)',
-                          borderRadius: '10px',
-                          color: '#fff',
-                          '& fieldset': { borderColor: 'rgba(30,60,139,0.35)' },
-                          '&:hover fieldset': { borderColor: 'rgba(74,127,255,0.5)' },
-                          '&.Mui-focused fieldset': { borderColor: 'rgba(74,127,255,0.7)' },
-                        },
-                        '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.3)' },
-                        '& .MuiSvgIcon-root': { color: 'rgba(74,127,255,0.7)' },
-                      },
-                    },
-                  }}
+                  slotProps={{ textField: { size: 'small', sx: { '& .MuiOutlinedInput-root': { color: '#fff' } } } }}
                 />
               </div>
             </LocalizationProvider>
 
-            {/* Botón buscar */}
             <button
               onClick={handleDateSearch}
               disabled={!startDate || !endDate || isLoading}
               className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
               style={{
-                background: startDate && endDate && !isLoading
-                  ? 'linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)'
-                  : 'rgba(255,255,255,0.05)',
+                background: startDate && endDate && !isLoading ? 'linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)' : 'rgba(255,255,255,0.05)',
                 color: startDate && endDate && !isLoading ? '#fff' : 'rgba(255,255,255,0.25)',
-                border: '1px solid rgba(30,60,139,0.3)',
-                boxShadow: startDate && endDate ? '0 4px 14px rgba(30,60,139,0.3)' : 'none',
-                cursor: startDate && endDate && !isLoading ? 'pointer' : 'not-allowed',
-                fontFamily: 'Syne, sans-serif',
                 height: 40,
               }}
             >
@@ -281,147 +212,42 @@ export default function ScreenInvoices() {
               {isLoading ? "Buscando..." : "Buscar"}
             </button>
 
-            {/* Botón limpiar */}
             {hasSearched && (
-              <button
-                onClick={handleClearSearch}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  color: 'rgba(255,255,255,0.45)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  height: 40,
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.75)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.45)';
-                }}
-              >
-                <X size={14} />
-                Limpiar
+              <button onClick={handleClearSearch} className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white/50 border border-white/10" style={{ height: 40 }}>
+                <X size={14} /> Limpiar
               </button>
             )}
 
-  // Exportar el archivo
-  const buffer = await workbook.xlsx.writeBuffer();
-  saveAs(new Blob([buffer]), "reporte_facturas.xlsx");
-};
-    return (
-        <div className="container mx-auto">
-            <div className="p-4 shadow">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold text-homePrimary-200">Facturas de compras</h2>
-                    <button
-                        onClick={handleExportExcel}
-                        disabled={!invoices.length}
-                        className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
-                        style={{ background: "linear-gradient(135deg, #059669 0%, #047857 100%)" }}
-                        >
-                        Descargar Excel
-                    </button>
-                </div>
+            <div className="ml-auto">
+              <TableFilter headers={tableHeaders} onSort={handleSort} />
             </div>
           </div>
         </div>
       </div>
 
-            <div className="flex justify-between items-center mb-4 mt-4">
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <div className="flex items-center gap-6 my-4 p-4 rounded-lg shadow-md">
-                        <div className="flex items-center gap-3">
-                            <label className="text-sm font-medium text-white">Desde:</label>
-                            <DatePicker
-                            label="Fecha inicio"
-                            value={startDate}
-                            onChange={(newValue) => setStartDate(newValue)}
-                            slotProps={{
-                              textField: {
-                                sx: {
-                                  "& .MuiInputBase-root": { background: "rgba(255,255,255,0.04)", borderRadius: "12px", color: "white", fontSize: "13px" },
-                                  "& .MuiOutlinedInput-notchedOutline": { border: "1px solid rgba(30,60,139,0.4)" },
-                                  "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.4)", fontSize: "12px" },
-                                  "& .MuiSvgIcon-root": { color: "rgba(74,127,255,0.7)" },
-                                },
-                              },
-                            }}
-                            />
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                            <label className="text-sm font-medium text-white">Hasta:</label>
-                            <DatePicker
-                                label="Fecha fin"
-                                value={endDate}
-                                onChange={(newValue) => setEndDate(newValue)}
-                                slotProps={{
-                                  textField: {
-                                    sx: {
-                                      "& .MuiInputBase-root": { background: "rgba(255,255,255,0.04)", borderRadius: "12px", color: "white", fontSize: "13px" },
-                                      "& .MuiOutlinedInput-notchedOutline": { border: "1px solid rgba(30,60,139,0.4)" },
-                                      "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.4)", fontSize: "12px" },
-                                      "& .MuiSvgIcon-root": { color: "rgba(74,127,255,0.7)" },
-                                    },
-                                  },
-                                }}
-                            />
-                        </div>
-                        
-                        <button
-                            onClick={handleDateSearch}
-                            disabled={!startDate || !endDate || isLoading}
-                            className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
-                            style={{ background: "linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)" }}
-                        >
-                            {isLoading ? "Buscando..." : "Buscar"}
-                        </button>
-                        
-                        {hasSearched && (
-                            <button
-                                onClick={handleClearSearch}
-                                className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80"
-                                style={{ border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}
-                            >
-                                Limpiar
-                            </button>
-                        )}
-                    </div>
-                </LocalizationProvider>
-                
-                <TableFilter
-                    headers={tableHeaders}
-                    onSort={handleSort}
-                />
-            </div>
-
-            {isLoading ? (
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-2 mt-4" style={{ color: "rgba(74,127,255,0.6)" }}>{t("loading")}</p>
-            ) : !hasSearched ? (
-                <div className="text-center py-8">
-                    <p className="text-sm font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>
-                        Selecciona un rango de fechas para buscar facturas
-                    </p>
-                </div>
-            ) : invoices.length === 0 ? (
-                <EmptyState message="No se encontraron facturas en el rango de fechas seleccionado" />
-            ) : (
-                <CustomTable
-                    title={t("tableTitle")}
-                    headers={tableHeaders}
-                    options={true}
-                    data={invoices}
-                    contextType="invoices"
-                    customActions={{
-                        view: handleViewInvoice,
-                        delete: handleDeleteInvoice,
-                    }}
-                />
-            )}
+      {/* ── Contenido ── */}
+      {isLoading ? (
+        <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mt-4">Cargando...</p>
+      ) : !hasSearched ? (
+        <div className="text-center py-20">
+          <p className="text-sm font-bold uppercase tracking-widest text-white/30">
+            Selecciona un rango de fechas para buscar facturas
+          </p>
         </div>
+      ) : invoices.length === 0 ? (
+        <EmptyState message="No se encontraron facturas" />
+      ) : (
+        <CustomTable
+          title={t("tableTitle")}
+          headers={tableHeaders}
+          options={true}
+          data={invoices}
+          contextType="invoices"
+          customActions={{
+            view: handleViewInvoice,
+            delete: handleDeleteInvoice,
+          }}
+        />
       )}
     </div>
   );

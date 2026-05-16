@@ -1,6 +1,6 @@
 import HomeBox from "@/components/organisms/HomeBox";
 
-export default function Loanslayout({
+export default function Saleslayout({
     children
 }: {
     children: React.ReactNode;

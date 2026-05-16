@@ -141,18 +141,44 @@ export default function DeliveriesSection() {
                 </p>
 
                 <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start gap-6">
+                    {/* CANTIDAD + UNIDAD */}
                     <div className="flex flex-col">
-                        <span className="text-[8px] font-bold text-slate-500 uppercase block">Cantidad Despachada</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-mono font-black text-white italic">
-                                {Number(del.productKg).toLocaleString('es-CO')}
-                            </span>
-                            <span className="text-[10px] text-[#1E3C8b] font-black italic uppercase">Kg</span>
-                        </div>
+                      <span className="text-[8px] font-bold text-slate-500 uppercase block">Cantidad</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-mono font-black text-white italic">
+                          {Number(del.quantity ?? del.productKg ?? 0).toLocaleString('es-CO')}
+                        </span>
+                        <span className="text-[10px] text-[#1E3C8b] font-black italic uppercase">
+                          {del.unit ?? 'kg'}
+                        </span>
+                      </div>
                     </div>
+
+                    {/* KG EQUIVALENTES — solo si vienen del backend */}
+                    {del.productKg != null && del.unit && del.unit !== 'kg' && (
+                      <div className="flex flex-col">
+                        <span className="text-[8px] font-bold text-slate-500 uppercase block">Equiv. Kg</span>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-lg font-mono font-black text-slate-400 italic">
+                            {Number(del.productKg).toLocaleString('es-CO')}
+                          </span>
+                          <span className="text-[9px] text-slate-500 font-black italic uppercase">kg</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* PRECIO TOTAL — solo si viene */}
+                    {del.pricePerUnit != null && (
+                      <div className="flex flex-col">
+                        <span className="text-[8px] font-bold text-slate-500 uppercase block">Valor</span>
+                        <span className="text-sm font-mono font-black text-emerald-400">
+                          ${(Number(del.quantity ?? del.productKg ?? 0) * del.pricePerUnit).toLocaleString('es-CO')}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  
+
                   <Link href={`/es/delivery/${del.id}`} className="w-10 h-10 bg-white/5 text-white rounded-full flex items-center justify-center hover:bg-[#1E3C8b] hover:scale-110 active:scale-95 transition-all">
                     <ArrowRight size={18} />
                   </Link>

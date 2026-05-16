@@ -169,17 +169,69 @@ export default function DeliveryDetailPage({ deliveryId }: { deliveryId: string 
               </div>
             </div>
 
-            {/* SECCIÓN DE PESO - RESALTADO */}
-            <div className="bg-white/[0.03] border-2 border-dashed border-white/10 rounded-[2rem] p-10 flex flex-col items-center justify-center relative overflow-hidden">
-               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#1E3C8b] to-transparent opacity-50" />
-               <Scale size={40} className="text-[#1E3C8b] mb-4 opacity-50" />
-               <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] mb-2">Peso Neto Certificado</span>
-               <div className="flex items-baseline gap-3">
+            {/* SECCIÓN CANTIDAD */}
+            <div className="bg-white/[0.03] border-2 border-dashed border-white/10 rounded-[2rem] p-10 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#1E3C8b] to-transparent opacity-50" />
+
+              {/* Cantidad principal (número de unidades) */}
+              <div className="flex flex-col items-center justify-center mb-6">
+                <Scale size={36} className="text-[#1E3C8b] mb-3 opacity-50" />
+                <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] mb-2">
+                  Cantidad Despachada
+                </span>
+                <div className="flex items-baseline gap-3">
                   <span className="text-8xl font-black font-mono text-white tracking-tighter italic">
-                    {Number(delivery?.productKg).toLocaleString('es-CO')}
+                    {Number(delivery?.quantity ?? delivery?.productKg ?? 0).toLocaleString('es-CO')}
                   </span>
-                  <span className="text-3xl font-black text-[#1E3C8b] italic">KG</span>
-               </div>
+                  <span className="text-3xl font-black text-[#1E3C8b] italic uppercase">
+                    {delivery?.unit ?? 'kg'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Datos opcionales: kg equivalente + precio */}
+              {(delivery?.productKg != null || delivery?.pricePerUnit != null) && (
+                <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/5">
+                  {/* Kg equivalente — solo si la unidad no es kg */}
+                  {delivery?.productKg != null && delivery?.unit !== 'kg' && (
+                    <div className="flex flex-col items-center">
+                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">
+                        Equiv. KG
+                      </span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-black font-mono text-slate-400 italic">
+                          {Number(delivery.productKg).toLocaleString('es-CO')}
+                        </span>
+                        <span className="text-sm font-black text-slate-600 uppercase italic">kg</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Precio por unidad */}
+                  {delivery?.pricePerUnit != null && (
+                    <div className="flex flex-col items-center">
+                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">
+                        Precio × {delivery?.unit ?? 'kg'}
+                      </span>
+                      <span className="text-xl font-black font-mono text-emerald-400 italic">
+                        ${Number(delivery.pricePerUnit).toLocaleString('es-CO')}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Total */}
+                  {delivery?.totalPrice != null && (
+                    <div className="col-span-2 flex flex-col items-center pt-3 border-t border-white/5">
+                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">
+                        Valor Total
+                      </span>
+                      <span className="text-3xl font-black font-mono text-emerald-400 italic">
+                        ${Number(delivery.totalPrice).toLocaleString('es-CO')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* PIE DE PÁGINA DEL TICKET */}
