@@ -22,8 +22,8 @@ const TableFilter: React.FC<TableFilterProps> = ({ headers, onSort }) => {
     const newDirection =
       field === sortField && sortDirection === "asc" ? "desc" : "asc";
     setSortField(field);
-    setSortDirection(newDir);
-    onSort(field, newDir);
+    setSortDirection(newDirection);
+    onSort(field, newDirection);
     setIsOpen(false);
   };
 

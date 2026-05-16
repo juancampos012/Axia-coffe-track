@@ -10,6 +10,7 @@ import { createPayment } from '@/lib/api-sales';
 import { crearFacturaVenta } from '@/lib/api-saleInvoce';
 import SearchBarUniversal from '@/components/molecules/SearchBar';
 import InvoicePDFGenerator from "./InvoicePDFGenerator";
+import { getCompanyById } from '@/request/companies';
 import { User, Package, Scale, DollarSign, ShoppingCart, X, CheckCircle2, Receipt, Trash2, Loader2 } from 'lucide-react';
 
 export default function ScreenMakeSale() {
@@ -33,6 +34,14 @@ export default function ScreenMakeSale() {
 
   const [clientAnnouncements, setClientAnnouncements] = useState<any[]>([]);
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<string | null>(null);
+  const [company, setCompany] = useState<{ name?: string; address?: string; nit?: string; phone?: string } | undefined>();
+
+  useEffect(() => {
+    if (!user?.tenantId) return;
+    getCompanyById(user.tenantId)
+      .then(c => setCompany({ name: c.name, address: c.address, nit: c.nit, phone: c.phone }))
+      .catch(() => {});
+  }, [user?.tenantId]);
 
   useEffect(() => {
     if (!selectedClient) {
@@ -140,7 +149,7 @@ export default function ScreenMakeSale() {
 
       const pdfBlob = await InvoicePDFGenerator.generatePDF({
         items, subtotal: calculateSubtotal(), taxTotal: calculateTaxTotal(), total: calculateTotal(),
-        client: selectedClient, user, t
+        client: selectedClient, user, t, company,
       });
 
       setPdfUrl(URL.createObjectURL(pdfBlob));
@@ -328,7 +337,7 @@ export default function ScreenMakeSale() {
                         </div>
                         
                         <div className="pt-6 mt-6 border-t border-white/10">
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] block mb-2 text-blue-400">Total a Cobrar</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] block mb-2 text-blue-400">Total a Pagar</span>
                             <div className="text-4xl font-black font-mono tracking-tighter leading-none break-all text-white">
                                 {formatCurrency(calculateTotal())}
                             </div>

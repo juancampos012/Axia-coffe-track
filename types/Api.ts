@@ -12,6 +12,37 @@ export type Compra = {
   products: SaleItemForAPI[];
 };
 
+// ─── Compra por Factor ───────────────────────────────────────────────────────
+
+export interface FactorPurchaseItem {
+  productId: string;
+  productName: string;
+  tenantId: string;
+  /** Precio base del catálogo (ProductDAO.purchasePrice) */
+  basePrice: number;
+  /** Factor aplicado (ej: 0.92) */
+  factor: number;
+  /** Precio final = basePrice × factor */
+  unitPrice: number;
+  /** Cantidad en la unidad seleccionada */
+  quantity: number;
+  /** Unidad de medida */
+  unit: DeliveryUnit;
+  /** Subtotal = quantity × unitPrice */
+  subtotal: number;
+}
+
+export interface FactorCompra {
+  tenantId: string;
+  /** ID del cliente (productor) al que se le compra */
+  clientId: string;
+  factor: number;
+  totalPrice: number;
+  date?: string;
+  electronicBill?: boolean;
+  products: FactorPurchaseItem[];
+}
+
 export interface Purchase {
     id: string;
     tenantId: string;
@@ -415,6 +446,8 @@ export interface PartnerDAO {
   updatedAt?: string;
 }
 
+export type DeliveryUnit = 'kg' | 'sacos' | 'lonas' | 'bultos' | 'canastillas';
+
 export interface DeliveryDAO {
   id: string;
 
@@ -422,7 +455,16 @@ export interface DeliveryDAO {
   partnerId: string;
   productId: string;
 
-  productKg: number;
+  /** Cantidad entregada (número de unidades o kilos) */
+  quantity: number;
+  /** Unidad de medida de la entrega */
+  unit: DeliveryUnit;
+  /** Equivalente en kg — solo si unit !== 'kg' (opcional) */
+  productKg?: number;
+  /** Precio por unidad — opcional */
+  pricePerUnit?: number;
+  /** Precio total calculado = quantity × pricePerUnit — opcional */
+  totalPrice?: number;
 
   createdAt?: string;
   updatedAt?: string;

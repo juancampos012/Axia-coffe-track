@@ -1,10 +1,13 @@
-'use client'; 
+'use client';
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useCallback, ReactNode } from 'react';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type BalanceContextType = {
   balance: number | null;
   setBalance: (balance: number | null) => void;
+  refreshBalance: (tenantId: string) => Promise<void>;
   isVisible: boolean;
   toggleVisibility: () => void;
   displayBalance: string;
@@ -18,17 +21,34 @@ export const BalanceProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleVisibility = () => setIsVisible((prev) => !prev);
 
-  const displayBalance = isVisible 
-    ? (balance !== null 
-        ? `$ ${Number(balance).toLocaleString('es-CO', { 
-            minimumFractionDigits: 0, 
-            maximumFractionDigits: 0 
-          })}` 
-        : "$ 0") 
-    : "••••••";
+  /** Recarga el balance desde la API sin recargar la página */
+  const refreshBalance = useCallback(async (tenantId: string) => {
+    if (!tenantId) return;
+    try {
+      const res = await fetch(`${API_URL}/companies/${tenantId}`, {
+        credentials: 'include',
+      });
+      if (!res.ok) return;
+      const company = await res.json();
+      if (company?.currentBalance !== undefined) {
+        setBalance(Number(company.currentBalance));
+      }
+    } catch {
+      // silencioso — no rompemos la UI si falla
+    }
+  }, []);
+
+  const displayBalance = isVisible
+    ? (balance !== null
+        ? `$ ${Number(balance).toLocaleString('es-CO', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          })}`
+        : '$ 0')
+    : '••••••';
 
   return (
-    <BalanceContext.Provider value={{ balance, setBalance, isVisible, toggleVisibility, displayBalance }}>
+    <BalanceContext.Provider value={{ balance, setBalance, refreshBalance, isVisible, toggleVisibility, displayBalance }}>
       {children}
     </BalanceContext.Provider>
   );
@@ -37,8 +57,6 @@ export const BalanceProvider = ({ children }: { children: ReactNode }) => {
 export const useBalance = () => {
   const context = useContext(BalanceContext);
   if (!context) {
-    // Si entras aquí, es porque el componente que llama a useBalance 
-    // no tiene un <BalanceProvider> por encima en el árbol de React.
     throw new Error('useBalance debe usarse dentro de BalanceProvider');
   }
   return context;
