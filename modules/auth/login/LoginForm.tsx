@@ -53,7 +53,7 @@ const LoginForm: React.FC = () => {
 
   return (
     <>
-      <form className="w-full mt-6" onSubmit={handleSubmit(onSubmit)}>
+      <form className="w-full mt-6" onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="w-full mb-7">
           <Input placeholder={t("emailPlaceholder")} {...register("email")} />
           {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
