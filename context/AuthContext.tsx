@@ -18,7 +18,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   initialized: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User | null>;
   logout: () => Promise<void>;
 }
 
@@ -99,16 +99,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             const data = await response.json();
 
+            let loggedUser: User | null = null;
+
             if (data.token) {
               Cookies.set("authToken", data.token, {
                 expires: 7,
                 sameSite: "lax",
               });
-
+              const decoded = jwtDecode<User>(data.token);
+              loggedUser = { id: decoded.id, name: decoded.name || "", email: decoded.email || "", role: decoded.role, tenantId: decoded.tenantId };
               setUserFromToken(data.token);
             } else if (data.user) {
+              loggedUser = data.user;
               setUser(data.user);
             }
+
+            return loggedUser;
           } catch (err) {
             setError(
               err instanceof Error

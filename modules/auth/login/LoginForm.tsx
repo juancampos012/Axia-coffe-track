@@ -33,16 +33,16 @@ const LoginForm: React.FC = () => {
     setLoading(true);
     setErrorMessage("");
     try {
-      await login(data.email, data.password);
-      const authToken = document.cookie.split("; ").find(r => r.startsWith("authToken="))?.split("=")[1];
-      if (!authToken) throw new Error("No se encontró token después del login");
-      const payload = JSON.parse(atob(authToken.split(".")[1]));
-      try {
-        const balanceData = await getCompanyById(payload.tenantId);
-        setBalance(balanceData.currentBalance);
-      } catch (e) { console.error("Error fetching balance:", e); }
-      if (payload.role === "ADMIN" || payload.role === "SUPERADMIN") router.push(`/${locale}/admin`);
-      else if (payload.role === "USER") router.push(`/${locale}/employee`);
+      const loggedUser = await login(data.email, data.password);
+      if (!loggedUser) throw new Error("Error al iniciar sesión");
+      if (loggedUser.tenantId) {
+        try {
+          const balanceData = await getCompanyById(loggedUser.tenantId);
+          setBalance(balanceData.currentBalance);
+        } catch (e) { console.error("Error fetching balance:", e); }
+      }
+      if (loggedUser.role === "ADMIN" || loggedUser.role === "SUPERADMIN") router.push(`/${locale}/admin`);
+      else if (loggedUser.role === "USER") router.push(`/${locale}/employee`);
       else router.push(`/${locale}/`);
     } catch (error: any) {
       setErrorMessage(error.message || t("connectionError"));
