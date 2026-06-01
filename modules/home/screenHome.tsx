@@ -6,6 +6,7 @@ import ContentHero from "./contentHero";
 import HeroBlur from "./heroBlur/heroBlur";
 import { PricingSection } from "./PricingSection";
 import HomeFooter from "@/components/organisms/HomeFooter";
+import CoffeePriceTicker from "@/components/molecules/CoffeePriceTicker";
 
 const ScreenHome: React.FC = () => {
   return (
@@ -15,7 +16,14 @@ const ScreenHome: React.FC = () => {
         <Hero />
       </div>
 
-      <div className="mt-1"> 
+      {/* Ticker precio café — justo debajo del hero */}
+      <div className="relative z-10 px-6 md:px-12 lg:px-20 -mt-6 pb-8" style={{ background: '#04060f' }}>
+        <div className="max-w-4xl mx-auto">
+          <CoffeePriceTicker variant="home" />
+        </div>
+      </div>
+
+      <div className="mt-1">
         <HeroBlur />
       </div>
 

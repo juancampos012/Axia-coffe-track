@@ -26,10 +26,6 @@ export const getListDeposit = async (): Promise<Deposit[]> => {
     },
   });
 
-  if (!response.ok) {
-    throw new Error(`Error fetching deposits: ${response.statusText}`);
-  }
-
   const data: Deposit[] = await response.json();
 
   return data;
@@ -58,6 +54,6 @@ export const deleteDeposit = async (id: string): Promise<void> => {
             headers: { 'Content-Type': 'application/json' },
         });
     } catch (rollbackError) {
-        console.error("Error durante rollback:", rollbackError);
+        throw rollbackError;
     }
 };

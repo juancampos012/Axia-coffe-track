@@ -37,6 +37,8 @@ export default function NewDeliveryPage() {
   const [productKg, setProductKg]       = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
 
+  const [createDebt, setCreateDebt] = useState(false);
+
   const [loadingPartners, setLoadingPartners] = useState(true);
   const [isSubmitting, setIsSubmitting]       = useState(false);
 
@@ -60,6 +62,7 @@ export default function NewDeliveryPage() {
     setQuantity('');
     setProductKg('');
     setPricePerUnit('');
+    setCreateDebt(false);
   };
 
   const handleSave = async () => {
@@ -80,6 +83,7 @@ export default function NewDeliveryPage() {
     if (productKg && unit !== 'kg')  body.productKg   = parseFloat(productKg);
     if (pricePerUnit)                body.pricePerUnit = parseFloat(pricePerUnit);
     if (totalPrice !== null)         body.totalPrice   = totalPrice;
+    if (createDebt && totalPrice !== null) body.createDebt = true;
 
     try {
       setIsSubmitting(true);
@@ -380,6 +384,37 @@ export default function NewDeliveryPage() {
                 </div>
               )}
             </div>
+
+            {/* TOGGLE: CREAR DEUDA AL ALIADO — solo si hay totalPrice */}
+            {totalPrice !== null && (
+              <div
+                className="mb-6 p-5 rounded-2xl"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(30,60,139,0.2)' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setCreateDebt(v => !v)}
+                  className="w-full flex items-center justify-between gap-3 text-left"
+                >
+                  <div className="flex-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white">
+                      Crear deuda al aliado
+                    </p>
+                    <p className="text-[9px] font-bold uppercase tracking-widest mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      Registra que el aliado nos debe el valor de esta entrega
+                    </p>
+                  </div>
+                  {/* Toggle switch */}
+                  <div
+                    className={`relative w-11 h-6 rounded-full transition-all shrink-0 ${createDebt ? 'bg-blue-600' : 'bg-white/10'}`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${createDebt ? 'translate-x-5' : 'translate-x-0'}`}
+                    />
+                  </div>
+                </button>
+              </div>
+            )}
 
             <button
               onClick={handleSave}

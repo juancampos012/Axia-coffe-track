@@ -87,11 +87,11 @@ export const partnerPayment = async (body: {
 
 /** Cargo: le entregamos algo y nos debe */
 export const partnerCharge = async (body: {
-  partnerId: string; tenantId: string; amount: number; description?: string;
+  partnerId: string; tenantId: string; amount: number; description?: string; affectsBalance?: boolean;
 }): Promise<any> => {
   const r = await fetchWithCredentials(`${API_URL}/partner-accounts`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...body, originalAmount: body.amount }),
+    body: JSON.stringify(body),
   });
   return r.json();
 };
@@ -127,7 +127,7 @@ export const clientCharge = async (body: {
 }): Promise<any> => {
   const r = await fetchWithCredentials(`${API_URL}/client-accounts`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...body, originalAmount: body.amount }),
+    body: JSON.stringify(body),
   });
   return r.json();
 };
@@ -163,14 +163,17 @@ export const supplierCharge = async (body: {
 }): Promise<any> => {
   const r = await fetchWithCredentials(`${API_URL}/supplier-accounts`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...body, originalAmount: body.amount }),
+    body: JSON.stringify(body),
   });
   return r.json();
 };
 
 // ─── EDITAR MOVIMIENTOS ───────────────────────────────────────────────────────
 
-export const editPartnerMovement = async (paymentId: string, body: { description?: string; amount?: number }): Promise<any> => {
+export type EditMovementBody = { description?: string; amount?: number; affectsBalance?: boolean };
+
+/** Editar abono (Payment record) */
+export const editPartnerMovement = async (paymentId: string, body: EditMovementBody): Promise<any> => {
   const r = await fetchWithCredentials(`${API_URL}/partner-accounts/payment/${paymentId}`, {
     method: 'PATCH', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -178,7 +181,7 @@ export const editPartnerMovement = async (paymentId: string, body: { description
   return r.json();
 };
 
-export const editClientMovement = async (paymentId: string, body: { description?: string; amount?: number }): Promise<any> => {
+export const editClientMovement = async (paymentId: string, body: EditMovementBody): Promise<any> => {
   const r = await fetchWithCredentials(`${API_URL}/client-accounts/payment/${paymentId}`, {
     method: 'PATCH', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -186,8 +189,33 @@ export const editClientMovement = async (paymentId: string, body: { description?
   return r.json();
 };
 
-export const editSupplierMovement = async (paymentId: string, body: { description?: string; amount?: number }): Promise<any> => {
+export const editSupplierMovement = async (paymentId: string, body: EditMovementBody): Promise<any> => {
   const r = await fetchWithCredentials(`${API_URL}/supplier-accounts/payment/${paymentId}`, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return r.json();
+};
+
+/** Editar cargo (Account record) */
+export const editPartnerAccount = async (accountId: string, body: EditMovementBody): Promise<any> => {
+  const r = await fetchWithCredentials(`${API_URL}/partner-accounts/account/${accountId}`, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return r.json();
+};
+
+export const editClientAccount = async (accountId: string, body: EditMovementBody): Promise<any> => {
+  const r = await fetchWithCredentials(`${API_URL}/client-accounts/account/${accountId}`, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return r.json();
+};
+
+export const editSupplierAccount = async (accountId: string, body: EditMovementBody): Promise<any> => {
+  const r = await fetchWithCredentials(`${API_URL}/supplier-accounts/account/${accountId}`, {
     method: 'PATCH', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });

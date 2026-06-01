@@ -23,35 +23,40 @@ const fmt = (n: number) =>
 
 export default function PaymentModal({
   isOpen, onClose, personName, currentBalance,
-  abonoLabel = 'Registrar abono (nos pagan)',
-  cargoLabel  = 'Registrar cargo (nuevo débito)',
+  abonoLabel = 'Ingreso',
+  cargoLabel  = 'Egreso',
   onConfirm,
 }: PaymentModalProps) {
   const [mode, setMode]               = useState<PaymentMode>('abono');
-  const [amount, setAmount]           = useState('');
+  const [amount, setAmount]           = useState(''); // valor limpio (sin puntos)
   const [description, setDescription] = useState('');
   const [affectsBalance, setAffectsBalance] = useState(true);
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState('');
 
+  const addDots  = (v: string) => v.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const stripDots = (v: string) => v.replace(/\./g, '');
+
   if (!isOpen) return null;
+
+  const numericAmount = Number(stripDots(amount));
 
   const previewBalance =
     amount
       ? mode === 'abono'
-        ? currentBalance - Number(amount)
-        : currentBalance + Number(amount)
+        ? currentBalance - numericAmount
+        : currentBalance + numericAmount
       : currentBalance;
 
   const handleConfirm = async () => {
-    if (!amount || Number(amount) <= 0) {
+    if (!amount || numericAmount <= 0) {
       setError('Ingresa un monto válido mayor a cero');
       return;
     }
     setError('');
     try {
       setLoading(true);
-      await onConfirm(mode, Number(amount), description.trim() || (mode === 'abono' ? 'Abono' : 'Cargo'), affectsBalance);
+      await onConfirm(mode, numericAmount, description.trim() || (mode === 'abono' ? 'Ingreso' : 'Egreso'), affectsBalance);
       // Reset
       setAmount('');
       setDescription('');
@@ -128,9 +133,12 @@ export default function PaymentModal({
                 : 'border-white/10 bg-white/[0.02] text-slate-500 hover:border-white/20'
             }`}
           >
-            <TrendingDown size={20} />
-            <span className="text-[9px] font-black uppercase tracking-widest text-center leading-tight">
+            <TrendingDown size={22} />
+            <span className="text-[10px] font-black uppercase tracking-widest">
               {abonoLabel}
+            </span>
+            <span className="text-[8px] font-medium opacity-60 normal-case tracking-normal">
+              Dinero que entra
             </span>
           </button>
           <button
@@ -141,9 +149,12 @@ export default function PaymentModal({
                 : 'border-white/10 bg-white/[0.02] text-slate-500 hover:border-white/20'
             }`}
           >
-            <TrendingUp size={20} />
-            <span className="text-[9px] font-black uppercase tracking-widest text-center leading-tight">
+            <TrendingUp size={22} />
+            <span className="text-[10px] font-black uppercase tracking-widest">
               {cargoLabel}
+            </span>
+            <span className="text-[8px] font-medium opacity-60 normal-case tracking-normal">
+              Dinero que sale
             </span>
           </button>
         </div>
@@ -154,14 +165,15 @@ export default function PaymentModal({
             <DollarSign size={12} /> Monto (COP)
           </label>
           <input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            type="text"
+            inputMode="numeric"
+            value={addDots(amount)}
+            onChange={(e) => setAmount(stripDots(e.target.value))}
             placeholder="0"
             className="w-full bg-black/40 border border-white/10 rounded-2xl p-5 text-4xl font-mono font-black text-white outline-none focus:border-[#1E3C8b] transition-all"
           />
           {/* Preview saldo */}
-          {amount && Number(amount) > 0 && (
+          {amount && numericAmount > 0 && (
             <div className="flex items-center justify-between px-2">
               <span className="text-[9px] text-slate-500 uppercase font-bold">Saldo resultante</span>
               <span

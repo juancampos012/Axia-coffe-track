@@ -5,6 +5,7 @@ import {
   supplierPayment,
   supplierCharge,
   editSupplierMovement,
+  editSupplierAccount,
 } from '@/request/accounts';
 import { useAuth } from '@/context/AuthContext';
 
@@ -16,8 +17,8 @@ export default function SupplierAccountDetail({ supplierId }: { supplierId: stri
       personId={supplierId}
       type="suppliers"
       personTypeName="Proveedor"
-      abonoLabel="El proveedor nos paga"
-      cargoLabel="Registrar nueva deuda"
+      abonoLabel="Ingreso"
+      cargoLabel="Egreso"
       positiveLabel="Te deben"
       negativeLabel="Les debes"
       fetchDetail={getSupplierAccountDetail}
@@ -28,6 +29,7 @@ export default function SupplierAccountDetail({ supplierId }: { supplierId: stri
         supplierCharge({ supplierId: id, tenantId: user?.tenantId ?? '', amount, description, affectsBalance } as any)
       }
       editMovement={editSupplierMovement}
+      editCharge={editSupplierAccount}
     />
   );
 }

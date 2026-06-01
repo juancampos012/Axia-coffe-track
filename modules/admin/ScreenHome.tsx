@@ -6,6 +6,7 @@ import { useBalance } from "@/context/BalanceContext"
 
 import MetricCharts from "@/components/molecules/MetricCharts"
 import CustomTable from "@/components/organisms/CustomTable"
+import CoffeePriceTicker from "@/components/molecules/CoffeePriceTicker"
 import { getListproducts } from "@/lib/api-products"
 import { ProductDAO } from "@/types/Api"
 
@@ -64,7 +65,12 @@ export default function DashboardPage() {
       </div>
 
       <MetricCharts />
-      
+
+      {/* Precio café en tiempo real */}
+      <div className="pt-6 pb-2">
+        <CoffeePriceTicker variant="dashboard" />
+      </div>
+
       <div className="pt-6">
         {isLoading && <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "rgba(74,127,255,0.6)" }}>Cargando productos...</p>}
         
