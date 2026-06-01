@@ -102,15 +102,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             let loggedUser: User | null = null;
 
             if (data.token) {
+              // Setear cookie accesible al middleware de Next.js
               Cookies.set("authToken", data.token, {
-                expires: 7,
+                expires: 0.5, // 12 horas
                 sameSite: "lax",
+                secure: true,
               });
               const decoded = jwtDecode<User>(data.token);
               loggedUser = { id: decoded.id, name: decoded.name || "", email: decoded.email || "", role: decoded.role, tenantId: decoded.tenantId };
               setUserFromToken(data.token);
-            } else if (data.user) {
-              loggedUser = data.user;
+            }
+
+            if (data.user) {
+              loggedUser = loggedUser ?? data.user;
               setUser(data.user);
             }
 
