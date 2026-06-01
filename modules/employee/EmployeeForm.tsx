@@ -56,7 +56,7 @@ const EmployeeForm = forwardRef<HTMLFormElement, EmployeeFormProps>(({ onSuccess
         console.log("Datos enviados:", formData);
         
         try {                
-            const response = await createEmployee(formData, authToken);
+            const response = await createEmployee(formData);
             console.log("Respuesta del servidor:", response);
 
             if (response.status === 201) {
