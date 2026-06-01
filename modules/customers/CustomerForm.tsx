@@ -57,7 +57,7 @@ const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(
         };
 
         try {
-            const response = await createCustomer(formData as any, authToken);
+            const response = await createCustomer(formData as any);
 
             if (response.status === 201) {
                 alert("Cliente creado correctamente");

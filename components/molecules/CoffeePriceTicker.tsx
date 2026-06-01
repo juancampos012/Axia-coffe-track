@@ -78,6 +78,7 @@ export default function CoffeePriceTicker({
 
   useEffect(() => {
     load(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto refresh
