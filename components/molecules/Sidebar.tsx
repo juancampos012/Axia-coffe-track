@@ -130,7 +130,7 @@ export default function Sidebar({
       allowedRoles: ["USER", "ADMIN", "SUPERADMIN"],
       subOptions: [
         { label: "Comprar (caja)", href: `/${locale}/sales/make-sales` },
-        { label: "Compra por Factor", href: `/${locale}/shopping/factor-purchase` },
+        { label: "Compra Cafe Por Factor", href: `/${locale}/shopping/factor-purchase` },
         {
           label: "Ver Compras",
           href: `/${locale}/sales/sales-invoices`,

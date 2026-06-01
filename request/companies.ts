@@ -9,15 +9,14 @@ const fetchWithCredentials = async <T>(url: string, options: RequestInit): Promi
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Error en la solicitud');
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `Error ${response.status}`);
   }
 
   return response.json() as Promise<T>;
 };
 
 export const getCompanyById = async (id: string): Promise<Company> => {
-  console.log(`${API_BASE_URL}/${id}`);
   const company: Company = await fetchWithCredentials(`${API_BASE_URL}/${id}`, {
     method: 'GET',
     headers: {
@@ -25,6 +24,5 @@ export const getCompanyById = async (id: string): Promise<Company> => {
     },
   });
 
-  console.log('Company fetched:', company);
   return company;
 };

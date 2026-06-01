@@ -175,18 +175,37 @@ export function generateMovementPDF(data: MovementPDFData): Blob {
   y += 5;
 
   // ── Saldos ────────────────────────────────────────────────────────────────
-  rowItem('Saldo anterior', fmt(data.balanceBefore), y);
+  // Etiquetas según quién debe a quién (perspectiva de la empresa)
+  const debtLabelBefore = data.balanceBefore > 0
+    ? 'Nos debían'
+    : data.balanceBefore < 0
+    ? 'Les debíamos'
+    : 'Estaban al día';
+
+  const debtLabelAfter = data.balanceAfter > 0
+    ? 'Nos deben'
+    : data.balanceAfter < 0
+    ? 'Les debemos'
+    : 'Al día ✓';
+
+  rowItem(debtLabelBefore, fmt(Math.abs(data.balanceBefore)), y);
   y += 5;
 
+  // Nuevo estado — label dinámico + monto destacado
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7);
-  doc.setTextColor(80, 80, 80);
-  doc.text('Nuevo saldo', margin, y);
+
+  if (data.balanceAfter === 0) {
+    doc.setTextColor(30, 140, 100);
+  } else if (data.balanceAfter > 0) {
+    doc.setTextColor(20, 90, 20);
+  } else {
+    doc.setTextColor(160, 30, 30);
+  }
+  doc.text(debtLabelAfter, margin, y);
+
   doc.setFontSize(8);
-  doc.setTextColor(data.balanceAfter > 0 ? 0 : data.balanceAfter < 0 ? 180 : 60,
-                   data.balanceAfter > 0 ? 80 : 60,
-                   data.balanceAfter > 0 ? 0 : data.balanceAfter < 0 ? 40 : 60);
-  const balStr = fmt(Math.abs(data.balanceAfter));
+  const balStr = data.balanceAfter === 0 ? '$0' : fmt(Math.abs(data.balanceAfter));
   const bw = doc.getTextWidth(balStr);
   doc.text(balStr, pageWidth - margin - bw, y);
   y += 6;

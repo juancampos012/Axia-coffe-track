@@ -5,6 +5,7 @@ import {
   clientPayment,
   clientCharge,
   editClientMovement,
+  editClientAccount,
 } from '@/request/accounts';
 import { useAuth } from '@/context/AuthContext';
 
@@ -16,8 +17,8 @@ export default function ClientAccountDetail({ clientId }: { clientId: string }) 
       personId={clientId}
       type="clients"
       personTypeName="Cliente"
-      abonoLabel="El cliente nos paga"
-      cargoLabel="Registrar nueva deuda"
+      abonoLabel="Ingreso"
+      cargoLabel="Egreso"
       positiveLabel="Te deben"
       negativeLabel="Les debes"
       fetchDetail={getClientAccountDetail}
@@ -28,6 +29,7 @@ export default function ClientAccountDetail({ clientId }: { clientId: string }) 
         clientCharge({ clientId: id, tenantId: user?.tenantId ?? '', amount, description, affectsBalance } as any)
       }
       editMovement={editClientMovement}
+      editCharge={editClientAccount}
     />
   );
 }

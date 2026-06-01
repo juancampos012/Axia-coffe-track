@@ -4,21 +4,26 @@ import { jsPDF } from 'jspdf';
 
 export interface FactorLiquidacionItem {
   productName: string;
-  quantity:    number;   // kg
+  quantity:    number; // kg
   basePrice:   number;
   factor:      number;
-  unitPrice:   number;   // basePrice × factor
+  unitPrice:   number; // precio/kg calculado
   subtotal:    number;
 }
 
 export interface FactorLiquidacionData {
-  receiptNumber: string;
-  date:          string;
-  clientName:    string;
-  clientPhone?:  string;
-  factor:        number;
-  items:         FactorLiquidacionItem[];
-  totalPrice:    number;
+  receiptNumber:    string;
+  date:             string;
+  clientName:       string;
+  clientPhone?:     string;
+  factor:           number;
+  cantidadMuestra?: number;
+  gramosExcelso?:   number;
+  precioBase?:      number;
+  precioCarga?:     number;
+  precioKg?:        number;
+  items:            FactorLiquidacionItem[];
+  totalPrice:       number;
   company?: {
     name?:    string;
     address?: string;
@@ -29,310 +34,343 @@ export interface FactorLiquidacionData {
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0,
+    style: 'currency', currency: 'COP', minimumFractionDigits: 0,
   }).format(n);
 
-/**
- * Genera una liquidación de compra por factor en tamaño carta (letter).
- * Incluye encabezado de empresa, datos del productor, tabla de productos
- * con cantidad (kg), factor de rendimiento, precios y totales.
- */
+const num = (n: number) => n.toLocaleString('es-CO');
+
 export function generateFactorLiquidacion(data: FactorLiquidacionData): Blob {
-  const doc = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: 'letter', // 215.9 × 279.4 mm
-  });
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
 
-  const pageW  = doc.internal.pageSize.getWidth();   // 215.9
-  const pageH  = doc.internal.pageSize.getHeight();  // 279.4
-  const margin = 18;
-  const cW     = pageW - margin * 2;                 // content width
+  const pageW  = doc.internal.pageSize.getWidth();  // 215.9
+  const pageH  = doc.internal.pageSize.getHeight(); // 279.4
+  const ML     = 20;   // left margin
+  const MR     = 20;   // right margin
+  const cW     = pageW - ML - MR;
 
-  // ── Color palette ─────────────────────────────────────────────────────────
-  const NAVY   = [4,  14, 45]  as const;
-  const ACCENT = [30, 90, 200] as const;
-  const WHITE  = [255, 255, 255] as const;
-  const GRAY1  = [60,  60,  70]  as const;   // dark text
-  const GRAY2  = [120, 120, 130] as const;   // muted
-  const GRAY3  = [240, 242, 248] as const;   // bg stripe
+  // ── Palette ───────────────────────────────────────────────────────────────
+  const INK      = [15,  20,  40]  as const;  // near-black
+  const INK2     = [70,  75,  95]  as const;  // secondary text
+  const INK3     = [130, 135, 155] as const;  // muted label
+  const RULE     = [15,  20,  40]  as const;  // thick rule color = same as ink
+  const ACCENT   = [30,  80,  180] as const;  // single accent (dark blue)
+  const STRIPE   = [247, 248, 251] as const;  // table row stripe
+  const BORDER   = [210, 213, 222] as const;  // box borders
+  const WHITE    = [255, 255, 255] as const;
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  const setFill   = ([r,g,b]: readonly number[]) => doc.setFillColor(r, g, b);
-  const setStroke = ([r,g,b]: readonly number[]) => doc.setDrawColor(r, g, b);
-  const setColor  = ([r,g,b]: readonly number[]) => doc.setTextColor(r, g, b);
+  const sf = ([r,g,b]: readonly number[]) => doc.setFillColor(r, g, b);
+  const ss = ([r,g,b]: readonly number[]) => doc.setDrawColor(r, g, b);
+  const sc = ([r,g,b]: readonly number[]) => doc.setTextColor(r, g, b);
 
-  const centerText = (text: string, y: number, size = 11) => {
-    doc.setFontSize(size);
+  const rText = (text: string, y: number, maxX: number) => {
     const w = doc.getTextWidth(text);
-    doc.text(text, (pageW - w) / 2, y);
+    doc.text(text, maxX - w, y);
   };
 
-  const rightText = (text: string, y: number, rightX = pageW - margin) => {
-    const w = doc.getTextWidth(text);
-    doc.text(text, rightX - w, y);
+  const hRule = (y: number, h = 0.6) => {
+    sf(RULE); doc.rect(ML, y, cW, h, 'F');
   };
 
-  // ── HEADER BLOCK ─────────────────────────────────────────────────────────
-  // Dark navy top bar
-  setFill(NAVY);
-  doc.rect(0, 0, pageW, 52, 'F');
+  const thinRule = (y: number) => {
+    ss(BORDER); doc.setLineWidth(0.25);
+    doc.line(ML, y, ML + cW, y);
+  };
 
-  // Accent side stripe
-  setFill(ACCENT);
-  doc.rect(0, 0, 6, 52, 'F');
+  // ─────────────────────────────────────────────────────────────────────────
+  // WHITE PAPER BACKGROUND
+  sf(WHITE); doc.rect(0, 0, pageW, pageH, 'F');
 
-  // Company name
+  // ── ACCENT LEFT STRIPE (thin, runs full height) ───────────────────────────
+  sf(ACCENT); doc.rect(0, 0, 3, pageH, 'F');
+
+  // ── HEADER ───────────────────────────────────────────────────────────────
+  let y = 16;
+
+  // Company name — top left
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  setColor(WHITE);
-  doc.text(data.company?.name ?? 'AXIA COFFEE', margin + 4, 22);
+  doc.setFontSize(18);
+  sc(INK);
+  doc.text((data.company?.name ?? 'AXIA COFFEE').toUpperCase(), ML, y);
 
-  // Company sub-info (address / NIT / phone) in one line if fits, else stacked
+  // Document type — top right
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  sc(ACCENT);
+  rText('LIQUIDACIÓN DE COMPRA', y, ML + cW);
+
+  y += 5;
+
+  // Company sub-info — left
+  const infoArr: string[] = [];
+  if (data.company?.nit)     infoArr.push(`NIT ${data.company.nit}`);
+  if (data.company?.address) infoArr.push(data.company.address);
+  if (data.company?.phone)   infoArr.push(`Tel. ${data.company.phone}`);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  setColor([180, 190, 220]);
-  const infoLines: string[] = [];
-  if (data.company?.address) infoLines.push(data.company.address);
-  if (data.company?.nit)     infoLines.push(`NIT: ${data.company.nit}`);
-  if (data.company?.phone)   infoLines.push(`Tel: ${data.company.phone}`);
-  const infoStr = infoLines.join('   ·   ');
-  doc.text(infoStr || '', margin + 4, 31);
+  doc.setFontSize(7.5);
+  sc(INK2);
+  doc.text(infoArr.join('   ·   '), ML, y);
 
-  // Document title (right side of header)
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  setColor(WHITE);
-  rightText('LIQUIDACIÓN DE COMPRA', 20, pageW - margin);
+  // Doc number + date — right
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  setColor([180, 190, 220]);
-  rightText('COMPRA POR FACTOR', 27, pageW - margin);
-
-  // Doc number + date inside header
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  setColor([180, 190, 220]);
-  rightText(`No. ${data.receiptNumber}`, 38, pageW - margin);
+  doc.setFontSize(7.5);
+  sc(INK2);
   const dateStr = new Date(data.date).toLocaleDateString('es-CO', {
-    year: 'numeric', month: 'long', day: 'numeric',
+    day: '2-digit', month: 'long', year: 'numeric',
   });
-  doc.setFont('helvetica', 'normal');
-  rightText(dateStr, 44, pageW - margin);
+  rText(`No. ${data.receiptNumber}   ·   ${dateStr}`, y, ML + cW);
 
-  let y = 62;
+  y += 7;
+  hRule(y);          // thick horizontal rule
+  y += 6;
 
-  // ── META ROW (Cliente & Factor) ───────────────────────────────────────────
-  // Two side-by-side boxes
-  const boxH = 38;
-  const halfW = (cW - 6) / 2;
+  // ── PARTIES SECTION ───────────────────────────────────────────────────────
+  // Left: empresa — Right: cliente
+  const colW2 = (cW - 6) / 2;
 
-  // Client box
-  setFill(GRAY3);
-  setStroke([210, 215, 230]);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(margin, y, halfW, boxH, 3, 3, 'FD');
+  // Left column: label + data
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.5);
+  sc(INK3);
+  doc.text('EMPRESA COMPRADORA', ML, y);
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  setColor([...ACCENT] as [number,number,number]);
-  doc.text('PRODUCTOR / CLIENTE', margin + 4, y + 8);
+  doc.setFontSize(10);
+  sc(INK);
+  doc.text((data.company?.name ?? 'Axia Coffee').toUpperCase(), ML, y + 6);
+
+  // Right column: cliente
+  const rx = ML + colW2 + 6;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.5);
+  sc(INK3);
+  doc.text('PRODUCTOR / PROVEEDOR', rx, y);
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  setColor(GRAY1);
-  doc.text(data.clientName.toUpperCase(), margin + 4, y + 18);
+  doc.setFontSize(10);
+  sc(INK);
+  doc.text(data.clientName.toUpperCase(), rx, y + 6);
 
   if (data.clientPhone) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    setColor(GRAY2);
-    doc.text(`Tel: ${data.clientPhone}`, margin + 4, y + 26);
+    sc(INK2);
+    doc.text(`Tel. ${data.clientPhone}`, rx, y + 12);
   }
 
-  // Factor box
-  const fx = margin + halfW + 6;
-  setFill(NAVY);
-  doc.roundedRect(fx, y, halfW, boxH, 3, 3, 'F');
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  setColor([180, 190, 220] as [number,number,number]);
-  doc.text('FACTOR DE RENDIMIENTO', fx + 4, y + 8);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(28);
-  setColor(WHITE);
-  doc.text(data.factor.toFixed(2), fx + 4, y + 24);
-
-  const pct = Math.abs(Math.round((data.factor - 1) * 100));
-  const pctLabel = data.factor < 1
-    ? `Descuento del ${pct}%`
-    : data.factor > 1
-    ? `Incremento del ${pct}%`
-    : 'Sin ajuste (precio base)';
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  setColor([150, 170, 220] as [number,number,number]);
-  doc.text(pctLabel, fx + 4, y + 32);
-
-  y += boxH + 10;
-
-  // ── TABLE HEADER ─────────────────────────────────────────────────────────
-  const cols = {
-    producto:  { x: margin,        w: 60 },
-    cantidad:  { x: margin + 60,   w: 28 },
-    pBase:     { x: margin + 88,   w: 28 },
-    factor:    { x: margin + 116,  w: 18 },
-    pFinal:    { x: margin + 134,  w: 30 },
-    subtotal:  { x: margin + 164,  w: cW - 164 },
-  };
-
-  setFill(NAVY);
-  doc.rect(margin, y, cW, 8, 'F');
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  setColor(WHITE);
-  doc.text('PRODUCTO',            cols.producto.x + 2,  y + 5.2);
-  doc.text('CANT. (kg)',          cols.cantidad.x + 2,  y + 5.2);
-  doc.text('P. BASE',            cols.pBase.x + 2,     y + 5.2);
-  doc.text('FCT',                cols.factor.x + 2,    y + 5.2);
-  doc.text('P. FINAL',           cols.pFinal.x + 2,    y + 5.2);
-  doc.text('SUBTOTAL',           cols.subtotal.x + 2,  y + 5.2);
+  y += 20;
+  thinRule(y);
   y += 8;
 
-  // ── TABLE ROWS ────────────────────────────────────────────────────────────
+  // ── ANÁLISIS DE MUESTRA ───────────────────────────────────────────────────
+  // Only render if we have sample data
+  if (data.cantidadMuestra != null && data.gramosExcelso != null) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+    sc(INK3);
+    doc.text('ANÁLISIS DE MUESTRA', ML, y);
+    y += 5;
+
+    // 5-column data row
+    const sampleCols = [
+      { label: 'Muestra (g)',          value: `${num(data.cantidadMuestra)} g` },
+      { label: 'Excelso (g)',           value: `${num(data.gramosExcelso)} g` },
+      { label: 'Precio base',           value: data.precioBase != null ? fmt(data.precioBase) : '—' },
+      { label: 'Factor calc.',          value: data.factor.toFixed(4) },
+      { label: 'Precio / kg',          value: data.precioKg != null ? fmt(data.precioKg) : '—' },
+    ];
+    const sColW = cW / sampleCols.length;
+
+    // Header stripe
+    sf(STRIPE); doc.rect(ML, y, cW, 6.5, 'F');
+    ss(BORDER); doc.setLineWidth(0.25);
+    doc.rect(ML, y, cW, 6.5, 'S');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+    sc(INK3);
+    sampleCols.forEach((col, i) => {
+      doc.text(col.label, ML + i * sColW + 3, y + 4.5);
+    });
+    y += 6.5;
+
+    // Value row
+    sf(WHITE); doc.rect(ML, y, cW, 8, 'F');
+    ss(BORDER); doc.setLineWidth(0.25);
+    doc.rect(ML, y, cW, 8, 'S');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    sc(INK);
+    sampleCols.forEach((col, i) => {
+      doc.text(col.value, ML + i * sColW + 3, y + 5.5);
+    });
+    y += 8;
+
+    y += 10;
+    thinRule(y);
+    y += 8;
+  }
+
+  // ── PRODUCT TABLE ─────────────────────────────────────────────────────────
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.5);
+  sc(INK3);
+  doc.text('DETALLE DE PRODUCTOS', ML, y);
+  y += 5;
+
+  // Column definitions
+  const C = {
+    desc:     { x: ML,       w: 65 },
+    qty:      { x: ML + 65,  w: 22 },
+    pBase:    { x: ML + 87,  w: 28 },
+    factor:   { x: ML + 115, w: 16 },
+    pKg:      { x: ML + 131, w: 28 },
+    subtotal: { x: ML + 159, w: cW - 159 },
+  };
+  const ROW_H = 8;
+  const HEAD_H = 7;
+
+  // Table header — dark background
+  sf(INK); ss(INK); doc.setLineWidth(0);
+  doc.rect(ML, y, cW, HEAD_H, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.5);
+  sc(WHITE);
+  doc.text('DESCRIPCIÓN',   C.desc.x + 2,     y + HEAD_H - 2);
+  doc.text('CANT. (kg)',    C.qty.x + 2,      y + HEAD_H - 2);
+  doc.text('PRECIO BASE',  C.pBase.x + 2,    y + HEAD_H - 2);
+  doc.text('FACTOR',       C.factor.x + 2,   y + HEAD_H - 2);
+  doc.text('PRECIO / KG',  C.pKg.x + 2,     y + HEAD_H - 2);
+  rText('SUBTOTAL',        y + HEAD_H - 2,   C.subtotal.x + C.subtotal.w - 2);
+  y += HEAD_H;
+
+  // Rows
   data.items.forEach((item, i) => {
-    const rowH = 9;
-    // Alternating stripe
-    if (i % 2 === 0) {
-      setFill(GRAY3);
-      doc.rect(margin, y, cW, rowH, 'F');
-    }
+    if (i % 2 === 0) { sf(STRIPE); doc.rect(ML, y, cW, ROW_H, 'F'); }
+
+    // vertical column rules
+    ss(BORDER); doc.setLineWidth(0.2);
+    [C.qty, C.pBase, C.factor, C.pKg, C.subtotal].forEach(col => {
+      doc.line(col.x, y, col.x, y + ROW_H);
+    });
+
+    const baseline = y + 5.5;
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
-    setColor(GRAY1);
-    doc.text(item.productName.toUpperCase(), cols.producto.x + 2, y + 6);
+    sc(INK);
+    doc.text(item.productName.toUpperCase(), C.desc.x + 2, baseline);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
+    sc(INK2);
+    doc.text(`${num(item.quantity)} kg`, C.qty.x + 2, baseline);
 
-    // Quantity
-    const qty = `${item.quantity.toLocaleString('es-CO')} kg`;
-    doc.text(qty, cols.cantidad.x + 2, y + 6);
+    sc(INK3);
+    doc.text(fmt(item.basePrice), C.pBase.x + 2, baseline);
 
-    // Base price
-    setColor(GRAY2);
-    doc.text(fmt(item.basePrice), cols.pBase.x + 2, y + 6);
-
-    // Factor
-    setColor([...ACCENT] as [number,number,number]);
     doc.setFont('helvetica', 'bold');
-    doc.text(item.factor.toFixed(2), cols.factor.x + 2, y + 6);
+    sc(ACCENT);
+    doc.text(item.factor.toFixed(4), C.factor.x + 2, baseline);
 
-    // Unit price (final)
-    setColor([0, 130, 80]);
-    doc.text(fmt(item.unitPrice), cols.pFinal.x + 2, y + 6);
+    sc(INK2);
+    doc.setFont('helvetica', 'normal');
+    doc.text(fmt(item.unitPrice), C.pKg.x + 2, baseline);
 
-    // Subtotal
     doc.setFont('helvetica', 'bold');
-    setColor(GRAY1);
-    const sub = fmt(item.subtotal);
-    rightText(sub, y + 6, cols.subtotal.x + cols.subtotal.w - 2);
+    sc(INK);
+    rText(fmt(item.subtotal), baseline, C.subtotal.x + C.subtotal.w - 2);
 
-    y += rowH;
+    y += ROW_H;
   });
 
   // Table bottom border
-  setStroke([200, 205, 215]);
-  doc.setLineWidth(0.4);
-  doc.line(margin, y, margin + cW, y);
+  ss(INK); doc.setLineWidth(0.5);
+  doc.line(ML, y, ML + cW, y);
   y += 8;
 
-  // ── TOTALS BLOCK ──────────────────────────────────────────────────────────
-  const totalBlockW = 90;
-  const totalBlockX = pageW - margin - totalBlockW;
+  // ── TOTALS ────────────────────────────────────────────────────────────────
+  const totalKg = data.items.reduce((s, i) => s + i.quantity, 0);
 
-  // Total box (navy)
-  setFill(NAVY);
-  doc.roundedRect(totalBlockX, y, totalBlockW, 20, 3, 3, 'F');
-
+  // Left summary
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  setColor([180, 190, 220] as [number,number,number]);
-  doc.text('TOTAL A PAGAR AL PRODUCTOR', totalBlockX + 4, y + 8);
+  sc(INK3);
+  doc.text(`Total: ${num(totalKg)} kg`, ML, y + 5);
 
+  // Right totals block — 2 rows: precio carga / total
+  const totBlockW = 95;
+  const totBlockX = ML + cW - totBlockW;
+
+  if (data.precioCarga != null) {
+    thinRule(y);
+    y += 5;
+    // Label left, value right — on the same baseline
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    sc(INK3);
+    doc.text('Precio por carga (125 kg)', ML, y + 5);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    sc(INK2);
+    rText(fmt(data.precioCarga), y + 5, ML + cW);
+    y += 10;
+    thinRule(y);
+  }
+
+  y += 5;
+
+  // Final total — label then value on separate lines
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  sc(INK3);
+  rText('TOTAL', y + 5, ML + cW);
+  y += 8;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
-  setColor(WHITE);
-  rightText(fmt(data.totalPrice), y + 18, totalBlockX + totalBlockW - 4);
+  sc(INK);
+  rText(fmt(data.totalPrice), y + 8, ML + cW);
+  y += 14;
 
-  // Summary stats (left of totals)
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  setColor(GRAY2);
-  doc.text(`${data.items.length} producto${data.items.length !== 1 ? 's' : ''}`, margin, y + 8);
-  const totalKg = data.items.reduce((s, i) => s + i.quantity, 0);
-  doc.text(`Total kg: ${totalKg.toLocaleString('es-CO')} kg`, margin, y + 16);
-
-  y += 28;
-
-  // ── OBSERVATION / NOTES AREA ──────────────────────────────────────────────
-  setFill(GRAY3);
-  setStroke([210, 215, 230]);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(margin, y, cW, 22, 3, 3, 'FD');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  setColor(GRAY2);
-  doc.text('OBSERVACIONES:', margin + 4, y + 7);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  setColor(GRAY1);
-  doc.text(`Factor aplicado: ${data.factor.toFixed(2)}  ·  ${pctLabel}`, margin + 4, y + 15);
-
-  y += 30;
+  hRule(y, 0.5);
+  y += 10;
 
   // ── SIGNATURE AREA ────────────────────────────────────────────────────────
-  const sigW = (cW - 10) / 2;
+  const sigColW = (cW - 10) / 2;
 
-  // Empresa firma
-  setStroke([180, 180, 190]);
-  doc.setLineWidth(0.3);
-  doc.line(margin, y + 16, margin + sigW, y + 16);
+  // Left sig
+  ss(INK2); doc.setLineWidth(0.3);
+  doc.line(ML, y + 14, ML + sigColW, y + 14);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.5);
+  sc(INK3);
+  doc.text('FIRMA Y SELLO — EMPRESA', ML, y + 19);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  setColor(GRAY2);
-  centerText('Firma responsable empresa', y + 20, 7);
+  doc.text(data.company?.name ?? '', ML, y + 24);
 
-  // Cliente firma
-  const sig2X = margin + sigW + 10;
-  doc.line(sig2X, y + 16, sig2X + sigW, y + 16);
-  // Center within second sig box
-  doc.setFontSize(7);
-  const label2 = 'Firma productor / cliente';
-  const lw2 = doc.getTextWidth(label2);
-  doc.text(label2, sig2X + (sigW - lw2) / 2, y + 20);
-
-  y += 28;
+  // Right sig
+  const sig2X = ML + sigColW + 10;
+  doc.line(sig2X, y + 14, sig2X + sigColW, y + 14);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.5);
+  sc(INK3);
+  doc.text('FIRMA — PRODUCTOR / PROVEEDOR', sig2X, y + 19);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.clientName, sig2X, y + 24);
 
   // ── FOOTER ───────────────────────────────────────────────────────────────
-  setFill([235, 237, 245]);
-  doc.rect(0, pageH - 14, pageW, 14, 'F');
-  setFill(ACCENT);
-  doc.rect(0, pageH - 14, 6, 14, 'F');
+  thinRule(pageH - 12);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  setColor(GRAY2);
-  const footerLeft = `${data.company?.name ?? 'Axia Coffee'}  ·  Liquidación de compra por factor`;
-  doc.text(footerLeft, margin + 4, pageH - 5.5);
-  doc.setFontSize(7);
-  rightText(`Generado: ${new Date().toLocaleString('es-CO')}`, pageH - 5.5, pageW - margin);
+  doc.setFontSize(6.5);
+  sc(INK3);
+  doc.text(
+    `${data.company?.name ?? 'Axia Coffee'}   ·   Liquidación de compra por factor No. ${data.receiptNumber}`,
+    ML, pageH - 7
+  );
+  rText(`Generado el ${new Date().toLocaleString('es-CO')}`, pageH - 7, ML + cW);
 
   return doc.output('blob');
 }

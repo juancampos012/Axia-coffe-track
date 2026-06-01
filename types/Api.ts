@@ -345,8 +345,13 @@ export type Company = {
   name: string;
   address: string;
   phone: string;
-  currentBalance: number;
   sector: string;
+  currentBalance: number;
+  coffeeQuantity: number;
+  wetCoffeeQuantity: number;
+  beanQuantity: number;
+  pasillaQuantity: number;
+  cacaoQuantity: number;
   createdAt: string;
   updatedAt: string;
 };

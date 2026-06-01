@@ -16,7 +16,7 @@ const fetchWithCredentials = async (url: string, options: RequestInit): Promise<
   return response;
 };
 
-export const createCustomer = async (body: ClientDAO, authToken: string): Promise<Response> => {
+export const createCustomer = async (body: ClientDAO): Promise<Response> => {
   const url = `${API_BASE_URL}/clients`;
 
   const headersOptions: RequestInit = {
@@ -30,7 +30,7 @@ export const createCustomer = async (body: ClientDAO, authToken: string): Promis
   return fetchWithCredentials(url, headersOptions);
 };
 
-export const createEmployee = async (body: EmployeeDAO, authToken: string): Promise<Response> => {
+export const createEmployee = async (body: EmployeeDAO): Promise<Response> => {
     const url = `${API_BASE_URL}/users`;
   
     const headersOptions: RequestInit = {
@@ -46,7 +46,6 @@ export const createEmployee = async (body: EmployeeDAO, authToken: string): Prom
   
 export const getListEmployees = async (): Promise<EmployeeDAO[]> => {
   const url = `${API_BASE_URL}/users`;
-  console.log('Fetching products from:', url);
 
   const response = await fetchWithCredentials(url, {
     method: 'GET',
@@ -61,7 +60,6 @@ export const getListEmployees = async (): Promise<EmployeeDAO[]> => {
 
 export const getListCustomers = async (): Promise<ClientDAO[]> => {
   const url = `${API_BASE_URL}/clients`;
-  console.log('Fetching products from:', url);
 
   const response = await fetchWithCredentials(url, {
     method: 'GET',
@@ -74,34 +72,26 @@ export const getListCustomers = async (): Promise<ClientDAO[]> => {
   return data;
 };
 
-export const deleteCustomers = async (id: string): Promise<ClientDAO[]> => {
+export const deleteCustomers = async (id: string): Promise<void> => {
   const url = `${API_BASE_URL}/clients/${id}`;
-  console.log('Fetching products from:', url);
 
-  const response = await fetchWithCredentials(url, {
+  await fetchWithCredentials(url, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
   });
-
-  const data: ClientDAO[] = await response.json();
-  return data;
 };
 
-export const deleteEmployees = async (id: string): Promise<EmployeeDAO[]> => {
+export const deleteEmployees = async (id: string): Promise<void> => {
   const url = `${API_BASE_URL}/users/${id}`;
-  console.log('Fetching products from:', url);
 
-  const response = await fetchWithCredentials(url, {
+  await fetchWithCredentials(url, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
   });
-
-  const data: EmployeeDAO[] = await response.json();
-  return data;
 };
 
 export const updateCustomer = async (body: ClientDAO, id:string): Promise<Response> => {

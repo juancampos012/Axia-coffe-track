@@ -5,6 +5,7 @@ import {
   partnerPayment,
   partnerCharge,
   editPartnerMovement,
+  editPartnerAccount,
 } from '@/request/accounts';
 import { useAuth } from '@/context/AuthContext';
 
@@ -16,8 +17,8 @@ export default function PartnerAccountDetail({ partnerId }: { partnerId: string 
       personId={partnerId}
       type="partners"
       personTypeName="Aliado"
-      abonoLabel="El aliado nos paga"
-      cargoLabel="Registrar nueva deuda"
+      abonoLabel="Ingreso"
+      cargoLabel="Egreso"
       positiveLabel="Te deben"
       negativeLabel="Les debes"
       fetchDetail={getPartnerAccountDetail}
@@ -28,6 +29,7 @@ export default function PartnerAccountDetail({ partnerId }: { partnerId: string 
         partnerCharge({ partnerId: id, tenantId: user?.tenantId ?? '', amount, description, affectsBalance } as any)
       }
       editMovement={editPartnerMovement}
+      editCharge={editPartnerAccount}
     />
   );
 }

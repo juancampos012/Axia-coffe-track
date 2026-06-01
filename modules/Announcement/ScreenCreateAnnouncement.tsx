@@ -89,21 +89,6 @@ export default function ScreenCreateAnnouncement() {
                   showResults={true}
                   placeholder="Buscar por nombre o NIT..."
                 />  
-                {selectedClient && (
-                  <div className="flex items-center justify-between p-4 bg-[#1E3C8b]/10 border border-[#1E3C8b]/20 rounded-2xl animate-in fade-in slide-in-from-top-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#1E3C8b] flex items-center justify-center text-xs font-black italic">
-                        {selectedClient.firstName.charAt(0)}
-                      </div>
-                      <span className="text-sm font-bold text-white uppercase tracking-tight">
-                        {selectedClient.firstName} {selectedClient.lastName}
-                      </span>
-                    </div>
-                    <button onClick={() => setSelectedClient(null)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                      <X size={18} className="text-slate-500 hover:text-red-400" />
-                    </button>
-                  </div>
-                )}
               </div>
 
               <div className="space-y-4">
@@ -114,19 +99,6 @@ export default function ScreenCreateAnnouncement() {
                   showResults={true}
                   placeholder="¿Qué café se pacta?"
                 />
-                {selectedProduct && (
-                  <div className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl animate-in fade-in slide-in-from-top-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-black">
-                        <Package size={18} />
-                      </div>
-                      <span className="text-sm font-bold text-white uppercase tracking-tight">{selectedProduct.name}</span>
-                    </div>
-                    <button onClick={() => setSelectedProduct(null)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                      <X size={18} className="text-slate-500 hover:text-red-400" />
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -201,13 +173,6 @@ export default function ScreenCreateAnnouncement() {
                 <div className="flex justify-between items-center p-4 bg-white/[0.03] rounded-2xl border border-white/5">
                   <span className="text-[10px] font-bold text-slate-500 uppercase">Estado</span>
                   <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full uppercase italic">Garantizado</span>
-                </div>
-                
-                <div className="flex flex-col gap-3 p-4 bg-white/[0.03] rounded-2xl border border-white/5">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">Resumen de Pacto</span>
-                  <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                    Se fijará un precio de <span className="text-white font-bold">${Number(price || 0).toLocaleString('es-CO')}</span> por kilo para un total de <span className="text-white font-bold">{totalQuantity || 0} kg</span>.
-                  </p>
                 </div>
               </div>
             </div>

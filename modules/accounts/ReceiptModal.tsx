@@ -40,6 +40,12 @@ export default function ReceiptModal({ isOpen, onClose, receipt, company }: Rece
 
   const isAbono = receipt.mode === 'abono';
 
+  const debtLabel = (balance: number) => {
+    if (balance > 0)  return 'Nos debían';
+    if (balance < 0)  return 'Les debíamos';
+    return 'Al día ✓';
+  };
+
   const handleViewPDF = () => {
     if (!receipt) return;
     const blob = generateMovementPDF({
@@ -169,8 +175,11 @@ export default function ReceiptModal({ isOpen, onClose, receipt, company }: Rece
               {isAbono ? 'Valor abonado' : 'Valor cargado'}
             </p>
             <p
-              className="text-4xl font-black font-mono"
-              style={{ color: isAbono ? '#10b981' : '#ef4444' }}
+              className="font-black font-mono break-all leading-tight"
+              style={{
+                color: isAbono ? '#10b981' : '#ef4444',
+                fontSize: receipt.amount >= 100_000_000 ? '1.6rem' : receipt.amount >= 10_000_000 ? '2rem' : '2.4rem',
+              }}
             >
               {isAbono ? '+' : '-'}{fmt(receipt.amount)}
             </p>
@@ -181,17 +190,27 @@ export default function ReceiptModal({ isOpen, onClose, receipt, company }: Rece
             style={{ background: 'rgba(30,60,139,0.3)', borderTop: '1px dashed rgba(30,60,139,0.4)' }}
           />
 
-          <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Saldo anterior</span>
-            <span className="text-sm font-mono text-white">{fmt(receipt.balanceBefore)}</span>
+          <div className="flex justify-between items-start gap-3">
+            <span className="text-[10px] font-bold uppercase tracking-widest shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              {debtLabel(receipt.balanceBefore)}
+            </span>
+            <span className="text-xs font-mono text-white text-right break-all">{fmt(Math.abs(receipt.balanceBefore))}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Saldo nuevo</span>
+          <div className="flex justify-between items-start gap-3">
+            <span className="text-[10px] font-bold uppercase tracking-widest shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              {debtLabel(receipt.balanceAfter)}
+            </span>
             <span
-              className="text-sm font-mono font-black"
-              style={{ color: receipt.balanceAfter >= 0 ? 'rgba(74,127,255,0.9)' : 'rgba(248,113,113,0.9)' }}
+              className="text-xs font-mono font-black text-right break-all"
+              style={{
+                color: receipt.balanceAfter === 0
+                  ? 'rgba(16,185,129,0.9)'
+                  : receipt.balanceAfter > 0
+                    ? 'rgba(74,127,255,0.9)'
+                    : 'rgba(248,113,113,0.9)',
+              }}
             >
-              {fmt(receipt.balanceAfter)}
+              {receipt.balanceAfter === 0 ? '$0' : fmt(Math.abs(receipt.balanceAfter))}
             </span>
           </div>
 

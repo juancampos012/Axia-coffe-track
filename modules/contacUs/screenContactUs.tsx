@@ -6,8 +6,8 @@ import HomeFooter from "@/components/organisms/HomeFooter";
 
 const ScreenContactUS: React.FC = () => {
   return (
-    <div className="w-full bg-black">
-        <Navbar/>   
+    <div className="w-full" style={{ background: '#04060f' }}>
+        <Navbar/>
         <ContactUs/>
         <HomeFooter
           style="bg-black text-white "
