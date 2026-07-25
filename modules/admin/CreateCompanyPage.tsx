@@ -6,8 +6,10 @@ import { useLocale } from 'next-intl';
 import {
   ArrowLeft, Building2, Hash, Phone, MapPin,
   Image as ImageIcon, Loader2, CheckCircle2, X,
+  User, Mail, KeyRound, UserPlus,
 } from 'lucide-react';
 import { createCompany } from '@/request/companies';
+import { createUserForCompany } from '@/request/users';
 
 const SECTORS = [
   { value: 'FOOD', label: 'Alimentos' },
@@ -31,6 +33,13 @@ export default function CreateCompanyPage() {
   });
   const [logo, setLogo] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [newCompanyId, setNewCompanyId] = useState<string | null>(null);
+
+  // ── Usuario ADMIN de la empresa recién creada ──────────────────────────────
+  const [userForm, setUserForm] = useState({ name: '', email: '', password: '' });
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [userCreated, setUserCreated] = useState(false);
+  const [userError, setUserError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,7 +59,8 @@ export default function CreateCompanyPage() {
 
     try {
       setLoading(true);
-      await createCompany({ ...formData, logo });
+      const company = await createCompany({ ...formData, logo });
+      setNewCompanyId(company.id);
       setSuccess(true);
     } catch (error: any) {
       alert(error.message || 'Error al crear la empresa');
@@ -59,35 +69,119 @@ export default function CreateCompanyPage() {
     }
   };
 
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCompanyId || !userForm.name || !userForm.email || !userForm.password) return;
+    setUserError('');
+    try {
+      setCreatingUser(true);
+      await createUserForCompany({ ...userForm, role: 'ADMIN', tenantId: newCompanyId });
+      setUserCreated(true);
+    } catch (error: any) {
+      setUserError(error.message || 'Error al crear el usuario');
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
   const resetForm = () => {
     setFormData({ nit: '', name: '', address: '', phone: '', sector: 'FOOD' });
     setLogo(null);
     setLogoPreview(null);
     setSuccess(false);
+    setNewCompanyId(null);
+    setUserForm({ name: '', email: '', password: '' });
+    setUserCreated(false);
+    setUserError('');
   };
 
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: '#0a1120' }}>
-        <div className="max-w-md w-full rounded-[3rem] p-10 text-center" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(16,185,129,0.15)' }}>
-            <CheckCircle2 size={40} style={{ color: '#10b981' }} />
+        <div className="max-w-md w-full rounded-[3rem] p-10" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="text-center">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(16,185,129,0.15)' }}>
+              <CheckCircle2 size={40} style={{ color: '#10b981' }} />
+            </div>
+            <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
+              Empresa creada
+            </h2>
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-8 text-slate-400">
+              {formData.name} · con 5 productos base (Cafe Seco, Cafe Mojado, Cacao, Frijol, Pasilla) y un proveedor predeterminado
+            </p>
           </div>
-          <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Empresa creada
-          </h2>
-          <p className="text-[10px] font-bold uppercase tracking-widest mb-8 text-slate-400">
-            {formData.name} · con 5 productos base (Cafe Seco, Cafe Mojado, Cacao, Frijol, Pasilla) y un proveedor predeterminado
-          </p>
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={resetForm}
-              className="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-white"
-              style={{ background: 'linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)' }}
-            >
-              Crear otra empresa
-            </button>
-          </div>
+
+          {userCreated ? (
+            <div className="text-center">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-8">
+                Usuario ADMIN creado — ya puede iniciar sesión
+              </p>
+              <button
+                onClick={resetForm}
+                className="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-white"
+                style={{ background: 'linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)' }}
+              >
+                Crear otra empresa
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleCreateUser} className="space-y-4 mb-4">
+              <h3 className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2" style={{ color: 'rgba(74,127,255,0.8)' }}>
+                <UserPlus size={14} /> Crear usuario ADMIN de esta empresa
+              </h3>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2"><User size={11} /> Nombre</label>
+                <input
+                  value={userForm.name}
+                  onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                  className="w-full rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none"
+                  style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(30,60,139,0.4)' }}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2"><Mail size={11} /> Correo</label>
+                <input
+                  type="email"
+                  value={userForm.email}
+                  onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                  className="w-full rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none"
+                  style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(30,60,139,0.4)' }}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2"><KeyRound size={11} /> Contraseña</label>
+                <input
+                  type="password"
+                  value={userForm.password}
+                  onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                  className="w-full rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none"
+                  style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(30,60,139,0.4)' }}
+                />
+              </div>
+
+              {userError && (
+                <p className="text-[9px] font-bold uppercase tracking-widest text-red-400">{userError}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={creatingUser || !userForm.name || !userForm.email || !userForm.password}
+                className="w-full py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-30 flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #1e3c8b 0%, #13275a 100%)' }}
+              >
+                {creatingUser ? <Loader2 size={14} className="animate-spin" /> : 'Crear usuario'}
+              </button>
+
+              <button
+                type="button"
+                onClick={resetForm}
+                className="w-full text-[9px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-300 pt-1"
+              >
+                Omitir y crear otra empresa
+              </button>
+            </form>
+          )}
         </div>
       </div>
     );

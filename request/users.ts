@@ -10,10 +10,32 @@ const fetchWithCredentials = async (url: string, options: RequestInit): Promise<
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
-    throw new Error(errorData.message || 'Error en la solicitud');
+    throw new Error(errorData.error || errorData.message || 'Error en la solicitud');
   }
 
   return response;
+};
+
+/** Crea el usuario ADMIN (u otro rol) de una empresa recién creada. Solo SUPERADMIN puede indicar tenantId. */
+export const createUserForCompany = async (data: {
+  name: string;
+  email: string;
+  password: string;
+  role: 'ADMIN' | 'USER';
+  tenantId: string;
+}): Promise<any> => {
+  const formData = new FormData();
+  formData.append('name', data.name);
+  formData.append('email', data.email);
+  formData.append('password', data.password);
+  formData.append('role', data.role);
+  formData.append('tenantId', data.tenantId);
+
+  const response = await fetchWithCredentials(`${API_BASE_URL}/users`, {
+    method: 'POST',
+    body: formData,
+  });
+  return response.json();
 };
 
 export const createCustomer = async (body: ClientDAO): Promise<Response> => {
