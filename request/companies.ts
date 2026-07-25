@@ -26,3 +26,57 @@ export const getCompanyById = async (id: string): Promise<Company> => {
 
   return company;
 };
+
+export const getCompanies = async (): Promise<Company[]> => {
+  return fetchWithCredentials(`${API_BASE_URL}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
+
+export const createCompany = async (data: {
+  nit: string;
+  name: string;
+  address: string;
+  phone: string;
+  sector: string;
+  logo?: File | null;
+}): Promise<Company> => {
+  const formData = new FormData();
+  formData.append('nit', data.nit);
+  formData.append('name', data.name);
+  formData.append('address', data.address);
+  formData.append('phone', data.phone);
+  formData.append('sector', data.sector);
+  if (data.logo) formData.append('logo', data.logo);
+
+  return fetchWithCredentials(`${API_BASE_URL}`, {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const updateCompany = async (
+  id: string,
+  data: {
+    nit: string;
+    name: string;
+    address: string;
+    phone: string;
+    sector: string;
+    logo?: File | null;
+  }
+): Promise<Company> => {
+  const formData = new FormData();
+  formData.append('nit', data.nit);
+  formData.append('name', data.name);
+  formData.append('address', data.address);
+  formData.append('phone', data.phone);
+  formData.append('sector', data.sector);
+  if (data.logo) formData.append('logo', data.logo);
+
+  return fetchWithCredentials(`${API_BASE_URL}/${id}`, {
+    method: 'PATCH',
+    body: formData,
+  });
+};

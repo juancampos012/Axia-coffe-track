@@ -96,6 +96,15 @@ export const partnerCharge = async (body: {
   return r.json();
 };
 
+/** Marca el cierre de período cuando el saldo ya está en $0 (no hay nada que saldar) */
+export const partnerClosePeriodMarker = async (partnerId: string, description: string): Promise<any> => {
+  const r = await fetchWithCredentials(`${API_URL}/partner-accounts/close-period`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ partnerId, description }),
+  });
+  return r.json();
+};
+
 // ─── CLIENTES ─────────────────────────────────────────────────────────────────
 
 export const getClientAccountsSummary = async (): Promise<AccountSummary[]> => {
@@ -132,6 +141,15 @@ export const clientCharge = async (body: {
   return r.json();
 };
 
+/** Marca el cierre de período cuando el saldo ya está en $0 (no hay nada que saldar) */
+export const clientClosePeriodMarker = async (clientId: string, description: string): Promise<any> => {
+  const r = await fetchWithCredentials(`${API_URL}/client-accounts/close-period`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId, description }),
+  });
+  return r.json();
+};
+
 // ─── PROVEEDORES ──────────────────────────────────────────────────────────────
 
 export const getSupplierAccountsSummary = async (): Promise<AccountSummary[]> => {
@@ -164,6 +182,15 @@ export const supplierCharge = async (body: {
   const r = await fetchWithCredentials(`${API_URL}/supplier-accounts`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+  });
+  return r.json();
+};
+
+/** Marca el cierre de período cuando el saldo ya está en $0 (no hay nada que saldar) */
+export const supplierClosePeriodMarker = async (supplierId: string, description: string): Promise<any> => {
+  const r = await fetchWithCredentials(`${API_URL}/supplier-accounts/close-period`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ supplierId, description }),
   });
   return r.json();
 };

@@ -7,20 +7,50 @@ import { useRouter } from "next/navigation";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Dayjs } from "dayjs";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import dayjs, { Dayjs } from "dayjs";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
 import EmptyState from '@/components/molecules/EmptyState';
 import CustomTable from "@/components/organisms/CustomTable";
-import { deleteSaleInvoice, searchInvoicesByDateRange } from "@/lib/api-saleInvoce";
+import { deleteSaleInvoice, searchInvoicesByDateRange, viewSaleInvoicePDF, updateSaleInvoiceItem } from "@/lib/api-saleInvoce";
+import { getCashMovements } from "@/lib/api-analytics";
 import TableFilter from "@/components/molecules/TableFilter";
-import { FileSpreadsheet, Search, X, Calendar } from "lucide-react";
+import SearchBarUniversal from "@/components/molecules/SearchBar";
+import { ProductDAO } from "@/types/Api";
+import { useAuth } from "@/context/AuthContext";
+import { useBalance } from "@/context/BalanceContext";
+import { FileSpreadsheet, Search, X, Calendar, CalendarCheck, Receipt, Pencil, Loader2, Save } from "lucide-react";
+
+const darkPickerTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: { main: '#4a7fff' },
+    background: { paper: '#0a1120' },
+  },
+  components: {
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          background: 'rgba(0,0,0,0.3)',
+          '& fieldset': { borderColor: 'rgba(74,127,255,0.3)' },
+          '&:hover fieldset': { borderColor: 'rgba(74,127,255,0.5)' },
+          '&.Mui-focused fieldset': { borderColor: '#4a7fff' },
+        },
+        input: { color: '#fff' },
+      },
+    },
+    MuiSvgIcon: { styleOverrides: { root: { color: 'rgba(255,255,255,0.4)' } } },
+  },
+});
 
 export default function ScreenInvoices() {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("saleInvoice");
+  const { user } = useAuth();
+  const { refreshBalance } = useBalance();
 
   const [currentSort, setCurrentSort] = useState<{ field: string; direction: 'asc' | 'desc' } | null>(null);
   const [invoices, setInvoices] = useState<{ [key: string]: string }[]>([]);
@@ -29,6 +59,17 @@ export default function ScreenInvoices() {
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+
+  type EditableItem = {
+    saleProductInvoiceId: string;
+    productId: string;
+    productName: string;
+    quantity: string;
+    unitPrice: string;
+  };
+  const [editingInvoice, setEditingInvoice] = useState<any>(null);
+  const [editItems, setEditItems] = useState<EditableItem[]>([]);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const tableHeaders = [
     { label: t("headers.id"), key: "id" },
@@ -66,6 +107,13 @@ export default function ScreenInvoices() {
     }
   };
 
+  const handleTodaySearch = () => {
+    const today = dayjs();
+    setStartDate(today);
+    setEndDate(today);
+    fetchInvoicesByDateRange(today.format("YYYY-MM-DD"), today.format("YYYY-MM-DD"));
+  };
+
   const handleClearSearch = () => {
     setStartDate(null);
     setEndDate(null);
@@ -75,13 +123,71 @@ export default function ScreenInvoices() {
 
   const handleViewInvoice = (invoiceId: string) => router.push(`/${locale}/sales/sales-invoices/${invoiceId}`);
 
+  const handleEditInvoice = (invoiceId: string) => {
+    const invoice = invoicesXlsx.find((inv) => inv.id === invoiceId);
+    const items = invoice?.invoiceProducts || [];
+    if (items.length === 0) {
+      alert("Esta factura no tiene productos para editar.");
+      return;
+    }
+    setEditingInvoice(invoice);
+    setEditItems(
+      items.map((it: any) => ({
+        saleProductInvoiceId: it.id,
+        productId: it.productId,
+        productName: it.product?.name || "Producto",
+        quantity: String(it.quantity),
+        unitPrice: String(it.unitPrice ?? 0),
+      }))
+    );
+  };
+
+  const updateEditItem = (id: string, patch: Partial<EditableItem>) => {
+    setEditItems((prev) => prev.map((it) => (it.saleProductInvoiceId === id ? { ...it, ...patch } : it)));
+  };
+
+  const handleSaveEditInvoice = async () => {
+    if (!editingInvoice) return;
+    try {
+      setIsSavingEdit(true);
+      await updateSaleInvoiceItem(editingInvoice.id, {
+        items: editItems.map((it) => ({
+          id: it.saleProductInvoiceId,
+          productId: it.productId,
+          quantity: Number(it.quantity),
+          unitPrice: Number(it.unitPrice),
+        })),
+      });
+      if (user?.tenantId) await refreshBalance(user.tenantId);
+      if (startDate && endDate) {
+        await fetchInvoicesByDateRange(startDate.format("YYYY-MM-DD"), endDate.format("YYYY-MM-DD"));
+      }
+      setEditingInvoice(null);
+      setEditItems([]);
+    } catch (err: any) {
+      alert(err.message || "Error al editar la factura");
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleViewReceipt = async (invoiceId: string) => {
+    try {
+      await viewSaleInvoicePDF(invoiceId);
+    } catch (err) {
+      console.error("Error al obtener el recibo:", err);
+      alert("No se pudo abrir el recibo.");
+    }
+  };
+
   const handleDeleteInvoice = async (invoiceId: string) => {
+    if (!confirm("¿Eliminar esta factura? Esta acción no se puede deshacer.")) return;
     try {
       await deleteSaleInvoice(invoiceId);
       setInvoices((prev) => prev.filter((inv) => inv.id !== invoiceId));
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error eliminando la factura:", err);
-      alert(t("deleteError"));
+      alert(err?.message || t("deleteError"));
     }
   };
 
@@ -101,6 +207,7 @@ export default function ScreenInvoices() {
     invoicesXlsx.forEach(inv => {
       (inv.invoiceProducts || []).forEach((p: any) => allProducts.add(p.product?.name || "Producto sin nombre"));
     });
+    const productTotals: { name: string; totalQty: number; totalSum: number }[] = [];
     for (const prodName of Array.from(allProducts)) {
       const worksheet = workbook.addWorksheet(prodName);
       worksheet.addRow(["Cliente", "Fecha", `${prodName} (Cantidad)`, `${prodName} (Precio Unitario)`, `${prodName} (Total)`]);
@@ -136,7 +243,80 @@ export default function ScreenInvoices() {
         if (typeof col.eachCell === "function") col.eachCell({ includeEmpty: true }, cell => { max = Math.max(max, (cell.value?.toString() || "").length); });
         col.width = max + 5;
       });
+
+      productTotals.push({ name: prodName, totalQty: totalQty || 0, totalSum: totalSum || 0 });
     }
+
+    // Hoja "Total": resumen por categoría (cantidad + valor) y gran total, como el reporte manual
+    const totalSheet = workbook.addWorksheet("Total");
+    productTotals.forEach(({ name, totalQty, totalSum }) => {
+      const row = totalSheet.addRow([name, totalQty, totalSum]);
+      row.getCell(1).font = { bold: true };
+      row.getCell(2).numFmt = '#,##0.##';
+      row.getCell(3).numFmt = '$ #,##0';
+    });
+    const grandTotal = productTotals.reduce((s, p) => s + p.totalSum, 0);
+    const grandTotalRow = totalSheet.addRow(["", "", grandTotal]);
+    grandTotalRow.getCell(3).numFmt = '$ #,##0';
+    grandTotalRow.font = { bold: true };
+
+    // Ingresos (abonos que nos hacen) y egresos (gastos) del mismo rango de fechas
+    if (startDate && endDate) {
+      try {
+        const { incomes, expenses } = await getCashMovements(
+          startDate.format("YYYY-MM-DD"),
+          endDate.format("YYYY-MM-DD")
+        );
+
+        // Bloque de Ingresos: columnas E/F
+        totalSheet.getCell(1, 5).value = "Ingresos";
+        totalSheet.getCell(1, 6).value = "Valor";
+        totalSheet.getCell(1, 5).font = { bold: true };
+        totalSheet.getCell(1, 6).font = { bold: true };
+        incomes.forEach((inc, i) => {
+          const r = i + 2;
+          const label = inc.description && inc.description !== "Abono" ? `${inc.name} - ${inc.description}` : inc.name;
+          totalSheet.getCell(r, 5).value = label;
+          totalSheet.getCell(r, 6).value = inc.amount;
+          totalSheet.getCell(r, 6).numFmt = "$ #,##0";
+        });
+        const incomesTotal = incomes.reduce((s, i) => s + i.amount, 0);
+        const incTotalRow = incomes.length + 2;
+        totalSheet.getCell(incTotalRow, 5).value = "Total Ingresos";
+        totalSheet.getCell(incTotalRow, 5).font = { bold: true };
+        totalSheet.getCell(incTotalRow, 6).value = incomesTotal;
+        totalSheet.getCell(incTotalRow, 6).numFmt = "$ #,##0";
+        totalSheet.getCell(incTotalRow, 6).font = { bold: true };
+
+        // Bloque de Egresos: columnas H/I
+        totalSheet.getCell(1, 8).value = "Egresos";
+        totalSheet.getCell(1, 9).value = "Valor";
+        totalSheet.getCell(1, 8).font = { bold: true };
+        totalSheet.getCell(1, 9).font = { bold: true };
+        expenses.forEach((exp, i) => {
+          const r = i + 2;
+          totalSheet.getCell(r, 8).value = exp.description || new Date(exp.date).toLocaleDateString("es-CO");
+          totalSheet.getCell(r, 9).value = exp.amount;
+          totalSheet.getCell(r, 9).numFmt = "$ #,##0";
+        });
+        const expensesTotal = expenses.reduce((s, e) => s + e.amount, 0);
+        const expTotalRow = expenses.length + 2;
+        totalSheet.getCell(expTotalRow, 8).value = "Total Egresos";
+        totalSheet.getCell(expTotalRow, 8).font = { bold: true };
+        totalSheet.getCell(expTotalRow, 9).value = expensesTotal;
+        totalSheet.getCell(expTotalRow, 9).numFmt = "$ #,##0";
+        totalSheet.getCell(expTotalRow, 9).font = { bold: true };
+      } catch (err) {
+        console.error("Error al obtener ingresos/egresos:", err);
+      }
+    }
+
+    totalSheet.columns.forEach(col => {
+      let max = 0;
+      if (typeof col.eachCell === "function") col.eachCell({ includeEmpty: true }, cell => { max = Math.max(max, (cell.value?.toString() || "").length); });
+      col.width = max + 5;
+    });
+
     const buffer = await workbook.xlsx.writeBuffer();
     saveAs(new Blob([buffer]), "reporte_facturas.xlsx");
   };
@@ -179,24 +359,26 @@ export default function ScreenInvoices() {
               <Calendar size={16} style={{ color: '#4a7fff' }} />
             </div>
 
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium uppercase tracking-wider text-white/40">Desde</label>
-                <DatePicker
-                  value={startDate}
-                  onChange={(v) => setStartDate(v)}
-                  slotProps={{ textField: { size: 'small', sx: { '& .MuiOutlinedInput-root': { color: '#fff' } } } }}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium uppercase tracking-wider text-white/40">Hasta</label>
-                <DatePicker
-                  value={endDate}
-                  onChange={(v) => setEndDate(v)}
-                  slotProps={{ textField: { size: 'small', sx: { '& .MuiOutlinedInput-root': { color: '#fff' } } } }}
-                />
-              </div>
-            </LocalizationProvider>
+            <ThemeProvider theme={darkPickerTheme}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wider text-white/40">Desde</label>
+                  <DatePicker
+                    value={startDate}
+                    onChange={(v) => setStartDate(v)}
+                    slotProps={{ textField: { size: 'small' } }}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wider text-white/40">Hasta</label>
+                  <DatePicker
+                    value={endDate}
+                    onChange={(v) => setEndDate(v)}
+                    slotProps={{ textField: { size: 'small' } }}
+                  />
+                </div>
+              </LocalizationProvider>
+            </ThemeProvider>
 
             <button
               onClick={handleDateSearch}
@@ -210,6 +392,21 @@ export default function ScreenInvoices() {
             >
               <Search size={14} />
               {isLoading ? "Buscando..." : "Buscar"}
+            </button>
+
+            <button
+              onClick={handleTodaySearch}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+              style={{
+                background: 'rgba(74,127,255,0.1)',
+                color: '#4a7fff',
+                border: '1px solid rgba(74,127,255,0.3)',
+                height: 40,
+              }}
+            >
+              <CalendarCheck size={14} />
+              Hoy
             </button>
 
             {hasSearched && (
@@ -246,8 +443,128 @@ export default function ScreenInvoices() {
           customActions={{
             view: handleViewInvoice,
             delete: handleDeleteInvoice,
+            custom: [
+              { label: "Ver recibo", icon: <Receipt size={14} className="text-emerald-400" />, action: handleViewReceipt },
+              { label: "Editar productos/cantidad/precio", icon: <Pencil size={14} className="text-[#4a7fff]" />, action: handleEditInvoice },
+            ],
           }}
         />
+      )}
+
+      {/* MODAL DE EDICIÓN */}
+      {editingInvoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditingInvoice(null)} />
+          <div
+            className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-[2rem] p-8 shadow-2xl"
+            style={{ background: 'rgba(10,17,32,0.98)', border: '1px solid rgba(30,60,139,0.35)', backdropFilter: 'blur(20px)' }}
+          >
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-black text-white tracking-tight" style={{ fontFamily: 'Syne, sans-serif' }}>
+                  Editar compra
+                </h2>
+                <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  Elige qué ítem modificar — producto, cantidad y/o precio
+                </p>
+              </div>
+              <button onClick={() => setEditingInvoice(null)} className="p-2 rounded-xl hover:bg-white/10 transition-colors">
+                <X size={18} style={{ color: 'rgba(255,255,255,0.4)' }} />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {editItems.map((it, idx) => (
+                <div
+                  key={it.saleProductInvoiceId}
+                  className="rounded-2xl p-5 space-y-4"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(30,60,139,0.2)' }}
+                >
+                  <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'rgba(74,127,255,0.7)' }}>
+                    Ítem {idx + 1}
+                  </p>
+
+                  <div>
+                    <label className="text-[9px] font-bold uppercase tracking-widest block mb-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                      Producto
+                    </label>
+                    <div className="mb-2 flex items-center justify-between p-2.5 rounded-xl text-sm font-bold text-white"
+                      style={{ background: 'rgba(74,127,255,0.08)', border: '1px solid rgba(74,127,255,0.2)' }}>
+                      {it.productName}
+                    </div>
+                    <SearchBarUniversal
+                      searchType="products"
+                      placeholder="Buscar para cambiar el producto..."
+                      showResults={true}
+                      onAddToCart={(p) => {
+                        const product = p as ProductDAO;
+                        updateEditItem(it.saleProductInvoiceId, { productId: product.id, productName: product.name });
+                      }}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[9px] font-bold uppercase tracking-widest block mb-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                        Cantidad (kg)
+                      </label>
+                      <input
+                        type="number"
+                        value={it.quantity}
+                        onChange={(e) => updateEditItem(it.saleProductInvoiceId, { quantity: e.target.value })}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono font-black text-white outline-none focus:border-[#1E3C8b] transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-bold uppercase tracking-widest block mb-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                        Precio unitario (COP/kg)
+                      </label>
+                      <input
+                        type="number"
+                        value={it.unitPrice}
+                        onChange={(e) => updateEditItem(it.saleProductInvoiceId, { unitPrice: e.target.value })}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono font-black text-white outline-none focus:border-[#1E3C8b] transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[9px] text-slate-500 uppercase font-bold">Subtotal</span>
+                    <span className="text-sm font-black font-mono text-white">
+                      {(Number(it.quantity || 0) * Number(it.unitPrice || 0)).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              <div className="flex items-center justify-between px-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                <span className="text-[10px] text-slate-400 uppercase font-black">Nuevo total de la factura</span>
+                <span className="text-lg font-black font-mono text-white">
+                  {editItems
+                    .reduce((s, it) => s + Number(it.quantity || 0) * Number(it.unitPrice || 0), 0)
+                    .toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setEditingInvoice(null)}
+                className="flex-1 py-3 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-white/5 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSaveEditInvoice}
+                disabled={isSavingEdit}
+                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 text-white bg-blue-600 hover:bg-blue-500 transition-all disabled:opacity-40"
+              >
+                {isSavingEdit ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {isSavingEdit ? 'Guardando...' : 'Guardar cambios'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

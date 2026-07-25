@@ -1079,10 +1079,10 @@
     "errorLoading": "Error al cargar los datos",
     "retry": "Reintentar",
     "sales": {
-      "title": "Análisis de Ventas",
-      "totalRevenue": "Ingreso Total",
-      "totalSales": "Ventas Totales",
-      "revenue": "Ingresos",
+      "title": "Análisis de Compras",
+      "totalRevenue": "Total Pagado",
+      "totalSales": "Compras Totales",
+      "revenue": "Pagado",
       "count": "Cantidad",
       "week": "Semana",
       "month": "Mes"

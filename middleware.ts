@@ -18,6 +18,13 @@ export function middleware(request: NextRequest) {
   console.log("Pathname:", pathname);
   console.log("Token:", authToken ? "Sí" : "No");
 
+  // Ruta fuera de la plataforma: no requiere sesión previa ni pasa por el
+  // control de roles de abajo, sin importar si ya hay un authToken en el navegador.
+  const alwaysPublicRoutes = ["/new/company/secret"];
+  if (alwaysPublicRoutes.includes(pathname)) {
+    return intlResponse;
+  }
+
   const publicRoutes = ["/login", "/register"];
   const routesClients = ["/", "/aboutus", "/contactus"];
 
@@ -100,7 +107,6 @@ export function middleware(request: NextRequest) {
         "/partners",
         "/partners/new",
         "/packaging"
-        
       ],
     
     };

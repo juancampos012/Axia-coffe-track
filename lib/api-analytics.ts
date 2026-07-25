@@ -11,6 +11,11 @@ import {
 } from '@/types/Api';
 import { envVariables } from "@/utils/config";
 
+export interface CashMovements {
+  incomes: { date: string; name: string; description: string; amount: number }[];
+  expenses: { date: string; description: string; amount: number }[];
+}
+
 /**
  * Wrapper para fetch con credenciales y manejo de errores
  * @param url URL del endpoint de API
@@ -141,6 +146,15 @@ export const getProductPerformance = async (period: string = 'month', limit: num
  */
 export const getCustomerInsights = async (): Promise<CustomerInsightsData> => {
   const url = `${envVariables.API_URL}/analytics/customer-insights`;
-  
+
   return fetchWithCredentials<CustomerInsightsData>(url);
+};
+
+/**
+ * Obtiene los ingresos (abonos que nos hacen) y egresos (gastos) en un rango de fechas
+ */
+export const getCashMovements = async (startDate: string, endDate: string): Promise<CashMovements> => {
+  const url = `${envVariables.API_URL}/analytics/cash-movements?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
+
+  return fetchWithCredentials<CashMovements>(url);
 };

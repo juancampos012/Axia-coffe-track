@@ -8,6 +8,7 @@ import {
   TrendingUp, TrendingDown, Minus, ArrowRight, AlertCircle,
 } from 'lucide-react';
 import { AccountSummary, AccountType } from '@/request/accounts';
+import { useBalance } from '@/context/BalanceContext';
 
 interface AccountsListProps {
   type: AccountType;
@@ -30,6 +31,8 @@ export default function AccountsList({
 }: AccountsListProps) {
   const router  = useRouter();
   const locale  = useLocale();
+  const { isVisible } = useBalance();
+  const mask = (v: string) => (isVisible ? v : '••••••');
 
   const [accounts, setAccounts] = useState<AccountSummary[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -82,7 +85,7 @@ export default function AccountsList({
             Total que {positiveLabel}
           </p>
           <p className="text-2xl font-black font-mono" style={{ color: 'rgba(74,127,255,0.9)' }}>
-            {fmt(totalPositive)}
+            {mask(fmt(totalPositive))}
           </p>
         </div>
         <div
@@ -93,7 +96,7 @@ export default function AccountsList({
             Total que {negativeLabel}
           </p>
           <p className="text-2xl font-black font-mono" style={{ color: 'rgba(248,113,113,0.9)' }}>
-            {fmt(totalNegative)}
+            {mask(fmt(totalNegative))}
           </p>
         </div>
       </div>
@@ -184,14 +187,14 @@ export default function AccountsList({
                 {/* Cobrado */}
                 <div className="col-span-2 text-right">
                   <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                    {fmt(acc.totalCharged)}
+                    {mask(fmt(acc.totalCharged))}
                   </span>
                 </div>
 
                 {/* Pagado */}
                 <div className="col-span-2 text-right">
                   <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                    {fmt(acc.totalPaid)}
+                    {mask(fmt(acc.totalPaid))}
                   </span>
                 </div>
 
@@ -205,7 +208,7 @@ export default function AccountsList({
                     <TrendingDown size={14} style={{ color: balanceColor }} />
                   )}
                   <span className="text-sm font-black font-mono" style={{ color: balanceColor }}>
-                    {isNeutral ? 'Al día' : (isPositive ? '+' : '-') + fmt(acc.balance)}
+                    {isNeutral ? 'Al día' : mask((isPositive ? '+' : '-') + fmt(acc.balance))}
                   </span>
                 </div>
 

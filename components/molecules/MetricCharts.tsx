@@ -16,7 +16,7 @@ export default function MetricCharts() {
   } = useDashboardData()
 
   const financialData = useMemo(() => ({
-    labels: ['Ventas', 'Préstamos pendientes'],
+    labels: ['Ingresos', 'Préstamos pendientes'],
     datasets: [
       {
         label: 'Monto',
@@ -24,7 +24,7 @@ export default function MetricCharts() {
           dashboardData?.sales.totalRevenue || 0,
           dashboardData?.operations.pendingLoans || 0
         ],
-        backgroundColor: ['#60a5fa', '#1e3c8b']
+        backgroundColor: ['#22c55e', '#ef4444']
       }
     ]
   }), [dashboardData])
@@ -105,12 +105,25 @@ export default function MetricCharts() {
         />
 
         <div className="flex justify-between mt-2 text-xs text-gray-400">
-          <div>
-            Total Ventas: {formatCurrency(financialData.datasets[0].data[0])}
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-green-500" />
+            Ingresos: {formatCurrency(financialData.datasets[0].data[0])}
           </div>
-          <div>
-            Préstamos pendientes: {formatCurrency(financialData.datasets[0].data[1])}
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-red-500" />
+            Préstamos: {formatCurrency(financialData.datasets[0].data[1])}
           </div>
+        </div>
+
+        <div className="mt-2 pt-2 border-t border-white/10 text-xs">
+          <span className="text-gray-400">Balance neto: </span>
+          <span className={`font-bold ${
+            (financialData.datasets[0].data[0] - financialData.datasets[0].data[1]) >= 0 
+              ? 'text-green-400' 
+              : 'text-red-400'
+          }`}>
+            {formatCurrency(financialData.datasets[0].data[0] - financialData.datasets[0].data[1])}
+          </span>
         </div>
       </div>
 

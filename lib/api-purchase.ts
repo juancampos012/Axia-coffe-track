@@ -87,6 +87,7 @@ export const crearCompra = async (compra: Compra): Promise<CreatedPurchase> => {
                 productId: p.productId,
                 invoiceId: facturaRes.id,
                 quantity: p.quantity,
+                unitPrice: p.unitPrice,
             }),
         })
         )
@@ -145,6 +146,7 @@ export const actualizarCompra = async (id: string, compra: Compra): Promise<void
     products: compra.products.map((p) => ({
       productId: p.productId,
       quantity: p.quantity,
+      unitPrice: p.unitPrice,
     })),
   };
 

@@ -2,47 +2,87 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  ArrowLeft, 
-  Receipt, 
-  Calendar, 
-  DollarSign, 
-  AlignLeft, 
-  Trash2, 
+import {
+  ArrowLeft,
+  Receipt,
+  Calendar,
+  DollarSign,
+  AlignLeft,
+  Trash2,
   Loader2,
   AlertCircle,
   Building2,
   Clock,
-  Download
+  Download,
+  Pencil,
+  X,
+  Save,
 } from 'lucide-react';
-import { getExpenseById, deleteExpense } from '@/request/expense';
+import { getExpenseById, deleteExpense, updateExpense } from '@/request/expense';
+import { useAuth } from '@/context/AuthContext';
+import { useBalance } from '@/context/BalanceContext';
 
 export default function ExpenseDetailPage({ expenseId }: { expenseId: string }) {
   const router = useRouter();
+  const { user } = useAuth();
+  const { refreshBalance } = useBalance();
   const [expense, setExpense] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editAmount, setEditAmount] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const fetchExpense = async () => {
+    try {
+      setLoading(true);
+      const data = await getExpenseById(expenseId);
+      setExpense(data);
+    } catch (error) {
+      console.error("Error al cargar el gasto:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchExpense = async () => {
-      try {
-        setLoading(true);
-        const data = await getExpenseById(expenseId);
-        setExpense(data);
-      } catch (error) {
-        console.error("Error al cargar el gasto:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchExpense();
   }, [expenseId]);
+
+  const startEdit = () => {
+    setEditAmount(String(expense?.amount ?? ''));
+    setEditDescription(expense?.description ?? '');
+    setIsEditing(true);
+  };
+
+  const cancelEdit = () => setIsEditing(false);
+
+  const handleSaveEdit = async () => {
+    if (!editAmount || !editDescription.trim()) return alert('Completa todos los campos');
+    try {
+      setIsSaving(true);
+      await updateExpense(expenseId, {
+        amount: parseFloat(editAmount),
+        description: editDescription.trim(),
+      });
+      if (user?.tenantId) await refreshBalance(user.tenantId);
+      await fetchExpense();
+      setIsEditing(false);
+    } catch (error: any) {
+      alert(error.message || 'Error al guardar los cambios');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!confirm("¿Deseas eliminar este registro? El monto se devolverá al balance de la empresa.")) return;
     try {
       setIsDeleting(true);
       await deleteExpense(expenseId);
+      if (user?.tenantId) await refreshBalance(user.tenantId);
       router.push('/es/expenses/view');
     } catch (error) {
       alert("Error al eliminar el registro");
@@ -80,7 +120,15 @@ export default function ExpenseDetailPage({ expenseId }: { expenseId: string }) 
             <button className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-slate-400">
                 <Download size={18} />
             </button>
-            <button 
+            {!isEditing && (
+              <button
+                  onClick={startEdit}
+                  className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-blue-500/20 transition-all text-blue-400"
+              >
+                  <Pencil size={18} />
+              </button>
+            )}
+            <button
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/30 transition-all text-red-500"
@@ -135,11 +183,20 @@ export default function ExpenseDetailPage({ expenseId }: { expenseId: string }) 
                   <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-slate-400">
                     <AlignLeft size={24} />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1 italic">Concepto de Pago</label>
-                    <p className="text-md font-bold text-slate-200 leading-relaxed italic">
-                        "{expense?.description}"
-                    </p>
+                    {isEditing ? (
+                      <textarea
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        className="w-full bg-black/40 border border-blue-500/30 rounded-xl p-3 text-sm font-medium text-white outline-none focus:border-blue-500/60 resize-none"
+                        rows={3}
+                      />
+                    ) : (
+                      <p className="text-md font-bold text-slate-200 leading-relaxed italic">
+                          "{expense?.description}"
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -167,13 +224,41 @@ export default function ExpenseDetailPage({ expenseId }: { expenseId: string }) 
             <div className="bg-red-500/5 border-2 border-dashed border-red-500/20 rounded-[2rem] p-10 flex flex-col items-center justify-center relative">
                <DollarSign size={40} className="text-red-500 mb-4 opacity-50" />
                <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] mb-2">Total Deducido del Balance</span>
-               <div className="flex items-baseline gap-3">
-                  <span className="text-7xl font-black font-mono text-red-500 tracking-tighter italic">
-                    -{formatCurrency(expense?.amount).replace('COP', '')}
-                  </span>
-                  <span className="text-2xl font-black text-red-700 italic tracking-widest">COP</span>
-               </div>
+               {isEditing ? (
+                 <input
+                   type="number"
+                   value={editAmount}
+                   onChange={(e) => setEditAmount(e.target.value)}
+                   className="bg-black/40 border border-blue-500/30 rounded-2xl px-6 py-4 text-4xl font-mono font-black text-white outline-none focus:border-blue-500/60 text-center w-full max-w-sm"
+                 />
+               ) : (
+                 <div className="flex items-baseline gap-3">
+                    <span className="text-7xl font-black font-mono text-red-500 tracking-tighter italic">
+                      -{formatCurrency(expense?.amount).replace('COP', '')}
+                    </span>
+                    <span className="text-2xl font-black text-red-700 italic tracking-widest">COP</span>
+                 </div>
+               )}
             </div>
+
+            {isEditing && (
+              <div className="flex gap-3">
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={isSaving}
+                  className="flex-1 py-4 rounded-2xl bg-blue-600 text-white hover:bg-blue-500 transition-all font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 disabled:opacity-40"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  {isSaving ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  className="px-6 py-4 rounded-2xl border border-white/10 text-slate-400 hover:bg-white/5 transition-all font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"
+                >
+                  <X size={16} /> Cancelar
+                </button>
+              </div>
+            )}
 
             {/* ADVERTENCIA DE REVERSIÓN */}
             <div className="flex items-center gap-4 p-6 bg-amber-500/5 border border-amber-500/10 rounded-2xl">

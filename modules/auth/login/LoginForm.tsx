@@ -33,7 +33,7 @@ const LoginForm: React.FC = () => {
     setLoading(true);
     setErrorMessage("");
     try {
-      const loggedUser = await login(data.email, data.password);
+      const loggedUser = await login(data.email.toLowerCase(), data.password);
       if (!loggedUser) throw new Error("Error al iniciar sesión");
       if (loggedUser.tenantId) {
         try {

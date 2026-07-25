@@ -8,7 +8,7 @@ import { useSalesMetrics } from '../hooks/useSaleMetrics'
 
 export default function SalesWidget() {
   const t = useTranslations('dashboard.sales')
-  const [period, setPeriod] = useState<'week' | 'month'>('month')
+  const [period, setPeriod] = useState<'week' | 'month'>('week')
 
   const { data, isLoading, isError } = useSalesMetrics(period)
 

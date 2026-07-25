@@ -29,6 +29,8 @@ interface AccountDetailProps {
   registerCharge:  (id: string, amount: number, description: string, affectsBalance: boolean) => Promise<any>;
   editMovement?:   (movementId: string, body: { description?: string; amount?: number; affectsBalance?: boolean }) => Promise<any>;
   editCharge?:     (accountId:  string, body: { description?: string; amount?: number; affectsBalance?: boolean }) => Promise<any>;
+  /** Registra un marcador de cierre de período cuando el saldo ya está en $0 */
+  closeMarker?:    (id: string, description: string) => Promise<any>;
 }
 
 const fmt = (n: number) =>
@@ -42,10 +44,11 @@ export default function AccountDetailView({
   cargoLabel  = 'Registrar cargo (nuevo débito)',
   positiveLabel = 'Te deben',
   negativeLabel  = 'Debes',
-  fetchDetail, registerPayment, registerCharge, editMovement, editCharge,
+  fetchDetail, registerPayment, registerCharge, editMovement, editCharge, closeMarker,
 }: AccountDetailProps) {
   const router = useRouter();
-  const { refreshBalance } = useBalance();
+  const { refreshBalance, isVisible } = useBalance();
+  const mask = (v: string) => (isVisible ? v : '••••••');
   const { user } = useAuth();
   const [company, setCompany] = useState<{ name?: string; address?: string; nit?: string; phone?: string } | undefined>();
 
@@ -139,14 +142,22 @@ export default function AccountDetailView({
   };
 
   const handleClosePeriod = async () => {
-    if (!detail || detail.balance === 0) return;
+    if (!detail) return;
     setClosingSaving(true);
     try {
       const dateStr = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
-      const description = `Cierre de período · ${dateStr}`;
-      if (detail.balance > 0) {
+
+      if (detail.balance === 0) {
+        if (closeMarker) {
+          await closeMarker(personId, `Cierre de período · ${dateStr} (sin saldo pendiente)`);
+        }
+      } else if (detail.balance > 0) {
+        // Nos deben: al cerrar, ese saldo pendiente por cobrar queda registrado como "faltante"
+        const description = `Cierre de período · ${dateStr} · Faltante cobrado: ${fmt(detail.balance)}`;
         await registerPayment(personId, detail.balance, description, closeAffects);
       } else {
+        // Les debemos: al cerrar, ese saldo pendiente por pagar queda registrado como "sobrante"
+        const description = `Cierre de período · ${dateStr} · Sobrante pagado: ${fmt(Math.abs(detail.balance))}`;
         await registerCharge(personId, Math.abs(detail.balance), description, closeAffects);
       }
       setClosingPeriod(false);
@@ -286,6 +297,10 @@ export default function AccountDetailView({
   // Helper: renderiza una fila de movimiento (puede ser agrupada)
   const renderMvRow = (mv: GroupedMv) => {
     const isAbono   = mv.type === 'abono';
+    // Un "cargo" con monto negativo es en realidad un crédito a favor (sobrepago):
+    // reduce lo que se debe, así que visualmente se muestra como un abono (verde, "-"),
+    // aunque para edición sigue siendo un "cargo" (SupplierAccount, no un Payment).
+    const isFavorable = isAbono || mv.amount < 0;
     const isEditing = editingId === mv.id;
     const grouped   = (mv._groupCount ?? 1) > 1;
     return (
@@ -298,9 +313,9 @@ export default function AccountDetailView({
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: isAbono ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' }}
+              style={{ background: isFavorable ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' }}
             >
-              {isAbono
+              {isFavorable
                 ? <TrendingDown size={16} style={{ color: '#10b981' }} />
                 : <TrendingUp   size={16} style={{ color: '#ef4444' }} />}
             </div>
@@ -323,12 +338,12 @@ export default function AccountDetailView({
           </div>
           <div className="flex items-center gap-3 flex-shrink-0 ml-3">
             <div className="text-right">
-              <p className="text-base font-black font-mono" style={{ color: isAbono ? '#10b981' : '#ef4444' }}>
-                {isAbono ? '-' : '+'}{fmt(Math.abs(mv.amount))}
+              <p className="text-base font-black font-mono" style={{ color: isFavorable ? '#10b981' : '#ef4444' }}>
+                {mask((isFavorable ? '-' : '+') + fmt(Math.abs(mv.amount)))}
               </p>
               {mv.balanceAfter !== undefined && (
                 <p className="text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                  Saldo: {fmt(mv.balanceAfter)}
+                  Saldo: {mask(fmt(mv.balanceAfter))}
                 </p>
               )}
             </div>
@@ -457,7 +472,7 @@ export default function AccountDetailView({
                 {isNeutral ? 'Al día' : isPositive ? positiveLabel : negativeLabel}
               </p>
               <p className="text-4xl font-black font-mono" style={{ color: balanceColor }}>
-                {isNeutral ? '$0' : (isPositive ? '+' : '') + fmt(detail.balance)}
+                {isNeutral ? '$0' : mask((isPositive ? '+' : '') + fmt(detail.balance))}
               </p>
             </div>
           </div>
@@ -476,7 +491,7 @@ export default function AccountDetailView({
           {hasPastPeriods && (
             <p className="text-[7px] uppercase tracking-widest mb-2" style={{ color: 'rgba(239,68,68,0.5)' }}>período actual</p>
           )}
-          <p className="text-xl font-black font-mono text-white">{fmt(periodTotalCharged)}</p>
+          <p className="text-xl font-black font-mono text-white">{mask(fmt(periodTotalCharged))}</p>
         </div>
         <div
           className="p-5 rounded-2xl"
@@ -488,7 +503,7 @@ export default function AccountDetailView({
           {hasPastPeriods && (
             <p className="text-[7px] uppercase tracking-widest mb-2" style={{ color: 'rgba(239,68,68,0.5)' }}>período actual</p>
           )}
-          <p className="text-xl font-black font-mono text-white">{fmt(periodTotalPaid)}</p>
+          <p className="text-xl font-black font-mono text-white">{mask(fmt(periodTotalPaid))}</p>
         </div>
       </div>
 
@@ -532,65 +547,52 @@ export default function AccountDetailView({
               <p className="text-sm font-black text-white mb-0.5">Cerrar período</p>
               <p className="text-[9px] font-mono leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 {detail.balance === 0
-                  ? 'El saldo ya está en $0. No hay nada que saldar.'
+                  ? 'El saldo ya está en $0. Puedes cerrar el período de todas formas para archivar los movimientos actuales y empezar de cero.'
                   : detail.balance > 0
-                  ? <>Se registrará un abono de <span style={{ color: '#10b981' }}>{fmt(detail.balance)}</span> para saldar la cuenta y llevarla a $0.</>
-                  : <>Se registrará un cargo de <span style={{ color: '#ef4444' }}>{fmt(Math.abs(detail.balance))}</span> para saldar la cuenta y llevarla a $0.</>
+                  ? <>Se registrará un abono de <span style={{ color: '#10b981' }}>{fmt(detail.balance)}</span> (faltante) para saldar la cuenta y llevarla a $0.</>
+                  : <>Se registrará un cargo de <span style={{ color: '#ef4444' }}>{fmt(Math.abs(detail.balance))}</span> (sobrante) para saldar la cuenta y llevarla a $0.</>
                 }
               </p>
             </div>
           </div>
 
           {detail.balance !== 0 && (
-            <>
-              {/* Toggle afectar balance */}
-              <div className="flex items-center justify-between px-1">
-                <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  Afectar balance de caja
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCloseAffects(v => !v)}
-                  className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0"
-                  style={{ background: closeAffects ? '#4a7fff' : 'rgba(255,255,255,0.1)' }}
-                >
-                  <span
-                    className="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform"
-                    style={{ transform: closeAffects ? 'translateX(18px)' : 'translateX(2px)' }}
-                  />
-                </button>
-              </div>
-
-              <div className="flex gap-2 pt-1">
-                <button
-                  onClick={handleClosePeriod}
-                  disabled={closingSaving}
-                  className="flex-1 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 text-white transition-all disabled:opacity-40"
-                  style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.4)' }}
-                >
-                  {closingSaving ? <Loader2 size={13} className="animate-spin" /> : <Flag size={13} />}
-                  {closingSaving ? 'Cerrando...' : 'Confirmar cierre'}
-                </button>
-                <button
-                  onClick={() => setClosingPeriod(false)}
-                  className="px-4 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)' }}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </>
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                Afectar balance de caja
+              </span>
+              <button
+                type="button"
+                onClick={() => setCloseAffects(v => !v)}
+                className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0"
+                style={{ background: closeAffects ? '#4a7fff' : 'rgba(255,255,255,0.1)' }}
+              >
+                <span
+                  className="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform"
+                  style={{ transform: closeAffects ? 'translateX(18px)' : 'translateX(2px)' }}
+                />
+              </button>
+            </div>
           )}
 
-          {detail.balance === 0 && (
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={handleClosePeriod}
+              disabled={closingSaving || (detail.balance === 0 && !closeMarker)}
+              className="flex-1 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 text-white transition-all disabled:opacity-40"
+              style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.4)' }}
+            >
+              {closingSaving ? <Loader2 size={13} className="animate-spin" /> : <Flag size={13} />}
+              {closingSaving ? 'Cerrando...' : 'Confirmar cierre'}
+            </button>
             <button
               onClick={() => setClosingPeriod(false)}
-              className="text-[9px] font-black uppercase tracking-widest transition-all"
-              style={{ color: 'rgba(255,255,255,0.25)' }}
+              className="px-4 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)' }}
             >
-              Cerrar
+              Cancelar
             </button>
-          )}
+          </div>
         </div>
       )}
 

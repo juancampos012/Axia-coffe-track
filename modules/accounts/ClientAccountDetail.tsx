@@ -6,6 +6,7 @@ import {
   clientCharge,
   editClientMovement,
   editClientAccount,
+  clientClosePeriodMarker,
 } from '@/request/accounts';
 import { useAuth } from '@/context/AuthContext';
 
@@ -30,6 +31,7 @@ export default function ClientAccountDetail({ clientId }: { clientId: string }) 
       }
       editMovement={editClientMovement}
       editCharge={editClientAccount}
+      closeMarker={clientClosePeriodMarker}
     />
   );
 }

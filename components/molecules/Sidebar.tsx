@@ -17,9 +17,12 @@ import {
   Package,
   Users,
   BookOpen,
+  Settings,
 } from "lucide-react";
 
 import { useUserStore } from "@/store/UserStore";
+import { useAuth } from "@/context/AuthContext";
+import { envVariables } from "@/utils/config";
 
 type SubOption = {
   label: string;
@@ -51,8 +54,8 @@ export default function Sidebar({
   const sidebarRef = useRef<HTMLElement>(null);
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const { role, setRole } = useUserStore();
+  const [loading, setLoading] = useState(!role);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -184,6 +187,13 @@ export default function Sidebar({
         { label: "Nuevo Aliado", href: `/${locale}/partners/new` },
         { label: "Proveedores", href: `/${locale}/shopping/suppliers` },
       ],
+    },
+    // ─── CONFIGURACIÓN ───────────────────────────────────────
+    {
+      icon: Settings,
+      label: "Configuración",
+      href: `/${locale}/admin/settings`,
+      allowedRoles: ["ADMIN", "SUPERADMIN"],
     },
   ];
 
@@ -326,7 +336,13 @@ export default function Sidebar({
         style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
       >
         <button
-          onClick={() => {
+          onClick={async () => {
+            try {
+              await fetch(`${envVariables.API_URL}/users/logout`, {
+                method: "POST",
+                credentials: "include",
+              }).catch(() => {});
+            } catch {}
             Cookies.remove("authToken", { path: "/" });
             useUserStore.getState().setRole(null);
             window.location.href = `/${locale}/login`;

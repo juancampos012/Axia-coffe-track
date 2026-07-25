@@ -128,32 +128,37 @@ export default function DashboardScreen() {
             {/* 1. SECCIÓN DE INVENTARIO FÍSICO (6 Tarjetas con protección contra undefined) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                <InventoryCard 
-                  title="Café Seco" 
+                  title="Cafe Seco"
                   value={companyData?.inventory?.stock?.coffee || 0} 
+                  valuePrice={companyData?.inventory?.categoryValues?.coffee || 0}
                   icon={<Coffee />} 
                   color="text-amber-500" 
                />
                <InventoryCard 
                   title="Cacao" 
                   value={companyData?.inventory?.stock?.cacao || 0} 
+                  valuePrice={companyData?.inventory?.categoryValues?.cacao || 0}
                   icon={<Bean />} 
                   color="text-orange-800" 
                />
                <InventoryCard 
-                  title="Café Mojado" 
+                  title="Cafe Mojado"
                   value={companyData?.inventory?.stock?.wetCoffee || 0} 
+                  valuePrice={companyData?.inventory?.categoryValues?.wetCoffee || 0}
                   icon={<Package />} 
                   color="text-blue-400" 
                />
                <InventoryCard 
                   title="Pasilla" 
                   value={companyData?.inventory?.stock?.pasilla || 0} 
+                  valuePrice={companyData?.inventory?.categoryValues?.pasilla || 0}
                   icon={<Scale />} 
                   color="text-yellow-600" 
                />
                <InventoryCard 
                   title="Frijol" 
                   value={companyData?.inventory?.stock?.bean || 0} 
+                  valuePrice={companyData?.inventory?.categoryValues?.bean || 0}
                   icon={<Layers />} 
                   color="text-emerald-600" 
                />
@@ -161,7 +166,7 @@ export default function DashboardScreen() {
                   title="Préstamos" 
                   value={companyData?.operations?.pendingLoans || 0} 
                   icon={<Briefcase />} 
-                  color="text-red-500" 
+                  color="text-red-500"
                   isCurrency 
                />
             </div>
@@ -225,8 +230,7 @@ export default function DashboardScreen() {
   )
 }
 
-function InventoryCard({ title, value, icon, color, isCurrency = false }: any) {
-  // Aseguramos que value siempre sea un número para evitar errores de renderizado
+function InventoryCard({ title, value, valuePrice, icon, color, isCurrency = false }: any) {
   const displayValue = Number(value || 0);
 
   return (
@@ -255,6 +259,16 @@ function InventoryCard({ title, value, icon, color, isCurrency = false }: any) {
         </h4>
         {!isCurrency && <span className="text-[10px] font-bold text-slate-600 uppercase">Kg</span>}
       </div>
+
+      {!isCurrency && (
+        <p className="text-emerald-400 text-xs font-bold mt-1 font-mono">
+          {new Intl.NumberFormat('es-CO', { 
+            style: 'currency', 
+            currency: 'COP', 
+            maximumFractionDigits: 0 
+          }).format(Number(valuePrice || 0))}
+        </p>
+      )}
       
       <div className="mt-4 h-1 w-12 bg-[#1E3C8b] rounded-full group-hover:w-full transition-all duration-700" />
     </div>

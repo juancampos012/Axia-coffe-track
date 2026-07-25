@@ -6,6 +6,7 @@ import {
   supplierCharge,
   editSupplierMovement,
   editSupplierAccount,
+  supplierClosePeriodMarker,
 } from '@/request/accounts';
 import { useAuth } from '@/context/AuthContext';
 
@@ -30,6 +31,7 @@ export default function SupplierAccountDetail({ supplierId }: { supplierId: stri
       }
       editMovement={editSupplierMovement}
       editCharge={editSupplierAccount}
+      closeMarker={supplierClosePeriodMarker}
     />
   );
 }

@@ -18,6 +18,12 @@ import { getAllPartners } from '@/request/partner';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 
+export const PACKAGING_TYPES: { value: 'sacos' | 'lona_pequena' | 'lona_grande'; label: string }[] = [
+  { value: 'sacos', label: 'Sacos' },
+  { value: 'lona_pequena', label: 'Lona pequeña' },
+  { value: 'lona_grande', label: 'Lona grande' },
+];
+
 export default function ScreenPartnerPackaging() {
   const router = useRouter();
   const locale = useLocale();
@@ -28,6 +34,7 @@ export default function ScreenPartnerPackaging() {
   const [selectedPartnerId, setSelectedPartnerId] = useState<string>('');
   const [movements, setMovements] = useState<any[]>([]);
   const [balance, setBalance] = useState(0);
+  const [balanceByType, setBalanceByType] = useState<Record<string, number>>({});
 
   const [loadingPartners, setLoadingPartners] = useState(true);
   const [loadingData, setLoadingData] = useState(false);
@@ -36,6 +43,7 @@ export default function ScreenPartnerPackaging() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [movementType, setMovementType] = useState<'DELIVERED_TO_PARTNER' | 'RETURNED_BY_PARTNER'>('DELIVERED_TO_PARTNER');
+  const [packagingType, setPackagingType] = useState<'sacos' | 'lona_pequena' | 'lona_grande'>('sacos');
   const [formData, setFormData] = useState({ quantity: '', description: '' });
 
   useEffect(() => {
@@ -82,10 +90,12 @@ export default function ScreenPartnerPackaging() {
       ]);
       setMovements(movementsData);
       setBalance(balanceData.packagingBalance);
+      setBalanceByType(balanceData.packagingBalanceByType || {});
     } catch (error) {
       console.error("Error cargando datos de empaque:", error);
       setMovements([]);
       setBalance(0);
+      setBalanceByType({});
     } finally {
       setLoadingData(false);
     }
@@ -122,11 +132,13 @@ export default function ScreenPartnerPackaging() {
         tenantId,
         partnerId: selectedPartnerId,
         type: movementType,
+        packagingType,
         quantity: quantityNum,
         description: formData.description.trim()
       });
 
       setFormData({ quantity: '', description: '' });
+      setPackagingType('sacos');
       setIsModalOpen(false);
       await fetchPackagingData(selectedPartnerId);
     } catch (error: any) {
@@ -173,11 +185,15 @@ export default function ScreenPartnerPackaging() {
             {loadingPartners && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-amber-500" size={14} />}
           </div>
 
-          <div className="bg-amber-500/10 border border-amber-500/20 px-6 py-2.5 rounded-2xl flex flex-col items-end min-w-[120px]">
-            <span className="text-[8px] font-black uppercase tracking-widest text-amber-500 italic">Saldo</span>
-            <span className="text-xl font-black text-white leading-none">
-              {loadingData ? '...' : balance} <small className="text-[9px] text-amber-500/50">Und</small>
-            </span>
+          <div className="flex gap-2">
+            {PACKAGING_TYPES.map((pt) => (
+              <div key={pt.value} className="bg-amber-500/10 border border-amber-500/20 px-4 py-2.5 rounded-2xl flex flex-col items-end min-w-[90px]">
+                <span className="text-[7px] font-black uppercase tracking-widest text-amber-500 italic">{pt.label}</span>
+                <span className="text-lg font-black text-white leading-none">
+                  {loadingData ? '...' : (balanceByType[pt.value] ?? 0)}
+                </span>
+              </div>
+            ))}
           </div>
 
           <button
@@ -224,6 +240,7 @@ export default function ScreenPartnerPackaging() {
                 <tr className="text-[10px] font-black uppercase tracking-widest text-slate-500 italic">
                   <th className="px-8 py-5">Fecha</th>
                   <th className="px-8 py-5">Operación</th>
+                  <th className="px-8 py-5">Tipo</th>
                   <th className="px-8 py-5">Observación</th>
                   <th className="px-8 py-5 text-right">Cantidad</th>
                   <th className="px-8 py-5 text-center w-24"></th>
@@ -250,6 +267,11 @@ export default function ScreenPartnerPackaging() {
                           <ArrowDownLeft size={14} /> Entrada
                         </div>
                       )}
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full text-amber-400 bg-amber-500/10">
+                        {PACKAGING_TYPES.find(pt => pt.value === m.packagingType)?.label || 'Sacos'}
+                      </span>
                     </td>
                     <td className="px-8 py-6">
                       <span className="text-[10px] text-slate-400 font-bold uppercase truncate block max-w-[250px] group-hover:text-slate-200">
@@ -331,6 +353,28 @@ export default function ScreenPartnerPackaging() {
                   <ArrowDownLeft size={28} className="mb-2" />
                   <span className="text-[10px] font-black uppercase tracking-widest italic">Entrada (Retorno)</span>
                 </button>
+              </div>
+
+              <div className="space-y-2 px-2">
+                <label className="flex items-center gap-2 text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                  <Package size={12} /> Tipo de empaque
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {PACKAGING_TYPES.map((pt) => (
+                    <button
+                      key={pt.value}
+                      type="button"
+                      onClick={() => setPackagingType(pt.value)}
+                      className={`py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                        packagingType === pt.value
+                          ? 'bg-amber-500/20 border-2 border-amber-500 text-white'
+                          : 'bg-white/5 border-2 border-transparent text-slate-500 hover:bg-white/10'
+                      }`}
+                    >
+                      {pt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-5">

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function FactorPurchaseRoute() {
   return (
-    <div className="w-full min-h-screen bg-[#04060f]">
+    <div className="w-full min-h-screen bg-[#0a1120]">
       <FactorPurchasePage />
     </div>
   );

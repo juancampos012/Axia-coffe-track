@@ -6,6 +6,7 @@ import {
   partnerCharge,
   editPartnerMovement,
   editPartnerAccount,
+  partnerClosePeriodMarker,
 } from '@/request/accounts';
 import { useAuth } from '@/context/AuthContext';
 
@@ -30,6 +31,7 @@ export default function PartnerAccountDetail({ partnerId }: { partnerId: string 
       }
       editMovement={editPartnerMovement}
       editCharge={editPartnerAccount}
+      closeMarker={partnerClosePeriodMarker}
     />
   );
 }

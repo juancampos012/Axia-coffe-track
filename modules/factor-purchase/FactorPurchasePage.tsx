@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useBalance } from '@/context/BalanceContext';
 import SearchBarUniversal from '@/components/molecules/SearchBar';
-import { ClientDAO } from '@/types/Api';
+import { ClientDAO, ProductDAO } from '@/types/Api';
 import { generateFactorLiquidacion } from './FactorLiquidacionPDF';
 import { getCompanyById } from '@/request/companies';
+import { getListproductsByName } from '@/lib/api-products';
+import { crearCompraFactor } from '@/lib/api-purchase';
 import {
   UserCheck, X, Loader2, ArrowRight,
   Calculator, CheckCircle, Receipt, FlaskConical, Scale,
@@ -34,6 +36,10 @@ export default function FactorPurchasePage() {
 
   // Cliente (productor)
   const [selectedClient, setSelectedClient] = useState<ClientDAO | null>(null);
+
+  // Producto que se está comprando: siempre Café seco/pergamino, resuelto automáticamente
+  const [selectedProduct, setSelectedProduct] = useState<ProductDAO | null>(null);
+  const [productError, setProductError] = useState(false);
 
   // Modo de ingreso del factor
   const [factorMode, setFactorMode] = useState<'auto' | 'manual'>('auto');
@@ -64,6 +70,21 @@ export default function FactorPurchasePage() {
       .catch(() => {});
   }, [user?.tenantId]);
 
+  // Resolver automáticamente el producto "Café seco" del tenant (aquí siempre se compra ese)
+  useEffect(() => {
+    if (!user?.tenantId) return;
+    getListproductsByName('cafe')
+      .then((products) => {
+        // El backend ya filtra por tenant; solo hace falta descartar "Cafe Mojado"
+        const match = (products || []).find(
+          (p) => p.name.toLowerCase().includes('cafe') && !p.name.toLowerCase().includes('mojado')
+        );
+        if (match) setSelectedProduct(match);
+        else setProductError(true);
+      })
+      .catch(() => setProductError(true));
+  }, [user?.tenantId]);
+
   // ── Cálculos ─────────────────────────────────────────────────────────────
   const muestraNum  = parseFloat(cantidadMuestra) || 0;
   const excelsoNum  = parseFloat(gramosExcelso)   || 0;
@@ -83,19 +104,38 @@ export default function FactorPurchasePage() {
   const totalPagar  = round2(precioKg * kgNum);
 
   const formulaOk = factorNum > 0 && precioKg > 0;
-  const canSubmit = !!selectedClient && formulaOk && kgNum > 0;
+  const canSubmit = !!selectedClient && !!selectedProduct && formulaOk && kgNum > 0;
 
   // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
-    if (!canSubmit || !selectedClient) return;
+    if (!canSubmit || !selectedClient || !selectedProduct || !user?.tenantId) return;
     try {
       setIsSubmitting(true);
 
+      // Registrar la compra en el backend (stock, balance y factura real)
+      const invoice = await crearCompraFactor({
+        tenantId:   user.tenantId,
+        clientId:   selectedClient.id,
+        factor:     factorNum,
+        totalPrice: totalPagar,
+        products: [{
+          productId:   selectedProduct.id,
+          productName: selectedProduct.name,
+          tenantId:    selectedProduct.tenantId,
+          basePrice:   baseNum,
+          factor:      factorNum,
+          unitPrice:   precioKg,
+          quantity:    kgNum,
+          unit:        'kg',
+          subtotal:    totalPagar,
+        }],
+      });
+
       // Actualizar balance global
-      if (user?.tenantId) await refreshBalance(user.tenantId);
+      await refreshBalance(user.tenantId);
 
       const blob = generateFactorLiquidacion({
-        receiptNumber:   String(Date.now()).slice(-6),
+        receiptNumber:   String(invoice?.folio ?? '—'),
         date:            new Date().toISOString(),
         clientName:      `${selectedClient.firstName} ${selectedClient.lastName}`,
         clientPhone:     selectedClient.phone ?? undefined,
@@ -106,7 +146,7 @@ export default function FactorPurchasePage() {
         precioCarga,
         precioKg,
         items: [{
-          productName: 'Café pergamino',
+          productName: selectedProduct.name,
           quantity:    kgNum,
           basePrice:   baseNum,
           factor:      factorNum,
@@ -129,6 +169,7 @@ export default function FactorPurchasePage() {
   const handleReset = () => {
     setSuccess(false); setPdfUrl(null);
     setSelectedClient(null);
+    setSelectedProduct(null);
     setFactorMode('auto');
     setCantidadMuestra(''); setGramosExcelso('');
     setPrecioBase(''); setTotalKg(''); setFactorOverride('');
@@ -205,6 +246,13 @@ export default function FactorPurchasePage() {
                 onAddToCart={(item) => setSelectedClient(item as ClientDAO)}
               />
             </div>
+
+            {productError && (
+              <div className="mt-4 p-3 rounded-xl text-[9px] font-bold uppercase tracking-widest text-center"
+                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: 'rgba(239,68,68,0.7)' }}>
+                No se encontró el producto "Cafe Seco" en el inventario. Créalo primero en Productos.
+              </div>
+            )}
           </section>
 
           {/* PASO 2 — FACTOR */}

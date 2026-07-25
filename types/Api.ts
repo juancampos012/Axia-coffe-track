@@ -26,8 +26,8 @@ export interface FactorPurchaseItem {
   unitPrice: number;
   /** Cantidad en la unidad seleccionada */
   quantity: number;
-  /** Unidad de medida */
-  unit: DeliveryUnit;
+  /** Unidad de medida (las compras por factor siempre son en kg) */
+  unit: 'kg';
   /** Subtotal = quantity × unitPrice */
   subtotal: number;
 }
@@ -346,6 +346,7 @@ export type Company = {
   address: string;
   phone: string;
   sector: string;
+  logoUrl?: string | null;
   currentBalance: number;
   coffeeQuantity: number;
   wetCoffeeQuantity: number;
@@ -416,15 +417,24 @@ export interface DashboardMetricsData {
       pasilla: number;
       cacao: number;
     };
+    categoryValues: {
+      coffee: number;
+      wetCoffee: number;
+      bean: number;
+      pasilla: number;
+      cacao: number;
+    };
   };
   sales: {
     totalRevenue: number; 
     count: number;
-    recent: SaleInvoice[]; // <--- Esto es lo que causaba el conflicto
+    recent: SaleInvoice[];
   };
   topProducts: {
     name: string;
     total: number;
+    unitPrice: number;
+    totalValue: number;
   }[];
   operations: {
     pendingLoans: number;
@@ -451,7 +461,7 @@ export interface PartnerDAO {
   updatedAt?: string;
 }
 
-export type DeliveryUnit = 'kg' | 'sacos' | 'lonas' | 'bultos' | 'canastillas';
+export type DeliveryUnit = 'sacos' | 'lona_pequena' | 'lona_grande';
 
 export interface DeliveryDAO {
   id: string;

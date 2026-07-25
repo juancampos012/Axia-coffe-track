@@ -11,7 +11,8 @@ import { crearFacturaVenta } from '@/lib/api-saleInvoce';
 import SearchBarUniversal from '@/components/molecules/SearchBar';
 import InvoicePDFGenerator from "./InvoicePDFGenerator";
 import { getCompanyById } from '@/request/companies';
-import { User, Package, Scale, DollarSign, ShoppingCart, X, CheckCircle2, Receipt, Trash2, Loader2 } from 'lucide-react';
+import { envVariables } from '@/utils/config';
+import { User, Package, Scale, DollarSign, ShoppingCart, X, CheckCircle2, Receipt, Trash2, Loader2, Pencil, Check } from 'lucide-react';
 
 export default function ScreenMakeSale() {
   const t = useTranslations("makeSale");
@@ -34,12 +35,21 @@ export default function ScreenMakeSale() {
 
   const [clientAnnouncements, setClientAnnouncements] = useState<any[]>([]);
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<string | null>(null);
-  const [company, setCompany] = useState<{ name?: string; address?: string; nit?: string; phone?: string } | undefined>();
+  // Ajuste manual y opcional del valor final (para redondear a pesos, ya que no se paga con monedas)
+  const [manualTotal, setManualTotal] = useState('');
+  const [editingTotal, setEditingTotal] = useState(false);
+  const [company, setCompany] = useState<{ name?: string; address?: string; nit?: string; phone?: string; logoDataUrl?: string } | undefined>();
 
   useEffect(() => {
     if (!user?.tenantId) return;
     getCompanyById(user.tenantId)
-      .then(c => setCompany({ name: c.name, address: c.address, nit: c.nit, phone: c.phone }))
+      .then(async (c) => {
+        const serverOrigin = (envVariables.API_URL || '').replace(/\/api\/v1\/?$/, '');
+        const logoDataUrl = c.logoUrl
+          ? await InvoicePDFGenerator.loadLogoAsDataUrl(`${serverOrigin}${c.logoUrl}`)
+          : undefined;
+        setCompany({ name: c.name, address: c.address, nit: c.nit, phone: c.phone, logoDataUrl });
+      })
       .catch(() => {});
   }, [user?.tenantId]);
 
@@ -60,7 +70,7 @@ export default function ScreenMakeSale() {
     setItems([]); setName(''); setQuantity(''); setPrice('');
     setStock(0); setTax(0); setSelectedProductId(''); setSelectedClient(null);
     setClientAnnouncements([]); setSelectedAnnouncementId(null);
-    setNextId(1); setPdfUrl(null); setSaleCompleted(false);
+    setNextId(1); setPdfUrl(null); setSaleCompleted(false); setManualTotal(''); setEditingTotal(false);
   };
 
   const handleAddItem = () => {
@@ -109,6 +119,8 @@ export default function ScreenMakeSale() {
   const calculateSubtotal = () => items.reduce((total, item) => total + item.quantity * item.basePrice, 0);
   const calculateTaxTotal = () => items.reduce((total, item) => total + (item.price - item.basePrice) * item.quantity, 0);
   const calculateTotal = () => items.reduce((total, item) => total + item.quantity * item.price, 0);
+  // Valor final a cobrar/pagar: usa el ajuste manual si se ingresó uno (para redondear a pesos, sin monedas)
+  const calculateFinalTotal = () => (manualTotal !== '' ? Number(manualTotal) : calculateTotal());
 
   const formatCurrency = (value: number) => 
     Number(value).toLocaleString('es-CO', { 
@@ -129,9 +141,14 @@ export default function ScreenMakeSale() {
         announcementId: (item as any).announcementId || null
       }));
 
+      // El ajuste manual solo afecta el total impreso en la factura/PDF.
+      // La factura, el pago y el balance siempre usan el total real calculado.
+      const realTotal = calculateTotal();
+      const displayTotal = calculateFinalTotal();
+
       const invoiceResponse = await crearFacturaVenta({
         clientId: selectedClient.id,
-        totalPrice: calculateTotal(),
+        totalPrice: realTotal,
         tenantId: user.tenantId,
         electronicBill: false,
         products: productsForAPI
@@ -139,16 +156,16 @@ export default function ScreenMakeSale() {
 
       await createPayment({
         tenantId: user.tenantId,
-        amount: calculateTotal(),
+        amount: realTotal,
         paymentMethod: 'CASH',
         reference: `PAY-${Date.now()}`,
         invoiceId: invoiceResponse.id
       });
 
-      if (balance !== null) setBalance(balance - calculateTotal());
+      if (balance !== null) setBalance(balance - realTotal);
 
       const pdfBlob = await InvoicePDFGenerator.generatePDF({
-        items, subtotal: calculateSubtotal(), taxTotal: calculateTaxTotal(), total: calculateTotal(),
+        items, subtotal: calculateSubtotal(), taxTotal: calculateTaxTotal(), total: displayTotal,
         client: selectedClient, user, t, company,
       });
 
@@ -263,7 +280,7 @@ export default function ScreenMakeSale() {
                     <SearchBarUniversal
                       searchType="products"
                       onAddToCart={(p: any) => {
-                        setName(p.name); setPrice(p.salePrice?.toString() || ''); setSelectedProductId(p.id); setTax(p.tax); setTenantIdProduct(p.tenantId);
+                        setName(p.name); setPrice(''); setSelectedProductId(p.id); setTax(p.tax); setTenantIdProduct(p.tenantId);
                       }}
                       showResults={true}
                       placeholder="Buscar producto comercial..." />
@@ -272,14 +289,44 @@ export default function ScreenMakeSale() {
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                     <div className="md:col-span-4 space-y-2">
                       <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-2 ml-1"><Scale size={12} /> Cantidad</label>
-                      <input type="text" value={quantity} onChange={(e) => setQuantity(e.target.value.replace(',', '.'))} placeholder="0.00 kg" className="w-full h-11 bg-black/40 border border-white/10 rounded-xl px-4 text-sm font-black text-white focus:border-blue-500 outline-none transition-all" />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={quantity}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(',', '.');
+                            if (raw !== '' && !/^\d*\.?\d*$/.test(raw)) return;
+                            setQuantity(raw);
+                          }}
+                          placeholder="0.00"
+                          className="w-full h-12 bg-black/40 border border-white/10 rounded-xl pl-4 pr-10 text-sm font-mono font-black text-white focus:border-blue-500 outline-none transition-all"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-600 uppercase">kg</span>
+                      </div>
                     </div>
                     <div className="md:col-span-5 space-y-2">
                       <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-2 ml-1"><DollarSign size={12} /> Unitario</label>
-                      <input type="text" value={price === "" ? "" : Number(price).toLocaleString('es-CO')} disabled={!!selectedAnnouncementId} onChange={(e) => setPrice(e.target.value.replace(/\./g, ""))} className="w-full h-11 bg-black/40 border border-white/10 rounded-xl px-4 text-sm font-mono font-black text-white outline-none disabled:opacity-50" />
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[13px] font-black text-slate-600">$</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={price === "" ? "" : parseInt(price, 10).toLocaleString('es-CO')}
+                          disabled={!!selectedAnnouncementId}
+                          onChange={(e) => {
+                            let raw = e.target.value.replace(/\./g, "").replace(/,/g, "");
+                            if (!/^\d*$/.test(raw)) return;
+                            raw = raw.replace(/^0+(?=\d)/, "");
+                            if (raw === "") { setPrice(""); return; }
+                            setPrice(raw);
+                          }}
+                          className="w-full h-12 bg-black/40 border border-white/10 rounded-xl pl-8 pr-4 text-sm font-mono font-black text-white outline-none focus:border-blue-500 disabled:opacity-50 transition-all"
+                        />
+                      </div>
                     </div>
                     <div className="md:col-span-3">
-                        <button onClick={handleAddItem} disabled={!name || !quantity || !price} className="w-full h-11 bg-blue-600 text-white font-black uppercase text-[10px] rounded-xl hover:bg-blue-500 disabled:opacity-10 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
+                        <button onClick={handleAddItem} disabled={!name || !quantity || !price} className="w-full h-12 bg-blue-600 text-white font-black uppercase text-[10px] rounded-xl hover:bg-blue-500 disabled:opacity-10 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/30 active:scale-95">
                             <ShoppingCart size={14} /> Añadir
                         </button>
                     </div>
@@ -291,36 +338,44 @@ export default function ScreenMakeSale() {
               <div className="bg-white/[0.02] border border-white/10 rounded-[2rem] overflow-hidden flex flex-col min-h-[300px] shrink-0">
                 <div className="bg-white/5 px-6 py-3 flex justify-between items-center shrink-0">
                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Resumen de Carga</span>
-                    <div className="px-2 py-0.5 bg-white/10 rounded text-[9px] font-black uppercase">{items.length} Ítems</div>
+                    <div className="px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded text-[9px] font-black uppercase">{items.length} Ítems</div>
                 </div>
-                <div className="flex-1 px-2">
-                  <table className="w-full">
-                    <tbody className="divide-y divide-white/5">
-                      {items.map((item) => (
-                        <tr key={item.id} className="group hover:bg-white/[0.03] transition-colors">
-                          <td className="px-6 py-3">
-                            <p className="text-xs font-black text-white uppercase tracking-tight italic">{item.name}</p>
-                            <p className="text-[9px] text-slate-500 font-bold">{item.quantity} kg × {formatCurrency(item.price)}</p>
-                          </td>
-                          <td className="px-6 py-3 text-right font-mono text-sm font-black text-white tracking-tighter">
-                            {formatCurrency(item.quantity * item.price)}
-                          </td>
-                          <td className="px-6 py-3 text-right w-10">
-                            <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="p-1.5 text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all">
-                                <Trash2 size={14} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                {items.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
+                    <ShoppingCart size={28} className="text-slate-700 mb-3" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Aún no hay ítems añadidos</p>
+                  </div>
+                ) : (
+                  <div className="flex-1 px-2">
+                    <table className="w-full">
+                      <tbody className="divide-y divide-white/5">
+                        {items.map((item) => (
+                          <tr key={item.id} className="group hover:bg-white/[0.03] transition-colors">
+                            <td className="px-6 py-3">
+                              <p className="text-xs font-black text-white uppercase tracking-tight italic">{item.name}</p>
+                              <p className="text-[9px] text-slate-500 font-bold">{item.quantity} kg × {formatCurrency(item.price)}</p>
+                            </td>
+                            <td className="px-6 py-3 text-right font-mono text-sm font-black text-white tracking-tighter">
+                              {formatCurrency(item.quantity * item.price)}
+                            </td>
+                            <td className="px-6 py-3 text-right w-10">
+                              <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="p-1.5 text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all">
+                                  <Trash2 size={14} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* PANEL DE CHECKOUT (FIJO) */}
             <div className="lg:col-span-4 h-full flex flex-col">
-              <div className="bg-blue-900/40 backdrop-blur-md border border-blue-500/20 rounded-[2.5rem] p-6 text-white flex flex-col h-fit shadow-2xl relative overflow-hidden">
+              <div className="bg-gradient-to-br from-blue-900/50 to-[#0d1525] backdrop-blur-md border border-blue-500/20 rounded-[2.5rem] p-6 text-white flex flex-col h-fit shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-transparent opacity-50" />
                 <div className="absolute -top-10 -right-10 p-10 opacity-5 rotate-12 text-white"><Receipt size={160} /></div>
 
                 <div className="relative z-10 flex flex-col">
@@ -338,9 +393,47 @@ export default function ScreenMakeSale() {
                         
                         <div className="pt-6 mt-6 border-t border-white/10">
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] block mb-2 text-blue-400">Total a Pagar</span>
-                            <div className="text-4xl font-black font-mono tracking-tighter leading-none break-all text-white">
-                                {formatCurrency(calculateTotal())}
-                            </div>
+
+                            {editingTotal ? (
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="number"
+                                        autoFocus
+                                        value={manualTotal}
+                                        onChange={(e) => setManualTotal(e.target.value)}
+                                        placeholder={calculateTotal().toString()}
+                                        onKeyDown={(e) => e.key === 'Enter' && setEditingTotal(false)}
+                                        className="w-full bg-black/30 border border-blue-400/50 rounded-xl px-4 py-2 text-2xl font-mono font-bold text-white outline-none transition-all"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditingTotal(false)}
+                                        className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all shrink-0"
+                                    >
+                                        <Check size={16} className="text-white" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3">
+                                    <div className="text-4xl font-black font-mono tracking-tighter leading-none break-all text-white">
+                                        {formatCurrency(calculateFinalTotal())}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setManualTotal(manualTotal || calculateTotal().toString()); setEditingTotal(true); }}
+                                        className="p-1.5 rounded-lg hover:bg-white/10 transition-all shrink-0"
+                                        title="Ajustar valor en la factura"
+                                    >
+                                        <Pencil size={14} className="opacity-50 hover:opacity-100" />
+                                    </button>
+                                </div>
+                            )}
+
+                            {manualTotal !== '' && Number(manualTotal) !== calculateTotal() && (
+                                <p className="text-[9px] font-bold uppercase tracking-widest mt-2 text-amber-400">
+                                    Solo se imprime en la factura · el registro real es {formatCurrency(calculateTotal())}
+                                </p>
+                            )}
                         </div>
                     </div>
 

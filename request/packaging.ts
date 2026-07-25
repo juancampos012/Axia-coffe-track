@@ -24,6 +24,7 @@ export const createPackagingMovement = async (body: {
   tenantId: string;
   partnerId: string;
   type: 'DELIVERED_TO_PARTNER' | 'RETURNED_BY_PARTNER' | 'ADJUSTMENT';
+  packagingType?: 'sacos' | 'lona_pequena' | 'lona_grande';
   quantity: number;
   description?: string;
 }): Promise<any> => {
@@ -55,7 +56,7 @@ export const getPackagingMovements = async (partnerId: string): Promise<any[]> =
 /**
  * Obtiene el saldo actual de empaques de un aliado
  */
-export const getPackagingBalance = async (partnerId: string): Promise<{ packagingBalance: number }> => {
+export const getPackagingBalance = async (partnerId: string): Promise<{ packagingBalance: number; packagingBalanceByType?: Record<string, number> }> => {
   const url = `${API_BASE_URL}/partner-packaging/${partnerId}/balance`;
   const response = await fetchWithCredentials(url, {
     method: 'GET',

@@ -5,19 +5,18 @@ import { useAuth } from '@/context/AuthContext';
 import SearchBarUniversal from '@/components/molecules/SearchBar';
 import { PartnerDAO, ProductDAO, DeliveryUnit } from '@/types/Api';
 import { createDelivery } from '@/request/delivery';
+import { createPackagingMovement } from '@/request/packaging';
 import { getAllPartners } from '@/request/partner';
 import {
   Truck, Package, Users, X, Loader2, ArrowRight,
   Hash, ChevronDown, DollarSign, Weight,
 } from 'lucide-react';
 
-// ─── Configuración de unidades ───────────────────────────────────────────────
+// ─── Configuración de unidades (siempre empaque físico, nunca kg directo) ────
 const UNITS: { value: DeliveryUnit; label: string; icon: string }[] = [
-  { value: 'kg',          label: 'Kilogramos',  icon: '⚖️' },
-  { value: 'sacos',       label: 'Sacos',       icon: '🧺' },
-  { value: 'lonas',       label: 'Lonas',       icon: '🛍️' },
-  { value: 'bultos',      label: 'Bultos',      icon: '📦' },
-  { value: 'canastillas', label: 'Canastillas', icon: '🪣' },
+  { value: 'sacos',        label: 'Sacos',        icon: '🧺' },
+  { value: 'lona_pequena', label: 'Lona pequeña', icon: '🛍️' },
+  { value: 'lona_grande',  label: 'Lona grande',  icon: '📦' },
 ];
 
 const fmt = (n: number) =>
@@ -31,13 +30,16 @@ export default function NewDeliveryPage() {
   const [selectedPartnerId, setSelectedPartnerId] = useState<string>('');
 
   // Campos principales
-  const [unit, setUnit]         = useState<DeliveryUnit>('kg');
+  const [unit, setUnit]         = useState<DeliveryUnit>('sacos');
   const [quantity, setQuantity] = useState('');
   // Campos opcionales
   const [productKg, setProductKg]       = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
 
   const [createDebt, setCreateDebt] = useState(false);
+
+  // ¿Registrar también una carga de empaque (sacos/lonas) al aliado que recibe la entrega?
+  const [registerPackaging, setRegisterPackaging] = useState(true);
 
   const [loadingPartners, setLoadingPartners] = useState(true);
   const [isSubmitting, setIsSubmitting]       = useState(false);
@@ -58,11 +60,12 @@ export default function NewDeliveryPage() {
   const resetForm = () => {
     setSelectedProduct(null);
     setSelectedPartnerId('');
-    setUnit('kg');
+    setUnit('sacos');
     setQuantity('');
     setProductKg('');
     setPricePerUnit('');
     setCreateDebt(false);
+    setRegisterPackaging(true);
   };
 
   const handleSave = async () => {
@@ -80,7 +83,7 @@ export default function NewDeliveryPage() {
     };
 
     // Solo enviar campos opcionales si tienen valor
-    if (productKg && unit !== 'kg')  body.productKg   = parseFloat(productKg);
+    if (productKg)                  body.productKg   = parseFloat(productKg);
     if (pricePerUnit)                body.pricePerUnit = parseFloat(pricePerUnit);
     if (totalPrice !== null)         body.totalPrice   = totalPrice;
     if (createDebt && totalPrice !== null) body.createDebt = true;
@@ -88,6 +91,22 @@ export default function NewDeliveryPage() {
     try {
       setIsSubmitting(true);
       await createDelivery(body);
+
+      // Registrar también la salida de empaque físico (sacos/lonas) hacia este aliado
+      if (registerPackaging && user?.tenantId) {
+        await createPackagingMovement({
+          tenantId: user.tenantId,
+          partnerId: selectedPartnerId,
+          type: 'DELIVERED_TO_PARTNER',
+          packagingType: unit,
+          quantity: parseFloat(quantity),
+          description: `Entrega — ${selectedProduct.name}`,
+        }).catch((err) => {
+          console.error('Error registrando carga de empaque:', err);
+          alert('La entrega se registró, pero no se pudo registrar la carga de empaque asociada.');
+        });
+      }
+
       alert('✅ Entrega registrada correctamente');
       resetForm();
     } catch (error: any) {
@@ -205,11 +224,11 @@ export default function NewDeliveryPage() {
             </h2>
 
             {/* SELECTOR DE UNIDAD */}
-            <div className="grid grid-cols-5 gap-2 mb-6">
+            <div className="grid grid-cols-3 gap-2 mb-6">
               {UNITS.map((u) => (
                 <button
                   key={u.value}
-                  onClick={() => { setUnit(u.value); if (u.value === 'kg') setProductKg(''); }}
+                  onClick={() => setUnit(u.value)}
                   className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all ${
                     unit === u.value
                       ? 'border-[#4a7fff] text-white'
@@ -263,31 +282,29 @@ export default function NewDeliveryPage() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* KG equivalente — solo si la unidad no es kg */}
-              {unit !== 'kg' && (
-                <div className="space-y-3">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <Weight size={12} /> Equiv. en kg{' '}
-                    <span className="text-slate-700 normal-case font-medium">(opcional)</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={productKg}
-                    onChange={(e) => setProductKg(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full rounded-2xl px-5 py-4 text-2xl font-mono font-black text-white outline-none transition-all"
-                    style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(30,60,139,0.25)' }}
-                  />
-                  <p className="text-[8px] text-slate-700 uppercase tracking-widest font-bold">
-                    ¿Cuántos kg equivalen a {quantity || '?'} {unitLabel}?
-                  </p>
-                </div>
-              )}
+              {/* KG equivalente — siempre opcional */}
+              <div className="space-y-3">
+                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                  <Weight size={12} /> Equiv. en kg{' '}
+                  <span className="text-slate-700 normal-case font-medium">(opcional)</span>
+                </label>
+                <input
+                  type="number"
+                  value={productKg}
+                  onChange={(e) => setProductKg(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full rounded-2xl px-5 py-4 text-2xl font-mono font-black text-white outline-none transition-all"
+                  style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(30,60,139,0.25)' }}
+                />
+                <p className="text-[8px] text-slate-700 uppercase tracking-widest font-bold">
+                  ¿Cuántos kg equivalen a {quantity || '?'} {unitLabel}?
+                </p>
+              </div>
 
               {/* Precio por unidad */}
               <div className="space-y-3">
                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                  <DollarSign size={12} /> Precio × {unit === 'kg' ? 'kg' : unitLabel.toLowerCase()}{' '}
+                  <DollarSign size={12} /> Precio × {unitLabel.toLowerCase()}{' '}
                   <span className="text-slate-700 normal-case font-medium">(opcional)</span>
                 </label>
                 <input
@@ -358,7 +375,7 @@ export default function NewDeliveryPage() {
               </div>
 
               {/* KG equivalente */}
-              {unit !== 'kg' && productKg && (
+              {productKg && (
                 <div>
                   <span className="text-[9px] uppercase tracking-widest font-black block mb-1" style={{ color: 'rgba(255,255,255,0.2)' }}>
                     Equiv. KG
@@ -415,6 +432,35 @@ export default function NewDeliveryPage() {
                 </button>
               </div>
             )}
+
+            {/* TOGGLE: REGISTRAR CARGA DE EMPAQUE AL ALIADO */}
+            <div
+              className="mb-6 p-5 rounded-2xl"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(30,60,139,0.2)' }}
+            >
+              <button
+                type="button"
+                onClick={() => setRegisterPackaging(v => !v)}
+                className="w-full flex items-center justify-between gap-3 text-left"
+              >
+                <div className="flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white">
+                    Registrar carga de empaque
+                  </p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    Suma {quantity || 0} {unitLabel.toLowerCase()} al saldo de empaque de este aliado
+                  </p>
+                </div>
+                {/* Toggle switch */}
+                <div
+                  className={`relative w-11 h-6 rounded-full transition-all shrink-0 ${registerPackaging ? 'bg-blue-600' : 'bg-white/10'}`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${registerPackaging ? 'translate-x-5' : 'translate-x-0'}`}
+                  />
+                </div>
+              </button>
+            </div>
 
             <button
               onClick={handleSave}

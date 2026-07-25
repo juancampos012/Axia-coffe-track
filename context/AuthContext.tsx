@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { envVariables } from "@/utils/config";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie";
+import { useUserStore } from "@/store/UserStore";
 
 type User = {
   id: string;
@@ -43,6 +44,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: decoded.role,
         tenantId: decoded.tenantId,
       });
+
+      useUserStore.getState().setRole(decoded.role);
+      useUserStore.getState().setTenantId(decoded.tenantId);
     } catch (err) {
       console.error("Error decodificando token:", err);
       setUser(null);
@@ -106,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               Cookies.set("authToken", data.token, {
                 expires: 0.5, // 12 horas
                 sameSite: "lax",
-                secure: true,
+                secure: process.env.NODE_ENV === "production",
               });
               const decoded = jwtDecode<User>(data.token);
               loggedUser = { id: decoded.id, name: decoded.name || "", email: decoded.email || "", role: decoded.role, tenantId: decoded.tenantId };

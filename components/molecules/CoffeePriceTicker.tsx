@@ -9,11 +9,17 @@ import {
 } from 'lucide-react';
 
 interface CoffeePrice {
-  nyPrice: number; // USc/lb
-  nyPriceUsd: number; // USD/lb
+  nyPrice: number;
+  nyPriceUsd: number;
   trm: number;
+  precioExcelso: number;
   estimatedCarga: number;
   kgCop: number;
+  valorExcelso: number;
+  valorPasilla: number;
+  kgExcelso: number;
+  kgPasilla: number;
+  precioPasilla: number;
   factor: number;
   lastUpdated: string;
   source: string;
@@ -47,24 +53,16 @@ export default function CoffeePriceTicker({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // Factor de conversión FNC ≈ 79 (rendimiento neto: lb→kg + pergamino→excelso + descuentos FNC)
-  const [factor, setFactor] = useState(customFactor ?? 79);
+  const [factor, setFactor] = useState(customFactor ?? 94);
 
   const load = useCallback(
     async (showLoader = false) => {
       if (showLoader) setLoading(true);
-
       setError(false);
-
       try {
-        const res = await fetch('/api/coffee-price', {
-          cache: 'no-store',
-        });
-
+        const res = await fetch('/api/coffee-price', { cache: 'no-store' });
         const json = await res.json();
-
         if (json.error) throw new Error();
-
         setPrev(data?.nyPrice ?? null);
         setData(json);
       } catch {
@@ -81,50 +79,10 @@ export default function CoffeePriceTicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto refresh
   useEffect(() => {
     const id = setInterval(() => load(false), 5 * 60 * 1000);
-
     return () => clearInterval(id);
   }, [load]);
-
-  /**
-   * ============================================
-   * FORMULA FNC APROXIMADA
-   * ============================================
-   *
-   * NY USc/lb → USD/lb
-   * × TRM
-   * × 2.20462 (lb por kg)
-   * × 125 kg (carga)
-   * × rendimiento (%)
-   */
-
-  /**
-   * Fórmula FNC verificada empíricamente:
-   *   Precio_carga = (NY USD/lb) × TRM × 2.20462 × 125 × (factor / 100)
-   *
-   * El factor (~79) es el rendimiento neto que incorpora:
-   *   – Conversión lb → kg (÷ 2.20462)
-   *   – Rendimiento pergamino seco → excelso (~80%)
-   *   – Retención cafetera (~6%) + costos FNC
-   *
-   * Verificado: NY=2.66, TRM=3.800 → $2.212.000 COP/carga con factor 79
-   */
-  const customCarga = data
-    ? Math.round(
-        data.nyPriceUsd * // USD/lb
-          data.trm * // COP/USD
-          2.20462 * // lb por kg
-          125 * // kg por carga
-          (factor / 100) // rendimiento neto FNC
-      )
-    : null;
-
-  // Precio por kilo pergamino aproximado
-  const kgPergamino = customCarga
-    ? Math.round(customCarga / 125)
-    : null;
 
   const trend =
     prev !== null && data
@@ -150,7 +108,6 @@ export default function CoffeePriceTicker({
       >
         <div className="flex items-center gap-2">
           <Coffee size={14} style={{ color: '#4a7fff' }} />
-
           <span
             className="text-[10px] font-black uppercase tracking-widest"
             style={{ color: 'rgba(255,255,255,0.35)' }}
@@ -164,31 +121,15 @@ export default function CoffeePriceTicker({
             Cargando...
           </span>
         ) : error ? (
-          <span className="text-xs text-red-500/60">
-            Sin conexión
-          </span>
+          <span className="text-xs text-red-500/60">Sin conexión</span>
         ) : data ? (
           <>
-            {/* NY */}
             <div className="flex items-center gap-1.5">
-              {trend === 'up' && (
-                <TrendingUp
-                  size={13}
-                  className="text-emerald-400"
-                />
-              )}
-
-              {trend === 'down' && (
-                <TrendingDown
-                  size={13}
-                  className="text-red-400"
-                />
-              )}
-
+              {trend === 'up' && <TrendingUp size={13} className="text-emerald-400" />}
+              {trend === 'down' && <TrendingDown size={13} className="text-red-400" />}
               <span className="text-base font-black font-mono text-white">
                 {data.nyPrice.toFixed(2)}
               </span>
-
               <span
                 className="text-[10px] font-bold"
                 style={{ color: 'rgba(255,255,255,0.35)' }}
@@ -197,12 +138,8 @@ export default function CoffeePriceTicker({
               </span>
             </div>
 
-            <div
-              className="w-px h-4"
-              style={{ background: 'rgba(255,255,255,0.1)' }}
-            />
+            <div className="w-px h-4" style={{ background: 'rgba(255,255,255,0.1)' }} />
 
-            {/* TRM */}
             <div className="flex items-center gap-1.5">
               <span
                 className="text-[10px] font-black uppercase tracking-widest"
@@ -210,18 +147,13 @@ export default function CoffeePriceTicker({
               >
                 TRM
               </span>
-
               <span className="text-sm font-black font-mono text-white">
                 {fmtCOP(data.trm)}
               </span>
             </div>
 
-            <div
-              className="w-px h-4"
-              style={{ background: 'rgba(255,255,255,0.1)' }}
-            />
+            <div className="w-px h-4" style={{ background: 'rgba(255,255,255,0.1)' }} />
 
-            {/* Carga */}
             <div className="flex items-center gap-1.5">
               <span
                 className="text-[10px] font-black uppercase tracking-widest"
@@ -229,27 +161,22 @@ export default function CoffeePriceTicker({
               >
                 Carga ~
               </span>
-
               <span
                 className="text-sm font-black font-mono"
                 style={{ color: 'rgba(74,127,255,0.9)' }}
               >
-                {fmtCOP(customCarga ?? 0)}
+                {fmtCOP(data.estimatedCarga)}
               </span>
             </div>
 
-            {/* Hora */}
             <span
               className="text-[9px] font-bold uppercase tracking-widest"
               style={{ color: 'rgba(255,255,255,0.2)' }}
             >
-              {new Date(data.lastUpdated).toLocaleTimeString(
-                'es-CO',
-                {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                }
-              )}
+              {new Date(data.lastUpdated).toLocaleTimeString('es-CO', {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
             </span>
           </>
         ) : null}
@@ -294,21 +221,18 @@ export default function CoffeePriceTicker({
           >
             <Coffee size={15} style={{ color: '#4a7fff' }} />
           </div>
-
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-white">
               Precio del Café
             </p>
-
             <p
               className="text-[9px] font-bold uppercase tracking-widest"
               style={{ color: 'rgba(255,255,255,0.3)' }}
             >
-              Tiempo real · NYSE
+              Fórmula FNC · NYSE
             </p>
           </div>
         </div>
-
         <button
           onClick={() => load(true)}
           disabled={loading}
@@ -328,9 +252,7 @@ export default function CoffeePriceTicker({
             <div
               key={i}
               className="h-10 rounded-xl animate-pulse"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-              }}
+              style={{ background: 'rgba(255,255,255,0.04)' }}
             />
           ))}
         </div>
@@ -339,7 +261,6 @@ export default function CoffeePriceTicker({
           <p className="text-sm text-red-400/70 font-bold">
             No se pudo obtener el precio
           </p>
-
           <button
             onClick={() => load(true)}
             className="text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-colors"
@@ -355,7 +276,6 @@ export default function CoffeePriceTicker({
         <>
           {/* MÉTRICAS */}
           <div className="grid grid-cols-2 gap-3 mb-5">
-            {/* NY */}
             <div
               className="rounded-xl p-4"
               style={{
@@ -369,27 +289,13 @@ export default function CoffeePriceTicker({
               >
                 Bolsa NY
               </p>
-
               <div className="flex items-center gap-1">
-                {trend === 'up' && (
-                  <TrendingUp
-                    size={12}
-                    className="text-emerald-400 shrink-0"
-                  />
-                )}
-
-                {trend === 'down' && (
-                  <TrendingDown
-                    size={12}
-                    className="text-red-400 shrink-0"
-                  />
-                )}
-
+                {trend === 'up' && <TrendingUp size={12} className="text-emerald-400 shrink-0" />}
+                {trend === 'down' && <TrendingDown size={12} className="text-red-400 shrink-0" />}
                 <span className="text-xl font-black font-mono text-white">
                   {data.nyPrice.toFixed(2)}
                 </span>
               </div>
-
               <p
                 className="text-[9px] font-bold mt-0.5"
                 style={{ color: 'rgba(255,255,255,0.25)' }}
@@ -398,7 +304,6 @@ export default function CoffeePriceTicker({
               </p>
             </div>
 
-            {/* TRM */}
             <div
               className="rounded-xl p-4"
               style={{
@@ -412,11 +317,9 @@ export default function CoffeePriceTicker({
               >
                 TRM
               </p>
-
               <span className="text-xl font-black font-mono text-white">
                 {data.trm.toLocaleString('es-CO')}
               </span>
-
               <p
                 className="text-[9px] font-bold mt-0.5"
                 style={{ color: 'rgba(255,255,255,0.25)' }}
@@ -426,7 +329,7 @@ export default function CoffeePriceTicker({
             </div>
           </div>
 
-          {/* PRECIO */}
+          {/* PRECIO CARGA FNC */}
           <div
             className="rounded-xl p-4 mb-5"
             style={{
@@ -438,31 +341,20 @@ export default function CoffeePriceTicker({
               className="text-[9px] font-black uppercase tracking-widest mb-1"
               style={{ color: 'rgba(74,127,255,0.7)' }}
             >
-              Precio estimado por carga (125 kg)
+              Precio carga pergamino FR{factor} (125 kg)
             </p>
-
             <p className="text-3xl font-black font-mono text-white">
-              {fmtCOP(customCarga ?? 0)}
+              {fmtCOP(data.estimatedCarga)}
             </p>
-
             <p
               className="text-[10px] font-bold mt-2"
               style={{ color: 'rgba(255,255,255,0.4)' }}
             >
-              ≈ {fmtCOP(kgPergamino ?? 0)} / kg
-            </p>
-
-            <p
-              className="text-[9px] font-bold mt-2"
-              style={{ color: 'rgba(255,255,255,0.25)' }}
-            >
-              Fórmula FNC:
-              <br />
-              NY × TRM × 2.20462 × 125 × ({factor} ÷ 100)
+              ≈ {fmtCOP(data.kgCop)} / kg pergamino
             </p>
           </div>
 
-          {/* FACTOR */}
+          {/* DESGLOSE FNC */}
           <div
             className="rounded-xl p-4 mb-4"
             style={{
@@ -470,50 +362,43 @@ export default function CoffeePriceTicker({
               border: '1px solid rgba(255,255,255,0.06)',
             }}
           >
-            <div className="flex items-center justify-between mb-3">
-              <p
-                className="text-[9px] font-black uppercase tracking-widest"
-                style={{ color: 'rgba(255,255,255,0.35)' }}
+            <p
+              className="text-[9px] font-black uppercase tracking-widest mb-3"
+              style={{ color: 'rgba(255,255,255,0.35)' }}
+            >
+              Desglose FNC por carga
+            </p>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-white/50">
+                  {data.kgExcelso.toFixed(2)} kg Excelso × {fmtCOP(data.precioExcelso)}/kg
+                </span>
+                <span className="text-[11px] font-mono font-bold text-emerald-400">
+                  {fmtCOP(data.valorExcelso)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-white/50">
+                  {data.kgPasilla.toFixed(2)} kg Pasilla × {fmtCOP(data.precioPasilla)}/kg
+                </span>
+                <span className="text-[11px] font-mono font-bold text-amber-400">
+                  {fmtCOP(data.valorPasilla)}
+                </span>
+              </div>
+              <div
+                className="pt-2 mt-2 flex justify-between items-center"
+                style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
               >
-                Factor de rendimiento
-              </p>
-
-              <span className="text-sm font-black font-mono text-white">
-                {factor}
-              </span>
-            </div>
-
-            <input
-              type="range"
-              min={70}
-              max={92}
-              step={1}
-              value={factor}
-              onChange={(e) =>
-                setFactor(Number(e.target.value))
-              }
-              className="w-full"
-              style={{ accentColor: '#1e3c8b' }}
-            />
-
-            <div className="flex justify-between mt-1">
-              <span
-                className="text-[8px] font-bold"
-                style={{ color: 'rgba(255,255,255,0.2)' }}
-              >
-                70
-              </span>
-
-              <span
-                className="text-[8px] font-bold"
-                style={{ color: 'rgba(255,255,255,0.2)' }}
-              >
-                92
-              </span>
+                <span className="text-[10px] font-bold text-white/60">Total carga</span>
+                <span className="text-[12px] font-mono font-black text-white">
+                  {fmtCOP(data.estimatedCarga)}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* DESGLOSE */}
+          {/* FÓRMULA */}
           <details className="group">
             <summary
               className="text-[9px] font-black uppercase tracking-widest cursor-pointer select-none"
@@ -521,33 +406,19 @@ export default function CoffeePriceTicker({
             >
               Ver fórmula ▾
             </summary>
-
             <div
               className="mt-3 space-y-1.5 pl-2 border-l"
               style={{ borderColor: 'rgba(30,60,139,0.3)' }}
             >
               {[
                 ['NY (USc/lb)', `${data.nyPrice.toFixed(2)}`],
-                [
-                  'NY (USD/lb)',
-                  fmtUSD(data.nyPriceUsd),
-                ],
-                [
-                  'Factor FNC',
-                  `${factor}`,
-                ],
-                [
-                  'TRM (COP/USD)',
-                  data.trm.toLocaleString('es-CO'),
-                ],
-                [
-                  'Precio carga',
-                  fmtCOP(customCarga ?? 0),
-                ],
-                [
-                  'Precio kg',
-                  fmtCOP(kgPergamino ?? 0),
-                ],
+                ['NY (USD/lb)', fmtUSD(data.nyPriceUsd)],
+                ['TRM (COP/USD)', data.trm.toLocaleString('es-CO')],
+                ['Precio Excelso', `${fmtCOP(data.precioExcelso)}/kg`],
+                ['Formula', '(NY/100) × 2.20462 × TRM'],
+                ['Kg Excelso/carga', `${data.kgExcelso} kg`],
+                ['Kg Pasilla/carga', `${data.kgPasilla} kg`],
+                ['Precio Pasilla', `${fmtCOP(data.precioPasilla)}/kg`],
               ].map(([label, val]) => (
                 <div
                   key={label}
@@ -555,13 +426,10 @@ export default function CoffeePriceTicker({
                 >
                   <span
                     className="text-[9px] font-bold"
-                    style={{
-                      color: 'rgba(255,255,255,0.3)',
-                    }}
+                    style={{ color: 'rgba(255,255,255,0.3)' }}
                   >
                     {label}
                   </span>
-
                   <span className="text-[10px] font-mono font-black text-white">
                     {val}
                   </span>
@@ -575,14 +443,11 @@ export default function CoffeePriceTicker({
             className="mt-4 text-[8px] font-bold uppercase tracking-widest text-center"
             style={{ color: 'rgba(255,255,255,0.15)' }}
           >
-            {data.source} · Actualizado{' '}
-            {new Date(data.lastUpdated).toLocaleTimeString(
-              'es-CO',
-              {
-                hour: '2-digit',
-                minute: '2-digit',
-              }
-            )}
+            {data.source} · FNC Oficial · Actualizado{' '}
+            {new Date(data.lastUpdated).toLocaleTimeString('es-CO', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
           </p>
         </>
       ) : null}

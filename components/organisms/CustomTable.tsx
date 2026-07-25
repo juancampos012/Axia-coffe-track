@@ -140,7 +140,11 @@ export default function CustomTable({
             <tbody className="overflow-visible">
               {paginatedData.map((item, index) => {
                 const globalIndex = (currentPage - 1) * itemsPerPage + index;
-                const zIndexStyle = { zIndex: paginatedData.length - index };
+                // La fila con el menú abierto siempre debe flotar por encima de las demás,
+                // sin importar si el menú se abre hacia arriba o hacia abajo.
+                const zIndexStyle = {
+                  zIndex: openDropdown === globalIndex ? 999 : paginatedData.length - index,
+                };
                 const isLast = index === paginatedData.length - 1;
 
                 return (
@@ -188,6 +192,11 @@ export default function CustomTable({
                                 : []),
                               ...(customActions?.view
                                 ? [{ text: labels.view, icon: <Eye size={14} className="text-white/40" />, action: () => customActions.view?.(item.id) }]
+                                : []),
+                              ...(customActions?.custom
+                                ? customActions.custom
+                                    .filter((c) => !c.condition || c.condition(item))
+                                    .map((c) => ({ text: c.label, icon: c.icon, action: () => c.action(item.id) }))
                                 : []),
                               ...(customActions?.delete
                                 ? [{ text: labels.delete, icon: <Trash2 size={14} className="text-red-400" />, action: () => customActions.delete?.(item.id) }]

@@ -108,6 +108,29 @@ export const updateCustomer = async (body: ClientDAO, id:string): Promise<Respon
   return fetchWithCredentials(url, headersOptions);
 };
 
+export const getUserById = async (id: string): Promise<any> => {
+  const url = `${API_BASE_URL}/users/${id}`;
+  const response = await fetchWithCredentials(url, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return response.json();
+};
+
+/** Actualiza datos propios de la cuenta (nombre, email y/o contraseña) */
+export const updateOwnAccount = async (
+  id: string,
+  body: { name?: string; email?: string; password?: string }
+): Promise<any> => {
+  const url = `${API_BASE_URL}/users/${id}`;
+  const response = await fetchWithCredentials(url, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+  });
+  return response.json();
+};
+
 export const updateEmployee = async (body: EmployeeDAO, id:string): Promise<Response> => {
   const url = `${API_BASE_URL}/users/${id}`;
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useBalance } from '@/context/BalanceContext';
 import { createExpense } from '@/request/expense';
 import { 
   DollarSign, 
@@ -16,21 +17,23 @@ import {
 export default function NewExpensePage() {
   const router = useRouter();
   const { user } = useAuth();
-  
+  const { refreshBalance } = useBalance();
+
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSave = async () => {
     if (!amount || !description) return alert("Completa todos los campos");
-    
+
     try {
       setIsSubmitting(true);
       await createExpense({
-        tenantId: user?.tenantId!, 
+        tenantId: user?.tenantId!,
         amount: parseFloat(amount),
         description: description.trim()
       });
+      if (user?.tenantId) await refreshBalance(user.tenantId);
       router.push('/es/expenses/view');
     } catch (error: any) {
       alert(error.message || "Error al registrar el gasto");

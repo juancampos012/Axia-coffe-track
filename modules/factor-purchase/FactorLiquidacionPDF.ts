@@ -34,8 +34,8 @@ export interface FactorLiquidacionData {
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('es-CO', {
-    style: 'currency', currency: 'COP', minimumFractionDigits: 0,
-  }).format(n);
+    style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0,
+  }).format(Math.round(n));
 
 const num = (n: number) => n.toLocaleString('es-CO');
 

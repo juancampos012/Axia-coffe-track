@@ -5,6 +5,7 @@ export const loginScheme = (t: ReturnType<typeof useTranslations>) => z.object({
 	email: z.string()
 			.nonempty({ message: t("errors.emailRequired") })
 			.email(t("errors.emailInvalid"))
+			.toLowerCase()
         	.max(40),
 		
 	password: z.string()
