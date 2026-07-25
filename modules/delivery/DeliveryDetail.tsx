@@ -28,11 +28,9 @@ import { partnerCharge } from '@/request/accounts';
 import { DeliveryUnit } from '@/types/Api';
 
 const UNITS: { value: DeliveryUnit; label: string; icon: string }[] = [
-  { value: 'kg',          label: 'Kilogramos',  icon: '⚖️' },
-  { value: 'sacos',       label: 'Sacos',       icon: '🧺' },
-  { value: 'lonas',       label: 'Lonas',       icon: '🛍️' },
-  { value: 'bultos',      label: 'Bultos',      icon: '📦' },
-  { value: 'canastillas', label: 'Canastillas', icon: '🪣' },
+  { value: 'sacos',        label: 'Sacos',        icon: '🧺' },
+  { value: 'lona_pequena', label: 'Lona pequeña', icon: '🛍️' },
+  { value: 'lona_grande',  label: 'Lona grande',  icon: '📦' },
 ];
 
 export default function DeliveryDetailPage({ deliveryId }: { deliveryId: string }) {
@@ -44,7 +42,7 @@ export default function DeliveryDetailPage({ deliveryId }: { deliveryId: string 
   // Edit panel state
   const [showEdit, setShowEdit] = useState(false);
   const [editQuantity, setEditQuantity] = useState('');
-  const [editUnit, setEditUnit] = useState<DeliveryUnit>('kg');
+  const [editUnit, setEditUnit] = useState<DeliveryUnit>('sacos');
   const [editProductKg, setEditProductKg] = useState('');
   const [editPricePerUnit, setEditPricePerUnit] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -71,7 +69,7 @@ export default function DeliveryDetailPage({ deliveryId }: { deliveryId: string 
   const openEdit = () => {
     if (!delivery) return;
     setEditQuantity(String(delivery.quantity ?? delivery.productKg ?? ''));
-    setEditUnit((delivery.unit as DeliveryUnit) ?? 'kg');
+    setEditUnit((delivery.unit as DeliveryUnit) ?? 'sacos');
     setEditProductKg(delivery.productKg != null ? String(delivery.productKg) : '');
     setEditPricePerUnit(delivery.pricePerUnit != null ? String(delivery.pricePerUnit) : '');
     setShowEdit(true);
@@ -89,7 +87,7 @@ export default function DeliveryDetailPage({ deliveryId }: { deliveryId: string 
         quantity: parseFloat(editQuantity),
         unit: editUnit,
       };
-      if (editProductKg && editUnit !== 'kg') body.productKg = parseFloat(editProductKg);
+      if (editProductKg) body.productKg = parseFloat(editProductKg);
       if (editPricePerUnit) body.pricePerUnit = parseFloat(editPricePerUnit);
       if (editTotalPrice !== null) body.totalPrice = editTotalPrice;
 
@@ -217,11 +215,11 @@ export default function DeliveryDetailPage({ deliveryId }: { deliveryId: string 
           {/* SELECTOR DE UNIDAD */}
           <div className="mb-6">
             <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-3">Unidad</label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {UNITS.map((u) => (
                 <button
                   key={u.value}
-                  onClick={() => { setEditUnit(u.value); if (u.value === 'kg') setEditProductKg(''); }}
+                  onClick={() => setEditUnit(u.value)}
                   className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all ${
                     editUnit === u.value
                       ? 'border-[#4a7fff] text-white'
@@ -252,27 +250,25 @@ export default function DeliveryDetailPage({ deliveryId }: { deliveryId: string 
               />
             </div>
 
-            {/* KG EQUIVALENTE — solo si no es kg */}
-            {editUnit !== 'kg' && (
-              <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                  <Weight size={12} /> Equiv. en kg <span className="text-slate-700 normal-case font-medium">(opcional)</span>
-                </label>
-                <input
-                  type="number"
-                  value={editProductKg}
-                  onChange={(e) => setEditProductKg(e.target.value)}
-                  placeholder="0.00"
-                  className="w-full rounded-2xl px-5 py-4 text-2xl font-mono font-black text-white outline-none transition-all"
-                  style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(30,60,139,0.25)' }}
-                />
-              </div>
-            )}
+            {/* KG EQUIVALENTE — siempre opcional */}
+            <div className="space-y-3">
+              <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Weight size={12} /> Equiv. en kg <span className="text-slate-700 normal-case font-medium">(opcional)</span>
+              </label>
+              <input
+                type="number"
+                value={editProductKg}
+                onChange={(e) => setEditProductKg(e.target.value)}
+                placeholder="0.00"
+                className="w-full rounded-2xl px-5 py-4 text-2xl font-mono font-black text-white outline-none transition-all"
+                style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(30,60,139,0.25)' }}
+              />
+            </div>
 
             {/* PRECIO POR UNIDAD */}
             <div className="space-y-3">
               <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                <DollarSign size={12} /> Precio × {editUnit === 'kg' ? 'kg' : UNITS.find(u => u.value === editUnit)?.label?.toLowerCase()}{' '}
+                <DollarSign size={12} /> Precio × {UNITS.find(u => u.value === editUnit)?.label?.toLowerCase()}{' '}
                 <span className="text-slate-700 normal-case font-medium">(opcional)</span>
               </label>
               <input
