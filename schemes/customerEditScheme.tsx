@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 
+import { customerFarmFields, isCoffeeHectaresValid, coffeeHectaresError } from "./customerScheme";
+
 export const customertEditSchema = (t: ReturnType<typeof useTranslations>) => z.object({
     firstName: z.string()
             .nonempty({ message: t("errors.firstName.required") })
@@ -46,8 +48,5 @@ export const customertEditSchema = (t: ReturnType<typeof useTranslations>) => z.
             .max(10)
             .or(z.literal("")),
 
-    email: z.string()
-            .nonempty({ message: t("errors.email.required") })
-            .email({message: t("errors.email.invalid") })
-            .max(40, t("errors.email.max")),
-});
+    ...customerFarmFields,
+}).refine(isCoffeeHectaresValid, coffeeHectaresError);

@@ -19,7 +19,12 @@ type CustomerFormData = {
     lastName: string;
     secondLastName?: string;
     phone?: string;
-    email?: string;
+    birthDate: string;
+    farmName: string;
+    farmVereda: string;
+    farmTotalHectares: number;
+    farmCoffeeHectares: number;
+    coffeeTrees: number;
 };
 
 interface CustomerFormProps {
@@ -66,7 +71,7 @@ const CustomerForm = forwardRef<HTMLFormElement, CustomerFormProps>(
             }
         } catch (error) {
             console.error(error);
-            alert("Error de conexión");
+            alert(error instanceof Error ? error.message : "Error de conexión");
         }
     };
 
@@ -128,16 +133,80 @@ placeholder="Opcional"
 type="text"
                     {...register("phone")}
                 />
+                {errors.phone && (
+                    <p className="text-red-500 text-xs">{errors.phone.message}</p>
+                )}
             </div>
 
             <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Correo Electrónico</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Fecha de Nacimiento</label>
                 <Input
-type="email"
-                    {...register("email")}
+type="date"
+                    {...register("birthDate")}
                 />
-                {errors.email && (
-                    <p className="text-red-500 text-xs">{errors.email.message}</p>
+                {errors.birthDate && (
+                    <p className="text-red-500 text-xs">{errors.birthDate.message}</p>
+                )}
+            </div>
+
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Nombre de la Finca</label>
+                <Input
+placeholder="Ej: La Esperanza"
+                    {...register("farmName")}
+                />
+                {errors.farmName && (
+                    <p className="text-red-500 text-xs">{errors.farmName.message}</p>
+                )}
+            </div>
+
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Vereda de la Finca</label>
+                <Input
+placeholder="Ingrese la vereda"
+                    {...register("farmVereda")}
+                />
+                {errors.farmVereda && (
+                    <p className="text-red-500 text-xs">{errors.farmVereda.message}</p>
+                )}
+            </div>
+
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Hectáreas Totales</label>
+                <Input
+type="number"
+                    step="0.01"
+                    min="0"
+                    {...register("farmTotalHectares")}
+                />
+                {errors.farmTotalHectares && (
+                    <p className="text-red-500 text-xs">{errors.farmTotalHectares.message}</p>
+                )}
+            </div>
+
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Hectáreas en Café</label>
+                <Input
+type="number"
+                    step="0.01"
+                    min="0"
+                    {...register("farmCoffeeHectares")}
+                />
+                {errors.farmCoffeeHectares && (
+                    <p className="text-red-500 text-xs">{errors.farmCoffeeHectares.message}</p>
+                )}
+            </div>
+
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Número de Árboles de Café</label>
+                <Input
+type="number"
+                    step="1"
+                    min="0"
+                    {...register("coffeeTrees")}
+                />
+                {errors.coffeeTrees && (
+                    <p className="text-red-500 text-xs">{errors.coffeeTrees.message}</p>
                 )}
             </div>
 

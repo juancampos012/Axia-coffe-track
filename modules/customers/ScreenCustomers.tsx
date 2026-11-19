@@ -21,6 +21,8 @@ import {
     SupplierDAO 
 } from "@/types/Api";
 
+const toOptionalNumber = (value?: string) => (value ? Number(value) : undefined);
+
 export default function ScreenCustomers() {
     const router = useRouter();
     const t = useTranslations("customers");
@@ -77,7 +79,12 @@ export default function ScreenCustomers() {
             "last name": client.lastName,
             "second last name": client.secondLastName || "",
             phone: client.phone || "",
-            email: client.email || "",
+            "birth date": client.birthDate || "",
+            "farm name": client.farmName || "",
+            "farm vereda": client.farmVereda || "",
+            "farm total hectares": client.farmTotalHectares?.toString() ?? "",
+            "farm coffee hectares": client.farmCoffeeHectares?.toString() ?? "",
+            "coffee trees": client.coffeeTrees?.toString() ?? "",
         }));
     };
 
@@ -112,7 +119,8 @@ export default function ScreenCustomers() {
                 "last name": `No se encontraron clientes para: "${searchTerm}"`,
                 "second last name": "",
                 phone: "",
-                email: "",
+                "farm name": "",
+                "farm vereda": "",
             }]);
         } else {
             if (currentSort) {
@@ -143,7 +151,12 @@ export default function ScreenCustomers() {
                 lastName: clientToEdit["last name"],
                 secondLastName: clientToEdit["second last name"], // Agregado
                 phone: clientToEdit["phone"],
-                email: clientToEdit.email,
+                birthDate: clientToEdit["birth date"],
+                farmName: clientToEdit["farm name"],
+                farmVereda: clientToEdit["farm vereda"],
+                farmTotalHectares: toOptionalNumber(clientToEdit["farm total hectares"]),
+                farmCoffeeHectares: toOptionalNumber(clientToEdit["farm coffee hectares"]),
+                coffeeTrees: toOptionalNumber(clientToEdit["coffee trees"]),
             } as ClientDAO);
             setIsModalOpen(true);
         }
@@ -175,7 +188,8 @@ export default function ScreenCustomers() {
         { label: t("table.lastName"), key: "last name"},
         { label: "Segundo Apellido", key: "second last name"},
         { label: 'Teléfono', key: "phone"},
-        { label: t("table.email"), key: "email"}
+        { label: "Finca", key: "farm name"},
+        { label: "Vereda", key: "farm vereda"},
     ];
 
     return (
@@ -259,7 +273,12 @@ export default function ScreenCustomers() {
                         lastName: currentClient.lastName,
                         secondLastName: currentClient.secondLastName || "",
                         phone: currentClient.phone || "",
-                        email: currentClient.email || ""
+                        birthDate: currentClient.birthDate,
+                        farmName: currentClient.farmName,
+                        farmVereda: currentClient.farmVereda,
+                        farmTotalHectares: currentClient.farmTotalHectares,
+                        farmCoffeeHectares: currentClient.farmCoffeeHectares,
+                        coffeeTrees: currentClient.coffeeTrees,
                     } : undefined}
                     onSuccess={() => {
                         fetchAllClients();

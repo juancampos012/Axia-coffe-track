@@ -3,7 +3,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Mail, CreditCard } from "lucide-react";
+import { ArrowLeft, CreditCard, Phone, Calendar, Home, MapPin, Map, Sprout, TreePine } from "lucide-react";
 
 import { ClientDAO } from "@/types/Api";
 
@@ -14,6 +14,19 @@ interface CustomerDetailClientProps {
 export default function CustomerDetailClient({ customer }: CustomerDetailClientProps) {
     const router = useRouter();
     const t = useTranslations("customerDetail");
+
+    const formatNumber = (value?: number) => (value != null ? value.toLocaleString("es-CO") : undefined);
+
+    const infoCards = [
+        { icon: CreditCard, label: t("identification"), value: customer.identification },
+        { icon: Phone, label: "Teléfono", value: customer.phone },
+        { icon: Calendar, label: "Fecha de nacimiento", value: customer.birthDate?.slice(0, 10) },
+        { icon: Home, label: "Finca", value: customer.farmName },
+        { icon: MapPin, label: "Vereda", value: customer.farmVereda },
+        { icon: Map, label: "Hectáreas totales", value: formatNumber(customer.farmTotalHectares) },
+        { icon: Sprout, label: "Hectáreas en café", value: formatNumber(customer.farmCoffeeHectares) },
+        { icon: TreePine, label: "Árboles de café", value: formatNumber(customer.coffeeTrees) },
+    ];
 
     return (
         <div className="w-full max-w-2xl mx-auto py-8 px-4">
@@ -64,27 +77,19 @@ export default function CustomerDetailClient({ customer }: CustomerDetailClientP
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div
-                    className="p-5 rounded-2xl"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(30,60,139,0.25)" }}
-                >
-                    <div className="flex items-center gap-2 mb-3">
-                        <Mail size={14} style={{ color: "rgba(74,127,255,0.7)" }} />
-                        <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>{t("email")}</span>
+                {infoCards.map(({ icon: Icon, label, value }) => (
+                    <div
+                        key={label}
+                        className="p-5 rounded-2xl"
+                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(30,60,139,0.25)" }}
+                    >
+                        <div className="flex items-center gap-2 mb-3">
+                            <Icon size={14} style={{ color: "rgba(74,127,255,0.7)" }} />
+                            <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>{label}</span>
+                        </div>
+                        <p className="text-sm text-white font-medium">{value || "—"}</p>
                     </div>
-                    <p className="text-sm text-white font-medium">{customer.email || "—"}</p>
-                </div>
-
-                <div
-                    className="p-5 rounded-2xl"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(30,60,139,0.25)" }}
-                >
-                    <div className="flex items-center gap-2 mb-3">
-                        <CreditCard size={14} style={{ color: "rgba(74,127,255,0.7)" }} />
-                        <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>{t("identification")}</span>
-                    </div>
-                    <p className="text-sm text-white font-medium">{customer.identification}</p>
-                </div>
+                ))}
             </div>
         </div>
     );

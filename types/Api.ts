@@ -170,6 +170,12 @@ export interface ClientDAO {
     email?: string;
     phone?: string;
     address?: string;
+    birthDate?: string;           // Fecha de nacimiento (YYYY-MM-DD)
+    farmName?: string;            // Nombre de la finca
+    farmVereda?: string;          // Vereda donde está la finca
+    farmTotalHectares?: number;   // Hectáreas totales de la finca
+    farmCoffeeHectares?: number;  // Hectáreas sembradas en café
+    coffeeTrees?: number;         // Número de árboles de café
 }
 
 export interface SupplierDAO {

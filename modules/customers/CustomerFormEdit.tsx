@@ -21,7 +21,12 @@ type CustomerFormData = {
     lastName: string;
     secondLastName?: string; // Nuevo
     phone?: string;
-    email: string; 
+    birthDate: string;
+    farmName: string;
+    farmVereda: string;
+    farmTotalHectares: number;
+    farmCoffeeHectares: number;
+    coffeeTrees: number;
 };
 
 // 2. Actualizamos la interfaz de las Props para que coincida con lo que envías desde la tabla
@@ -34,7 +39,12 @@ interface CustomerFormProps {
         lastName: string;
         secondLastName?: string; // Nuevo
         phone?: string;
-        email: string; 
+        birthDate?: string;
+        farmName?: string;
+        farmVereda?: string;
+        farmTotalHectares?: number;
+        farmCoffeeHectares?: number;
+        coffeeTrees?: number;
     };
     onSuccess?: () => void; 
     onClose?: () => void;
@@ -68,7 +78,13 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
             setValue('lastName', client.lastName);
             setValue('secondLastName', client.secondLastName || "");
             setValue('phone', client.phone || "");
-            setValue('email', client.email);
+            // El backend puede devolver la fecha en ISO; el input date necesita YYYY-MM-DD
+            setValue('birthDate', client.birthDate ? client.birthDate.slice(0, 10) : "");
+            setValue('farmName', client.farmName || "");
+            setValue('farmVereda', client.farmVereda || "");
+            if (client.farmTotalHectares != null) setValue('farmTotalHectares', client.farmTotalHectares);
+            if (client.farmCoffeeHectares != null) setValue('farmCoffeeHectares', client.farmCoffeeHectares);
+            if (client.coffeeTrees != null) setValue('coffeeTrees', client.coffeeTrees);
             
             if (client.id) {
                 setValue('id', client.id);
@@ -95,7 +111,12 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
                 lastName: data.lastName,
                 secondLastName: data.secondLastName,
                 phone: data.phone || "",
-                email: data.email,
+                birthDate: data.birthDate,
+                farmName: data.farmName,
+                farmVereda: data.farmVereda,
+                farmTotalHectares: data.farmTotalHectares,
+                farmCoffeeHectares: data.farmCoffeeHectares,
+                coffeeTrees: data.coffeeTrees,
             };
     
             const response = await updateCustomer(requestBody, client.id);
@@ -110,6 +131,7 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
             
         } catch (error) {
             console.error("Error en onSubmit:", error);
+            alert(error instanceof Error ? error.message : t("alerts.updateError"));
         }
     };
     
@@ -161,19 +183,49 @@ const CustomerFormEdit = forwardRef<HTMLFormElement, CustomerFormProps>(({ onSuc
                 <Input type="text" {...register("secondLastName")} />
             </div>
 
-            {/* Fila: Email y Teléfono */}
-            <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{t("fields.email")}*</label>
-                <Input type="email" {...register("email")} />
-                {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
-            </div>
-
             <div>
                 <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Teléfono</label>
                 <Input type="text" {...register("phone")} />
                 {errors.phone && <p className="text-red-500 text-xs">{errors.phone.message}</p>}
             </div>
-            
+
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Fecha de Nacimiento*</label>
+                <Input type="date" {...register("birthDate")} />
+                {errors.birthDate && <p className="text-red-500 text-xs">{errors.birthDate.message}</p>}
+            </div>
+
+            {/* Datos de la finca */}
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Nombre de la Finca*</label>
+                <Input type="text" {...register("farmName")} />
+                {errors.farmName && <p className="text-red-500 text-xs">{errors.farmName.message}</p>}
+            </div>
+
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Vereda de la Finca*</label>
+                <Input type="text" {...register("farmVereda")} />
+                {errors.farmVereda && <p className="text-red-500 text-xs">{errors.farmVereda.message}</p>}
+            </div>
+
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Hectáreas Totales*</label>
+                <Input type="number" step="0.01" min="0" {...register("farmTotalHectares")} />
+                {errors.farmTotalHectares && <p className="text-red-500 text-xs">{errors.farmTotalHectares.message}</p>}
+            </div>
+
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Hectáreas en Café*</label>
+                <Input type="number" step="0.01" min="0" {...register("farmCoffeeHectares")} />
+                {errors.farmCoffeeHectares && <p className="text-red-500 text-xs">{errors.farmCoffeeHectares.message}</p>}
+            </div>
+
+            <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Número de Árboles de Café*</label>
+                <Input type="number" step="1" min="0" {...register("coffeeTrees")} />
+                {errors.coffeeTrees && <p className="text-red-500 text-xs">{errors.coffeeTrees.message}</p>}
+            </div>
+
             <div className="col-span-2 flex justify-end gap-2 mt-4">
                 <CustomButton text={t("buttons.close")} variant="ghost" typeButton="button" onClickButton={onSuccess}  />
                 <CustomButton

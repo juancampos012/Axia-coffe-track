@@ -1,5 +1,51 @@
 import { z } from "zod";
 
+// Campos de la finca y fecha de nacimiento, compartidos por creación y edición
+export const customerFarmFields = {
+    birthDate: z
+      .string()
+      .nonempty("La fecha de nacimiento es obligatoria")
+      .refine(
+        (value) => !isNaN(Date.parse(value)) && new Date(value) <= new Date(),
+        { message: "La fecha de nacimiento no es válida" }
+      ),
+
+    farmName: z
+      .string()
+      .trim()
+      .nonempty("El nombre de la finca es obligatorio")
+      .max(80, "El nombre de la finca no puede superar 80 caracteres"),
+
+    farmVereda: z
+      .string()
+      .trim()
+      .nonempty("La vereda es obligatoria")
+      .max(80, "La vereda no puede superar 80 caracteres"),
+
+    farmTotalHectares: z.coerce
+      .number({ invalid_type_error: "Ingrese un número válido" })
+      .positive("Las hectáreas totales deben ser mayores a 0"),
+
+    farmCoffeeHectares: z.coerce
+      .number({ invalid_type_error: "Ingrese un número válido" })
+      .positive("Las hectáreas en café deben ser mayores a 0"),
+
+    coffeeTrees: z.coerce
+      .number({ invalid_type_error: "Ingrese un número válido" })
+      .int("El número de árboles debe ser un número entero")
+      .positive("El número de árboles debe ser mayor a 0"),
+};
+
+type FarmHectares = { farmTotalHectares: number; farmCoffeeHectares: number };
+
+export const isCoffeeHectaresValid = (data: FarmHectares) =>
+  data.farmCoffeeHectares <= data.farmTotalHectares;
+
+export const coffeeHectaresError = {
+  message: "Las hectáreas en café no pueden superar las hectáreas totales",
+  path: ["farmCoffeeHectares"],
+};
+
 export const customertSchema = () =>
   z.object({
     identification: z
@@ -55,9 +101,5 @@ export const customertSchema = () =>
         { message: "El teléfono debe tener exactamente 10 dígitos" }
       ),
 
-    email: z
-      .string()
-      .nonempty("El correo es obligatorio")
-      .email("Correo inválido")
-      .max(40, "El correo no puede superar 40 caracteres"),
-  });
+    ...customerFarmFields,
+  }).refine(isCoffeeHectaresValid, coffeeHectaresError);
